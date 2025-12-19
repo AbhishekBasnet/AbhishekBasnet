@@ -131,5 +131,5 @@
 </div>
 
 <div align="center" style="margin-top: 20px;">
-    <img src="https://raw.githubusercontent.com/AbhishekBasnet/AbhishekBasnet/output/snake.svg" alt="Snake animation" />
+    <img src="https://raw.githubusercontent.com/AbhishekBasnet/AbhishekBasnet/images/snake.svg" alt="Snake animation" />
 </div>
