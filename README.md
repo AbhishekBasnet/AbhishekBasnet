@@ -1,4 +1,4 @@
-<h2 align="center">Hi 👋<br>My name is Abhishek Basnet<br>I'm a Developer from Nepal</h3>
+<h2 align="center">Hi 👋<br>My name is Abhishek Basnet<br>I'm a Developer from Nepal</h2>
 
 <div style="display: flex; align-items: center;">
     <img align="left" height="150" src="https://i.imgur.com/W5RBIrx.gif" />
@@ -131,5 +131,5 @@
 </div>
 
 <div align="center" style="margin-top: 20px;">
-    <img src="https://raw.githubusercontent.com/abhishekbasnet/abhishekbasnet/output/snake.svg" alt="Snake animation" />
+    <img src="https://raw.githubusercontent.com/AbhishekBasnet/AbhishekBasnet/output/snake.svg" alt="Snake animation" />
 </div>
