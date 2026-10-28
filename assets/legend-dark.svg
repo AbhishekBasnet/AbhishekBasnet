@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="808" height="140" viewBox="46 0 808 140" role="img" aria-label="Legend: go — services, concurrency, systems; fastapi — python apis; flutter — the clients on top">
+  <style>
+    .label { font: 400 11px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 1.8px; fill: #8F9BB3; }
+    .key { font: 500 12px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 2px; fill: #ECEFF4; }
+    .val { font: 400 12px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 1px; fill: #8F9BB3; }
+    .tri { fill: none; stroke: #88C0D0; stroke-width: 1.1; stroke-linejoin: miter; }
+    .rule { stroke: #3B4252; stroke-width: 1; }
+  </style>
+  <text class="label" x="48" y="48">legend</text>
+  <g transform="translate(0 48)"><path class="tri" d="M186 -9 L192 1 L180 1 Z"/><text class="key" x="204" y="0">go</text><text class="val" x="300" y="0">services · concurrency · systems</text></g>
+  <g transform="translate(0 76)"><path class="tri" d="M186 -9 L192 1 L180 1 Z"/><text class="key" x="204" y="0">fastapi</text><text class="val" x="300" y="0">python apis</text></g>
+  <g transform="translate(0 104)"><path class="tri" d="M186 -9 L192 1 L180 1 Z"/><text class="key" x="204" y="0">flutter</text><text class="val" x="300" y="0">the clients on top</text></g>
+  <line class="rule" x1="48" y1="132" x2="852" y2="132"/>
+</svg>
