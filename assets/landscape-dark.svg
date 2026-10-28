@@ -55,6 +55,12 @@
       .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
       .cloud      { animation: drift 14s ease-in-out -7s infinite alternate; }
 
+      /* shooting stars (dark only): the tail stretches out, the head streaks and burns out */
+      .meteor       { opacity: 0; animation: meteor var(--t) linear var(--d) infinite; }
+      .meteor .tail { fill: url(#meteor-tail); transform-box: fill-box; transform-origin: right center;
+                      animation: meteor-tail var(--t) ease-out var(--d) infinite; }
+      .meteor .head { fill: #ECEFF4; }
+
       @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
       @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
       @keyframes rise        { from { opacity: 0; transform: translateY(16px); } }
@@ -69,6 +75,9 @@
                                22%, 100% { opacity: 0; stroke-width: .3; } }
       @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
       @keyframes twinkle     { 50% { opacity: .12; } }
+      @keyframes meteor      { 0% { opacity: 0; transform: none; } .25% { opacity: 1; }
+                               1.3%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes meteor-tail { 0% { transform: scaleX(.15); } .6%, 100% { transform: none; } }
       @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
@@ -79,6 +88,10 @@
       <circle cx="792" cy="92" r="10" fill="#fff"/>
       <circle cx="797" cy="87.5" r="8.6" fill="#000"/>
     </mask>
+    <linearGradient id="meteor-tail">
+      <stop offset="0" stop-color="#ECEFF4" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ECEFF4" stop-opacity=".85"/>
+    </linearGradient>
   </defs>
 
   <!-- sky -->
@@ -101,6 +114,66 @@
     <circle class="star" cx="712" cy="124" r="1.1" style="--t: 4.6s; --d: 5.2s; opacity: .65"/>
     <circle class="star" cx="848" cy="70" r="1.4" style="--t: 3.3s; --d: 6.1s; opacity: .8"/>
     <circle class="star" cx="836" cy="150" r="1" style="--t: 5.2s; --d: 5.5s; opacity: .55"/>
+    <g transform="translate(184.65 89.34) rotate(24.48)">
+      <g class="meteor" style="--travel: 81.94px; --t: 48.77s; --d: 6.5s">
+        <rect class="tail" x="-39.48" y="-.56" width="39.48" height="1.12" rx=".56"/>
+        <circle class="head" r=".84"/>
+      </g>
+    </g>
+    <g transform="translate(692.65 98.29) rotate(159.67)">
+      <g class="meteor" style="--travel: 81.53px; --t: 102.47s; --d: 10.03s">
+        <rect class="tail" x="-49.36" y="-.52" width="49.36" height="1.05" rx=".52"/>
+        <circle class="head" r=".79"/>
+      </g>
+    </g>
+    <g transform="translate(539.37 90.4) rotate(28.31)">
+      <g class="meteor" style="--travel: 106.8px; --t: 101.84s; --d: 10.11s">
+        <rect class="tail" x="-38.59" y="-.67" width="38.59" height="1.34" rx=".67"/>
+        <circle class="head" r="1"/>
+      </g>
+    </g>
+    <g transform="translate(368.21 78.76) rotate(157.96)">
+      <g class="meteor" style="--travel: 63.73px; --t: 49.38s; --d: 20.16s">
+        <rect class="tail" x="-40.97" y="-.59" width="40.97" height="1.18" rx=".59"/>
+        <circle class="head" r=".89"/>
+      </g>
+    </g>
+    <g transform="translate(181.42 84.81) rotate(28.57)">
+      <g class="meteor" style="--travel: 118.71px; --t: 101.12s; --d: 27.16s">
+        <rect class="tail" x="-37.3" y="-.56" width="37.3" height="1.12" rx=".56"/>
+        <circle class="head" r=".84"/>
+      </g>
+    </g>
+    <g transform="translate(242.32 83.74) rotate(156.8)">
+      <g class="meteor" style="--travel: 61.68px; --t: 63.16s; --d: 27.9s">
+        <rect class="tail" x="-53.07" y="-.41" width="53.07" height=".82" rx=".41"/>
+        <circle class="head" r=".61"/>
+      </g>
+    </g>
+    <g transform="translate(596.32 102.17) rotate(23.18)">
+      <g class="meteor" style="--travel: 119.28px; --t: 107.08s; --d: 28.33s">
+        <rect class="tail" x="-57.47" y="-.68" width="57.47" height="1.36" rx=".68"/>
+        <circle class="head" r="1.02"/>
+      </g>
+    </g>
+    <g transform="translate(434.4 89.43) rotate(158.81)">
+      <g class="meteor" style="--travel: 99.64px; --t: 104.14s; --d: 34.11s">
+        <rect class="tail" x="-74.38" y="-.43" width="74.38" height=".85" rx=".43"/>
+        <circle class="head" r=".64"/>
+      </g>
+    </g>
+    <g transform="translate(513.35 99.98) rotate(27.16)">
+      <g class="meteor" style="--travel: 90.1px; --t: 79.57s; --d: 40.58s">
+        <rect class="tail" x="-56.19" y="-.68" width="56.19" height="1.35" rx=".68"/>
+        <circle class="head" r="1.01"/>
+      </g>
+    </g>
+    <g transform="translate(440.32 103.57) rotate(149.97)">
+      <g class="meteor" style="--travel: 85.89px; --t: 78.51s; --d: 50.16s">
+        <rect class="tail" x="-75.96" y="-.45" width="75.96" height=".9" rx=".45"/>
+        <circle class="head" r=".67"/>
+      </g>
+    </g>
   </g>
 
   <!-- range: the ridge, then two copies for the light that runs along it -->

@@ -17,12 +17,15 @@ Animation timeline (seconds after the image loads):
     3.2 – 4.8   sky, once        clouds or stars fade in
     5.0 →       loop, every 12s  labels glow → light runs along the ridge →
                                  ripple leaves the sun/moon → rest
-    always      ambient          glow breathes, stars twinkle, clouds sway
+    always      ambient          glow breathes, stars twinkle, clouds sway,
+                                 shooting stars fall now and then (dark only)
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import math
+import random
+from dataclasses import dataclass, replace
 from pathlib import Path
 from string import Template
 from textwrap import dedent, indent
@@ -114,6 +117,63 @@ STARS = [
 ]
 BRIGHT_STAR = STARS[4]
 
+
+@dataclass(frozen=True)
+class Meteor:
+    x: float          # where the head starts
+    y: float
+    angle: float      # direction of travel, degrees clockwise from east
+    length: float     # tail, px
+    width: float
+    travel: float     # px the head covers before it burns out
+    period: float     # seconds between its appearances
+    delay: float      # first appearance, seconds after load
+
+
+METEOR_COUNT = 10
+METEOR_SEED = 7       # change for a different arrangement
+METEOR_SKY = (52, 62, 848, 150)  # left, top, right, bottom the whole streak must stay inside
+
+
+def meteors() -> list[Meteor]:
+    """Shooting stars with seeded-random placement, size and timing.
+
+    An SVG cannot draw random numbers while it plays, so the randomness is baked
+    in here. Each meteor repeats on its own period, so together they never fall
+    into a rhythm a viewer would notice.
+    """
+    rng = random.Random(METEOR_SEED)
+    found: list[Meteor] = []
+    while len(found) < METEOR_COUNT:
+        # alternate to the right and to the left, always downwards
+        angle = rng.uniform(18, 38) if len(found) % 2 == 0 else rng.uniform(142, 162)
+        m = Meteor(x=rng.uniform(70, 830), y=rng.uniform(62, 104), angle=angle,
+                   length=rng.uniform(36, 84), width=rng.uniform(.8, 1.4), travel=rng.uniform(60, 120),
+                   period=rng.uniform(45, 110), delay=0)
+        if meteor_fits(m):
+            found.append(m)
+    # the first falls soon after the sky appears, the rest within the first minute
+    delays = [6.5] + sorted(rng.uniform(9, 66) for _ in found[1:])
+    return [replace(m, delay=d) for m, d in zip(found, delays)]
+
+
+def meteor_fits(m: Meteor) -> bool:
+    """Stays inside the sky, clear of the moon and the coordinates."""
+    dx, dy = math.cos(math.radians(m.angle)), math.sin(math.radians(m.angle))
+    tail = (m.x - m.length * dx, m.y - m.length * dy)
+    end = (m.x + m.travel * dx, m.y + m.travel * dy)
+    left, top, right, bottom = METEOR_SKY
+    if not all(left <= x <= right and top <= y <= bottom for x, y in (tail, end)):
+        return False
+    # sample along the whole path for the moon
+    mx, my = ORB
+    for i in range(21):
+        t = i / 20
+        x, y = tail[0] + (end[0] - tail[0]) * t, tail[1] + (end[1] - tail[1]) * t
+        if math.hypot(x - mx, y - my) < 34:
+            return False
+    return True
+
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
 
 LOOP = 12.0
@@ -128,7 +188,7 @@ RIPPLE_AT, RIPPLE_LEN = 5.2, 2.64      # step 4: ring leaving the sun/moon
 def num(v: float) -> str:
     """Shortest clean form of a number: 12.0 → 12, 0.50 → .5"""
     s = f"{v:.2f}".rstrip("0").rstrip(".")
-    return s[1:] if s.startswith("0.") else s
+    return s.replace("0.", ".", 1) if s.lstrip("-").startswith("0.") else s
 
 
 def pct(seconds: float) -> str:
@@ -155,6 +215,16 @@ def cloud(c: Cloud) -> str:
 def star(s: Star) -> str:
     return (f'<circle class="star" cx="{s.x}" cy="{s.y}" r="{num(s.r)}" '
             f'style="--t: {num(s.period)}s; --d: {num(s.delay)}s; opacity: {num(s.opacity)}"/>')
+
+
+def meteor(m: Meteor) -> str:
+    timing = f"--travel: {num(m.travel)}px; --t: {num(m.period)}s; --d: {num(m.delay)}s"
+    return f"""<g transform="translate({num(m.x)} {num(m.y)}) rotate({num(m.angle)})">
+      <g class="meteor" style="{timing}">
+        <rect class="tail" x="{num(-m.length)}" y="{num(-m.width / 2)}" width="{num(m.length)}" height="{num(m.width)}" rx="{num(m.width / 2)}"/>
+        <circle class="head" r="{num(m.width * .75)}"/>
+      </g>
+    </g>"""
 
 
 def summit(i: int, x: int, y: int, label: str) -> str:
@@ -223,6 +293,12 @@ STYLE = Template("""
     .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
     .cloud      { animation: drift ${wind}s ease-in-out -${wind_half}s infinite alternate; }
 
+    /* shooting stars (dark only): the tail stretches out, the head streaks and burns out */
+    .meteor       { opacity: 0; animation: meteor var(--t) linear var(--d) infinite; }
+    .meteor .tail { fill: url(#meteor-tail); transform-box: fill-box; transform-origin: right center;
+                    animation: meteor-tail var(--t) ease-out var(--d) infinite; }
+    .meteor .head { fill: $snow; }
+
     @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
     @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
     @keyframes rise        { from { opacity: 0; transform: translateY(16px); } }
@@ -237,6 +313,9 @@ STYLE = Template("""
                              $ripple_end, 100% { opacity: 0; stroke-width: .3; } }
     @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
     @keyframes twinkle     { 50% { opacity: .12; } }
+    @keyframes meteor      { 0% { opacity: 0; transform: none; } .25% { opacity: 1; }
+                             1.3%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+    @keyframes meteor-tail { 0% { transform: scaleX(.15); } .6%, 100% { transform: none; } }
     @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
 
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
@@ -269,6 +348,7 @@ def sky(theme: str) -> str:
     {clouds}
   </g>"""
     stars = "\n    ".join(star(s) for s in STARS)
+    shooting = "\n    ".join(meteor(m) for m in meteors())
     return f"""  <g class="ripple"><circle cx="{cx}" cy="{cy}" r="10"/></g>
   <g class="orb">
     <circle class="glow" cx="{cx}" cy="{cy}" r="22" filter="url(#blur)"/>
@@ -277,14 +357,22 @@ def sky(theme: str) -> str:
   <g class="sky">
     <circle class="haze" cx="{BRIGHT_STAR.x}" cy="{BRIGHT_STAR.y}" r="5" filter="url(#blur)"/>
     {stars}
+    {shooting}
   </g>"""
 
 
 def landscape(theme: str) -> str:
     cx, cy = ORB
     d = ridge_path()
-    crescent = (f'\n    <mask id="crescent">\n      <circle cx="{cx}" cy="{cy}" r="10" fill="#fff"/>\n'
-                f'      <circle cx="{cx + 5}" cy="{cy - 4.5}" r="8.6" fill="#000"/>\n    </mask>') if theme == "dark" else ""
+    night_defs = f"""
+    <mask id="crescent">
+      <circle cx="{cx}" cy="{cy}" r="10" fill="#fff"/>
+      <circle cx="{cx + 5}" cy="{cy - 4.5}" r="8.6" fill="#000"/>
+    </mask>
+    <linearGradient id="meteor-tail">
+      <stop offset="0" stop-color="{SNOW}" stop-opacity="0"/>
+      <stop offset="1" stop-color="{SNOW}" stop-opacity=".85"/>
+    </linearGradient>""" if theme == "dark" else ""
     summits = "\n".join(summit(i, x, y, label) for i, (x, y, label) in enumerate(SUMMITS))
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" viewBox="{VIEW_X} {VIEW_Y} {WIDTH} {HEIGHT}" role="img" aria-labelledby="title">
   <title id="title">{TITLE}</title>
@@ -292,7 +380,7 @@ def landscape(theme: str) -> str:
   <defs>
     <style>{style(theme)}</style>
     <filter id="blur" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
-    <path id="ridge-line" pathLength="1" d="{d}"/>{crescent}
+    <path id="ridge-line" pathLength="1" d="{d}"/>{night_defs}
   </defs>
 
   <!-- sky -->
