@@ -47,37 +47,56 @@ class Moon:
 
 @dataclass(frozen=True)
 class Ribbon:
-    """One curtain of the aurora."""
-    top: list[tuple[float, float]]   # points along its upper edge
+    """One curtain of the aurora. Its upper edge repeats every `wave` px, so the
+    folds can flow sideways forever while the lit stretch of sky stays put."""
+    top: list[tuple[float, float]]   # points along its upper edge, a wave beyond the span each side
     span: tuple[float, float]        # left and right of the stretch of sky it lights; fades at both ends
     thickness: float
     color: str
     opacity: float
-    sway: float       # px it drifts either side of rest
-    period: float     # seconds per drift
+    wave: float       # px from one fold to the next
+    flow: float       # seconds for the folds to move one wave along; negative flows left
 
 
 @dataclass(frozen=True)
 class Satellite:
+    """One pass: edge to edge on a gentle arc, as real satellites appear to."""
     x: float          # start, just off one edge
     y: float
-    angle: float      # direction of travel, degrees clockwise from east
-    travel: float     # px to the far edge
-    duration: float   # seconds to cross
-    cycle: float      # seconds from one pass to the next
-    delay: float      # first pass, seconds after load
+    dx: float         # px to the far edge; negative flies leftwards
+    dy: float         # px lower (+) or higher (-) the far end is
+    arc: float        # px the middle of the pass rises above the straight line
+    lean: float       # degrees the whole craft is turned from level
+    start: float      # seconds after load of its first pass
+
+
+@dataclass(frozen=True)
+class Route:
+    """A path across the sky: in from just off one edge, then dx across and dy down."""
+    x: float
+    y: float
+    dx: float         # negative flies leftwards
+    dy: float         # positive sinks, negative climbs
 
 
 @dataclass(frozen=True)
 class Visit:
-    """One crossing by a bird flock, the paraglider or the plane."""
-    kind: str         # "birds", "paraglider" or "plane"
-    x: float          # start, just off one edge
-    y: float
-    dx: float         # px to the far edge; negative flies leftwards
-    dy: float         # px it rises (negative) or sinks on the way
+    """One crossing by a bird flock, the parachute, the hang glider or the plane."""
+    kind: str         # "birds", "parachute", "glider" or "plane"
+    route: Route
     start: float      # seconds into the schedule
     flock: tuple[tuple[float, float, float], ...] = ()   # birds only: offset x, offset y, size
+
+
+@dataclass(frozen=True)
+class Ufo:
+    """Rises `rise` px from behind the ridge to park at (x, y), then leaves by (dx, dy)."""
+    x: float
+    y: float
+    rise: float
+    dx: float
+    dy: float
+    start: float      # seconds after load of its first visit
 
 
 @dataclass(frozen=True)
@@ -93,4 +112,9 @@ class Sky:
     meteors: list[Meteor]
     moon: Moon
     aurora: list[Ribbon]
-    satellite: Satellite
+    satellites: list[Satellite]   # night: take turns, one per pass
+    satellite_pass: float         # night: seconds each pass takes
+    satellite_cycle: float        # night: seconds before the first comes round again
+    ufos: list[Ufo]               # night: take turns
+    ufo_times: tuple[float, float, float]   # night: seconds to rise, park and leave
+    ufo_cycle: float              # night: seconds before the first comes round again

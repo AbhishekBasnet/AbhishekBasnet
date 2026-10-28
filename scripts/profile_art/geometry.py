@@ -29,6 +29,14 @@ def distance_to_box(p: Point, box: Box) -> float:
     return distance(p, nearest)
 
 
+def height_on(polyline: list[Point], x: float) -> float:
+    """The y of a left-to-right polyline at x."""
+    for (x0, y0), (x1, y1) in zip(polyline, polyline[1:]):
+        if x0 <= x <= x1:
+            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+    raise ValueError(f"x={x} is outside the polyline")
+
+
 def segment_clear_of(start: Point, end: Point, centre: Point, radius: float, samples: int = 20) -> bool:
     """True if no sampled point of the segment comes within radius of centre."""
     return all(

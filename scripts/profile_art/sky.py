@@ -14,8 +14,8 @@ from dataclasses import replace
 from datetime import date, datetime, timezone
 
 from . import config as cfg
-from .geometry import Box, contains, distance, distance_to_box, inside, overlaps, segment_clear_of
-from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Visit
+from .geometry import Box, contains, distance, distance_to_box, height_on, inside, overlaps, segment_clear_of
+from .models import Cloud, Meteor, Moon, Ribbon, Route, Satellite, Sky, Star, Ufo, Visit
 
 
 def roll_sky(seed: str, day: date) -> Sky:
@@ -28,10 +28,14 @@ def roll_sky(seed: str, day: date) -> Sky:
     meteors = place_meteors(rng)
     stars = place_stars(rng)
     flight, visits, visit_cycle = plan_visits(rng)
+    satellites, satellite_duration, satellite_cycle = plan_satellites(rng)
+    ufos, ufo_times, ufo_cycle = plan_ufos(rng)
     return Sky(clouds=clouds, cloudy_sun=cloudy_sun, wind=wind,
                visits=visits, flight=flight, visit_cycle=visit_cycle,
                stars=stars, meteors=meteors, moon=moon_on(day),
-               aurora=shape_aurora(rng), satellite=plan_satellite(rng))
+               aurora=shape_aurora(rng), satellites=satellites,
+               satellite_pass=satellite_duration, satellite_cycle=satellite_cycle,
+               ufos=ufos, ufo_times=ufo_times, ufo_cycle=ufo_cycle)
 
 
 # ── Clouds ───────────────────────────────────────────────────────────────────
@@ -144,73 +148,150 @@ def moon_on(day: date) -> Moon:
 # ── Aurora ───────────────────────────────────────────────────────────────────
 
 def shape_aurora(rng: random.Random) -> list[Ribbon]:
-    """Two soft curtains low over the ridge; their stretch of sky and wavy upper
-    edges are rolled daily."""
+    """Two soft curtains low over the ridge. Their stretch of sky, folds and flow
+    are rolled daily; the upper edge repeats every wave so the folds can flow."""
     ribbons = []
     for i, color in enumerate(cfg.AURORA_COLORS):
         base = rng.uniform(*cfg.AURORA_BASE_Y) - i * 22     # the second hangs higher
         width = rng.uniform(*cfg.AURORA_WIDTH)
         left = rng.uniform(cfg.LEFT, cfg.RIGHT - width)
-        amp, waves, shift = rng.uniform(8, 20), rng.uniform(1.2, 2.4), rng.uniform(0, 2 * math.pi)
-        span = cfg.RIGHT - cfg.LEFT
-        top = [(x, base - amp * math.sin(2 * math.pi * waves * (x - cfg.LEFT) / span + shift))
-               for x in range(cfg.LEFT - 60, cfg.RIGHT + 61, 40)]
+        wave = rng.uniform(*cfg.AURORA_WAVE)
+        amp, ripple, shift = rng.uniform(8, 18), rng.uniform(2, 6), rng.uniform(0, 2 * math.pi)
+        step = wave / 6
+        xs = [left - wave + k * step for k in range(int((width + 2 * wave) / step) + 2)]
+        top = [(x, base - amp * math.sin(2 * math.pi * x / wave + shift)
+                     - ripple * math.sin(4 * math.pi * x / wave + 2 * shift)) for x in xs]
+        flow = rng.uniform(*cfg.AURORA_FLOW) * rng.choice((1, -1))
         ribbons.append(Ribbon(top=top, span=(left, left + width), thickness=rng.uniform(34, 52),
                               color=color, opacity=rng.uniform(*cfg.AURORA_OPACITY),
-                              sway=rng.uniform(14, 26), period=rng.uniform(18, 30)))
+                              wave=wave, flow=flow))
     return ribbons
 
 
 # ── Satellite ────────────────────────────────────────────────────────────────
 
-def plan_satellite(rng: random.Random) -> Satellite:
-    """A steady dot crossing edge to edge, clear of the moon."""
-    while True:
+def satellite_path(s: Satellite, samples: int = 24) -> list[tuple[float, float]]:
+    """Points along the pass: a straight line lifted by a parabola peaking mid-way."""
+    return [(s.x + s.dx * t, s.y + s.dy * t - s.arc * 4 * t * (1 - t))
+            for t in (i / samples for i in range(samples + 1))]
+
+
+def satellite_fits(s: Satellite) -> bool:
+    path = satellite_path(s)
+    return (min(y for _, y in path) >= cfg.SATELLITE_TOP
+            and all(distance(p, cfg.ORB) >= cfg.SATELLITE_MOON_CLEAR for p in path))
+
+
+def plan_satellites(rng: random.Random) -> tuple[list[Satellite], float, float]:
+    """The day's satellites taking turns: each its own arc and lean, with clear sky
+    between passes. Returns the passes, the seconds per pass and the full cycle."""
+    duration = rng.uniform(*cfg.SATELLITE_PASS)
+    passes, t = [], rng.uniform(*cfg.SATELLITE_FIRST)
+    first = t
+    for _ in range(cfg.SATELLITES):
+        passes.append(satellite_pass(rng, start=t))
+        t += duration + rng.uniform(*cfg.SATELLITE_GAP)
+    return passes, duration, t - first
+
+
+def satellite_pass(rng: random.Random, start: float, attempts: int = 10_000) -> Satellite:
+    for _ in range(attempts):
         rightward = rng.random() < .5
-        tilt = rng.uniform(-6, 6)
-        angle = tilt if rightward else 180 - tilt
-        x = cfg.OFFSTAGE[0] if rightward else cfg.OFFSTAGE[1]
-        y = rng.uniform(*cfg.SATELLITE_Y)
-        travel = (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]) / math.cos(math.radians(tilt))
-        end = (x + travel * math.cos(math.radians(angle)), y + travel * math.sin(math.radians(angle)))
-        if (cfg.SATELLITE_Y[0] - 10 <= end[1] <= cfg.SATELLITE_Y[1] + 10
-                and segment_clear_of((x, y), end, cfg.ORB, cfg.SATELLITE_MOON_CLEAR)):
-            duration = rng.uniform(*cfg.SATELLITE_PASS)
-            return Satellite(x=x, y=y, angle=angle, travel=travel, duration=duration,
-                             cycle=duration + rng.uniform(*cfg.SATELLITE_GAP), delay=rng.uniform(8, 20))
+        y, end_y = rng.uniform(*cfg.SATELLITE_Y), rng.uniform(*cfg.SATELLITE_Y)
+        s = Satellite(x=cfg.OFFSTAGE[0] if rightward else cfg.OFFSTAGE[1], y=y,
+                      dx=(cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]) * (1 if rightward else -1), dy=end_y - y,
+                      arc=rng.uniform(*cfg.SATELLITE_ARC), lean=rng.uniform(-cfg.SATELLITE_LEAN, cfg.SATELLITE_LEAN),
+                      start=start)
+        if satellite_fits(s):
+            return s
+    raise RuntimeError("no satellite path fits the rules in config")
+
+
+# ── UFOs ─────────────────────────────────────────────────────────────────────
+
+def ufo_parks_well(x: float, y: float) -> bool:
+    """Clear of the ridge below and the summit leader lines beside."""
+    return (height_on(cfg.RIDGE, x) - y >= cfg.UFO_ABOVE_RIDGE
+            and all(abs(x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS))
+
+
+def plan_ufos(rng: random.Random) -> tuple[list[Ufo], tuple[float, float, float], float]:
+    """The night's UFOs taking turns. Returns them, the seconds to rise, park and
+    leave, and the full cycle."""
+    times = (rng.uniform(*cfg.UFO_RISE), rng.uniform(*cfg.UFO_PARK), rng.uniform(*cfg.UFO_LEAVE))
+    ufos, t = [], rng.uniform(*cfg.UFO_FIRST)
+    first = t
+    for _ in range(cfg.UFOS):
+        ufos.append(ufo(rng, start=t))
+        t += sum(times) + rng.uniform(*cfg.UFO_GAP)
+    return ufos, times, t - first
+
+
+def ufo(rng: random.Random, start: float, attempts: int = 10_000) -> Ufo:
+    for _ in range(attempts):
+        x, y = rng.uniform(cfg.LEFT + 30, cfg.RIGHT - 30), rng.uniform(*cfg.UFO_PARK_Y)
+        if ufo_parks_well(x, y):
+            angle = math.radians(rng.uniform(*cfg.UFO_LEAVE_ANGLE))
+            distance_ = rng.uniform(*cfg.UFO_LEAVE_DISTANCE)
+            # start far enough down that it is fully hidden behind the ridge
+            return Ufo(x=x, y=y, rise=height_on(cfg.RIDGE, x) - y + 16,
+                       dx=distance_ * math.cos(angle), dy=distance_ * math.sin(angle), start=start)
+    raise RuntimeError("no UFO parking spot fits the rules in config")
 
 
 # ── Day visitors ─────────────────────────────────────────────────────────────
 
 def plan_visits(rng: random.Random) -> tuple[dict[str, float], list[Visit], float]:
-    """A schedule where birds, the paraglider and the plane take turns.
+    """A schedule where birds, the parachute, the hang glider and the plane take turns.
 
-    Each visitor crosses edge to edge, then the sky stays empty for VISIT_GAP
-    seconds before the next. No kind follows itself, including across the loop,
-    and every kind appears at least once. Returns the day's crossing time per
-    kind, the visits, and the schedule length.
+    Each visitor crosses, then the sky stays empty for VISIT_GAP seconds before the
+    next. The parachute, glider and plane work through their day's routes in turn;
+    birds take a fresh path every time. No kind follows itself, including across
+    the loop, and the schedule runs until every route has been flown. Returns the
+    day's crossing time per kind, the visits, and the schedule length.
     """
     flight = {kind: rng.uniform(*span) for kind, span in cfg.FLIGHT.items()}
+    routes = {kind: daily_routes(rng, kind) for kind in cfg.ROUTE_KINDS}
+    flown = {kind: 0 for kind in cfg.ROUTE_KINDS}
     kinds = list(cfg.FLIGHT)
     visits: list[Visit] = []
     t = 0.0
-    while (t < cfg.VISIT_SCHEDULE or {v.kind for v in visits} != set(kinds)
-           or visits[-1].kind == visits[0].kind):
+    while (t < cfg.VISIT_SCHEDULE or any(n < cfg.ROUTES for n in flown.values())
+           or "birds" not in {v.kind for v in visits} or visits[-1].kind == visits[0].kind):
         kind = rng.choice([k for k in kinds if not visits or k != visits[-1].kind])
-        visits.append(visit(rng, kind, start=t))
+        if kind == "birds":
+            visits.append(Visit(kind, bird_route(rng), start=t, flock=flock(rng)))
+        else:
+            visits.append(Visit(kind, routes[kind][flown[kind] % cfg.ROUTES], start=t))
+            flown[kind] += 1
         t += flight[kind] + rng.uniform(*cfg.VISIT_GAP)
     return flight, visits, t
 
 
-def visit(rng: random.Random, kind: str, start: float) -> Visit:
-    rightward = rng.random() < .5
-    x = cfg.OFFSTAGE[0] if rightward else cfg.OFFSTAGE[1]
-    dx = (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]) * (1 if rightward else -1)
-    flock: tuple = ()
-    if kind == "birds":
-        # a loose V: the leader in front, the rest trailing and alternating sides
-        size = rng.randint(*cfg.FLOCK_SIZE)
-        flock = tuple((-i * rng.uniform(9, 14), (1 if i % 2 else -1) * i * rng.uniform(3, 6) if i else 0,
-                       rng.uniform(.8, 1.1)) for i in range(size))
-    return Visit(kind=kind, x=x, y=rng.uniform(*cfg.VISIT_Y[kind]), dx=dx,
-                 dy=rng.uniform(*cfg.VISIT_DRIFT[kind]), start=start, flock=flock)
+def daily_routes(rng: random.Random, kind: str) -> list[Route]:
+    """ROUTES paths for the day: a random mix of directions (at least one each way),
+    each a little above or below the day's height for this kind."""
+    lefts = rng.randint(1, cfg.ROUTES - 1)
+    directions = [-1] * lefts + [1] * (cfg.ROUTES - lefts)
+    rng.shuffle(directions)
+    low, high = cfg.VISIT_Y[kind]
+    height = rng.uniform(low + cfg.ROUTE_JITTER, high - cfg.ROUTE_JITTER)
+    return [route(rng, kind, d, height + rng.uniform(-cfg.ROUTE_JITTER, cfg.ROUTE_JITTER)) for d in directions]
+
+
+def route(rng: random.Random, kind: str, direction: int, y: float) -> Route:
+    x = cfg.OFFSTAGE[0] if direction > 0 else cfg.OFFSTAGE[1]
+    if kind == "parachute":
+        # drifts in on the wind while it comes down, until the ridge hides it
+        return Route(x, y, direction * rng.uniform(*cfg.PARACHUTE_DRIFT), cfg.PARACHUTE_LANDING_Y - y)
+    return Route(x, y, direction * (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]), rng.uniform(*cfg.SINK[kind]))
+
+
+def bird_route(rng: random.Random) -> Route:
+    return route(rng, "birds", rng.choice((1, -1)), rng.uniform(*cfg.VISIT_Y["birds"]))
+
+
+def flock(rng: random.Random) -> tuple[tuple[float, float, float], ...]:
+    """A loose V: the leader in front, the rest trailing and alternating sides."""
+    return tuple((-i * rng.uniform(9, 14), (1 if i % 2 else -1) * i * rng.uniform(3, 6) if i else 0,
+                  rng.uniform(.8, 1.1)) for i in range(rng.randint(*cfg.FLOCK_SIZE)))

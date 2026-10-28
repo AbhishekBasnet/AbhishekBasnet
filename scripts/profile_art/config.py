@@ -83,36 +83,73 @@ AURORA_COLORS = ("#A3BE8C", "#8FBCBB")   # Nord green and frost
 AURORA_BASE_Y = (196, 214)           # upper edge of the lower curtain; the ridge hides the rest
 AURORA_WIDTH = (380, 600)            # px of sky each curtain covers
 AURORA_OPACITY = (.10, .16)
+AURORA_WAVE = (160, 260)             # px between folds; the folds flow sideways along the curtain
+AURORA_FLOW = (22, 34)               # seconds for the folds to move one wave along
 
-SATELLITE_PASS = (25, 40)            # seconds to cross the sky
+# Four satellites a day take turns, one per pass. Each flies its own arc and the
+# whole craft (body and wings together) leans its own way.
+SATELLITES = 4
+SATELLITE_PASS = (25, 40)            # seconds to cross the sky, rolled daily
 SATELLITE_GAP = (40, 80)             # seconds of clear sky between passes
-SATELLITE_Y = (74, 130)              # below the coordinates, above the labels
-SATELLITE_MOON_CLEAR = 36
+SATELLITE_FIRST = (8, 20)            # seconds after load the first one appears
+SATELLITE_Y = (74, 140)              # ends of the pass: below the coordinates, above the labels
+SATELLITE_ARC = (18, 40)             # px the middle of the pass rises
+SATELLITE_TOP = 58                   # the arc never rises above this
+SATELLITE_LEAN = 25                  # degrees either way from level; the tumble adds up to 5 more
+SATELLITE_TUMBLE = 5
+SATELLITE_MOON_CLEAR = 26            # the moon's disc plus the craft's half-width
 SATELLITE_HULL = "#D8DEE9"
 SATELLITE_PANEL = "#5E81AC"
 SATELLITE_TRIM = "#88C0D0"
 
+# Four UFOs a day, by day and by night: each rises from behind the ridge, parks
+# for a moment, then leaves for space in its own direction, shrinking as it goes.
+UFOS = 4
+UFO_FIRST = (25, 45)                 # seconds after load the first one rises
+UFO_GAP = (40, 180)                  # seconds of empty sky between flights
+UFO_RISE, UFO_PARK, UFO_LEAVE = (2.2, 3.2), (3, 5), (1, 1.6)   # seconds, rolled daily
+UFO_PARK_Y = (178, 214)              # below the labels, above the ridge
+UFO_ABOVE_RIDGE = 22                 # px it parks clear of the ridge line
+UFO_CLEAR_OF_LEADERS = 30            # px from the summit leader lines
+UFO_LEAVE_DISTANCE = (460, 620)
+UFO_LEAVE_ANGLE = (-160, -20)        # degrees clockwise from east: always upwards
+UFO_COLORS = {                       # the hull is darker by day so it shows against white
+    "light": dict(hull="#4C566A", dome="#88C0D0", light="#EBCB8B"),
+    "dark": dict(hull="#D8DEE9", dome="#88C0D0", light="#EBCB8B"),
+}
+
 # ── Day visitors ─────────────────────────────────────────────────────────────
 
-# Birds, the paraglider and the plane share one schedule: only one is ever in the
-# sky, and after it leaves the sky stays empty for VISIT_GAP seconds.
+# Birds, the parachute, the hang glider and the plane share one schedule: only one
+# is ever in the sky, and after it leaves the sky stays empty for VISIT_GAP seconds.
 VISIT_GAP = (5, 15)
 VISIT_FIRST = 6.0                    # seconds after load the first visitor appears
-VISIT_SCHEDULE = 180                 # seconds of schedule rolled before it repeats
+VISIT_SCHEDULE = 180                 # at least this many seconds before the schedule repeats
 OFFSTAGE = (24, 876)                 # x just outside the left and right edges
-FLIGHT = {"birds": (9, 13), "paraglider": (30, 40), "plane": (16, 22)}   # seconds to cross
-VISIT_Y = {"birds": (74, 140), "paraglider": (70, 124), "plane": (58, 96)}
-VISIT_DRIFT = {"birds": (-10, 10), "paraglider": (8, 20), "plane": (-6, 6)}
+FLIGHT = {"birds": (9, 13), "parachute": (24, 32), "glider": (28, 38), "plane": (16, 22)}   # seconds
+VISIT_Y = {"birds": (74, 140), "parachute": (66, 100), "glider": (70, 116), "plane": (58, 96)}
 FLOCK_SIZE = (2, 4)
 
+# The parachute, glider and plane each fly ROUTES routes a day, taken in turn. The
+# mix of directions is rolled (at least one each way), and every route sits a little
+# above or below the kind's height for the day.
+ROUTE_KINDS = ("parachute", "glider", "plane")
+ROUTES = 4
+ROUTE_JITTER = 10                    # px a route sits above or below the day's height
+SINK = {"birds": (-10, 10), "glider": (24, 60), "plane": (-14, 14)}   # px lost (+) or gained (-) crossing
+PARACHUTE_DRIFT = (260, 440)         # px it drifts in from the edge while it comes down
+PARACHUTE_LANDING_Y = 360            # it sinks to here; the ridge hides it well before
+
 VISITOR_INK = "#4C566A"
-CANOPY = "#D08770"
+CANOPY = "#D08770"                   # parachute
+GLIDER_WING = "#B48EAD"
 CONTRAIL = "#C2CAD6"
 
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
 
-LOOP = 12.0
-LOOP_START = 5.0
-LABEL_GLOW, LABEL_STAGGER = 1.4, 0.7   # step 2: each label, one after another
-TRACE_AT, TRACE_LEN = 3.0, 2.4         # step 3: light along the ridge
-RIPPLE_AT, RIPPLE_LEN = 5.2, 2.64      # step 4: ring leaving the sun/moon
+# After the intro, one sequence plays once: labels glow in turn, light runs along
+# the ridge, a ripple leaves the sun or moon. Then the header rests.
+SEQUENCE_START = 4.0
+LABEL_GLOW, LABEL_STAGGER = 1.4, 0.7   # each label, one after another
+TRACE_AT, TRACE_LEN = 3.0, 2.4         # light along the ridge, after SEQUENCE_START
+RIPPLE_AT, RIPPLE_LEN = 5.2, 2.64      # ring leaving the sun or moon, after SEQUENCE_START

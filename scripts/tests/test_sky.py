@@ -6,14 +6,13 @@
 from __future__ import annotations
 
 import datetime
-import math
 import unittest
 import xml.dom.minidom
 
 from profile_art import config as cfg
-from profile_art.geometry import contains, distance, overlaps, segment_clear_of
+from profile_art.geometry import contains, distance, height_on, overlaps
 from profile_art.render import landscape, legend
-from profile_art.sky import cloud_box, cloud_fits, meteor_fits, moon_on, roll_sky
+from profile_art.sky import cloud_box, cloud_fits, meteor_fits, moon_on, roll_sky, satellite_path
 
 DAYS = [datetime.date(2026, 1, 1) + datetime.timedelta(days=d) for d in range(365)]
 SKIES = [roll_sky(day.isoformat(), day) for day in DAYS]
@@ -86,15 +85,35 @@ class VisitorRules(unittest.TestCase):
             for a, b in zip(kinds, kinds[1:] + kinds[:1]):
                 self.assertNotEqual(a, b)
 
-    def test_visitors_cross_edge_to_edge_at_a_sky_height(self):
+    def test_each_flyer_flies_its_routes_mixed_directions_and_heights(self):
+        for sky in SKIES:
+            for kind in cfg.ROUTE_KINDS:
+                routes = {v.route for v in sky.visits if v.kind == kind}
+                self.assertEqual(len(routes), cfg.ROUTES)
+                self.assertEqual({r.dx > 0 for r in routes}, {True, False})    # at least one each way
+                heights = [r.y for r in routes]
+                self.assertLessEqual(max(heights) - min(heights), 2 * cfg.ROUTE_JITTER)
+                low, high = cfg.VISIT_Y[kind]
+                self.assertTrue(all(low <= h <= high for h in heights))
+
+    def test_visitors_enter_from_off_an_edge(self):
         for sky in SKIES:
             for v in sky.visits:
-                self.assertIn(v.x, cfg.OFFSTAGE)
-                self.assertEqual(abs(v.dx), cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0])
-                low, high = cfg.VISIT_Y[v.kind]
-                self.assertTrue(low <= v.y <= high)
+                self.assertIn(v.route.x, cfg.OFFSTAGE)
                 if v.kind == "birds":
                     self.assertTrue(cfg.FLOCK_SIZE[0] <= len(v.flock) <= cfg.FLOCK_SIZE[1])
+
+    def test_parachute_lands_behind_the_ridge_and_the_glider_sinks_gently(self):
+        ridge_top = min(y for _, y in cfg.RIDGE)
+        for sky in SKIES:
+            for v in sky.visits:
+                r = v.route
+                if v.kind == "parachute":
+                    self.assertGreater(r.y + r.dy, ridge_top)
+                    self.assertTrue(cfg.PARACHUTE_DRIFT[0] <= abs(r.dx) <= cfg.PARACHUTE_DRIFT[1])
+                elif v.kind == "glider":
+                    self.assertTrue(cfg.SINK["glider"][0] <= r.dy <= cfg.SINK["glider"][1])
+                    self.assertEqual(abs(r.dx), cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0])
 
 
 class NightRules(unittest.TestCase):
@@ -108,19 +127,42 @@ class NightRules(unittest.TestCase):
         for sky in SKIES:
             self.assertGreaterEqual(sky.moon.lit, cfg.MOON_MIN_LIT)
 
-    def test_satellite_crosses_clear_of_the_moon(self):
+    def test_satellites_take_turns_on_arcs_clear_of_the_moon(self):
         for sky in SKIES:
-            s = sky.satellite
-            end = (s.x + s.travel * math.cos(math.radians(s.angle)), s.y + s.travel * math.sin(math.radians(s.angle)))
-            self.assertTrue(segment_clear_of((s.x, s.y), end, cfg.ORB, cfg.SATELLITE_MOON_CLEAR))
-            self.assertTrue(cfg.SATELLITE_PASS[0] <= s.duration <= cfg.SATELLITE_PASS[1])
-            self.assertTrue(cfg.SATELLITE_GAP[0] <= s.cycle - s.duration <= cfg.SATELLITE_GAP[1])
+            self.assertEqual(len(sky.satellites), cfg.SATELLITES)
+            starts = [s.start for s in sky.satellites] + [sky.satellites[0].start + sky.satellite_cycle]
+            for a, b in zip(starts, starts[1:]):
+                self.assertTrue(cfg.SATELLITE_GAP[0] <= b - a - sky.satellite_pass <= cfg.SATELLITE_GAP[1])
+            for s in sky.satellites:
+                path = satellite_path(s)
+                self.assertTrue(all(distance(p, cfg.ORB) >= cfg.SATELLITE_MOON_CLEAR for p in path))
+                self.assertGreaterEqual(min(y for _, y in path), cfg.SATELLITE_TOP)
+                self.assertTrue(cfg.SATELLITE_ARC[0] <= s.arc <= cfg.SATELLITE_ARC[1])
+                self.assertLessEqual(abs(s.lean) + cfg.SATELLITE_TUMBLE, 30)
+            self.assertTrue(cfg.SATELLITE_PASS[0] <= sky.satellite_pass <= cfg.SATELLITE_PASS[1])
 
-    def test_aurora_stays_inside_the_sky(self):
+    def test_ufos_rise_from_behind_the_ridge_park_clear_and_leave_upwards(self):
+        for sky in SKIES:
+            self.assertEqual(len(sky.ufos), cfg.UFOS)
+            visit = sum(sky.ufo_times)
+            starts = [u.start for u in sky.ufos] + [sky.ufos[0].start + sky.ufo_cycle]
+            for a, b in zip(starts, starts[1:]):
+                self.assertTrue(cfg.UFO_GAP[0] <= b - a - visit <= cfg.UFO_GAP[1])
+            for u in sky.ufos:
+                ridge = height_on(cfg.RIDGE, u.x)
+                self.assertGreater(u.y + u.rise, ridge)                       # starts hidden
+                self.assertGreaterEqual(ridge - u.y, cfg.UFO_ABOVE_RIDGE)     # parks clear
+                self.assertTrue(all(abs(u.x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS))
+                self.assertLess(u.dy, 0)                                      # leaves upwards
+
+    def test_aurora_stays_inside_the_sky_and_has_room_to_flow(self):
         for sky in SKIES:
             self.assertEqual(len(sky.aurora), len(cfg.AURORA_COLORS))
             for rb in sky.aurora:
                 self.assertTrue(cfg.LEFT <= rb.span[0] < rb.span[1] <= cfg.RIGHT)
+                # the drawn edge reaches a full wave past the window on both sides
+                self.assertLessEqual(rb.top[0][0], rb.span[0] - rb.wave + 1e-6)
+                self.assertGreaterEqual(rb.top[-1][0], rb.span[1] + rb.wave - 1e-6)
 
 
 class Output(unittest.TestCase):
