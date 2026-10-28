@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="808" height="240" viewBox="46 38 808 240" role="img" aria-label="Abhishek Basnet — developer, Nepal">
+  <style>
+    .name { font: 300 46px 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, sans-serif; letter-spacing: -0.5px; fill: #2E3440; }
+    .mono { font: 400 13px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 1.5px; fill: #7B88A1; }
+    .ridge { fill: none; stroke: #5E81AC; stroke-width: 1.25; stroke-linejoin: miter; stroke-dasharray: 1; animation: draw 2.8s cubic-bezier(.6,.05,.3,1) both; }
+    .ground { stroke: #D8DEE9; stroke-width: 1; }
+    .sun { fill: #BF616A; animation: rise 2.8s ease-out both; }
+    @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .ridge, .sun { animation: none; } }
+  </style>
+
+  <text class="mono" x="48" y="56">01 — README</text>
+  <text class="mono" x="852" y="56" text-anchor="end">28.39° N   84.12° E</text>
+
+  <text class="name" x="46" y="122">Abhishek Basnet</text>
+  <text class="mono" x="48" y="152">developer · nepal</text>
+
+  <circle class="sun" cx="712" cy="132" r="6"/>
+  <path class="ridge" pathLength="1" d="M48 262 L118 250 L166 254 L228 224 L262 234 L318 188 L346 206 L374 172 L406 200 L452 148 L482 174 L514 162 L562 210 L606 198 L652 228 L702 216 L754 240 L802 234 L852 250"/>
+  <line class="ground" x1="48" y1="272" x2="852" y2="272"/>
+</svg>

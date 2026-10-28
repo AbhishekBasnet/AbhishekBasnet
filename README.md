@@ -1,38 +1,33 @@
-<h2 align="center">Hi 👋<br>My name is Abhishek Basnet<br>I'm a Developer from Nepal</h2>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/header-dark.svg">
+  <img alt="Abhishek Basnet — developer, Nepal" src="./assets/header-light.svg" width="100%">
+</picture>
 
-<div style="display: flex; align-items: center;">
-    <img align="left" height="150" src="https://i.imgur.com/W5RBIrx.gif" />
-    <div align="right" style="padding: 10px;">
-        <a href="https://en.wikipedia.org/wiki/HTML5" target="_blank" style="text-decoration: none;">
-            <img src="https://skillicons.dev/icons?i=html" height="30" width="30" alt="html5 logo" />
-        </a>
-        <a href="https://en.wikipedia.org/wiki/CSS" target="_blank" style="text-decoration: none;">
-            <img src="https://skillicons.dev/icons?i=css" height="30" width="30" alt="css3 logo" />
-        </a>
-        <a href="https://www.typescriptlang.org/" target="_blank" style="text-decoration: none;">
-            <img src="https://skillicons.dev/icons?i=ts" height="30" width="30" alt="typescript logo" />
-        </a>
-    </div>
-    <div align="right" style="margin-top: 20px;">
-        <a href="https://github.com/AbhishekBasnet" target="_blank" style="text-decoration: none;">
-            <img src="https://img.shields.io/static/v1?message=Github&logo=github&label=&color=12100E&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="github logo"  />
-        </a>
-        <a href="https://www.linkedin.com/in/abhishekbasnet" target="_blank" style="text-decoration: none;">
-            <img src="https://img.shields.io/static/v1?message=LinkedIn&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="linkedin logo"  />
-        </a>
-    </div>
-</div>
+<br>
 
----
+I build small, focused tools — mostly backends, systems and the quiet parts of software that just need to work.
 
+<br>
 
-<a href="https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats?user_id=98574280" target="_blank" style="display: block" align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=98574280&image_size=auto&color_scheme=dark" width="771" height="auto">
-    <img alt="Dashboard stats of @AbhishekBasnet" src="https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=98574280&image_size=auto&color_scheme=light" width="771" height="auto">
-  </picture>
-</a>
+#### 02 — work
 
-<div align="center" style="margin-top: 20px;">
-    <img src="https://raw.githubusercontent.com/AbhishekBasnet/AbhishekBasnet/images/snake.svg" alt="Snake animation" />
-</div>
+[`goredis`](https://github.com/AbhishekBasnet/goredis) &nbsp;·&nbsp; redis, written in go<br>
+[`stampede-guard`](https://github.com/AbhishekBasnet/stampede-guard) &nbsp;·&nbsp; protection against cache stampedes<br>
+[`api-drift`](https://github.com/AbhishekBasnet/Api-Drift) &nbsp;·&nbsp; catching drift between an api and its contract<br>
+[`nixmon`](https://github.com/AbhishekBasnet/NixMon_Unix-Linux-Monitor) &nbsp;·&nbsp; a monitor for unix / linux systems
+
+<br>
+
+#### 03 — tools
+
+go &nbsp;·&nbsp; python &nbsp;·&nbsp; typescript &nbsp;·&nbsp; linux
+
+<br>
+
+#### 04 — elsewhere
+
+[website](https://abhishekbasnet.github.io) &nbsp;·&nbsp; [linkedin](https://www.linkedin.com/in/abhishekbasnet)
+
+<br>
+
+<sub>less, but better.</sub>
