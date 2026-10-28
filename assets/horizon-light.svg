@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="808" height="300" viewBox="46 36 808 300" role="img" aria-label="Abhishek Basnet, backend engineer — flutter, go, fastapi">
+<svg xmlns="http://www.w3.org/2000/svg" width="808" height="300" viewBox="46 36 808 300" role="img" aria-label="Abhishek Man Basnet, backend engineer — flutter, go, fastapi">
   <style>
     .name { font: 300 30px 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, sans-serif; letter-spacing: -0.3px; fill: #2E3440; }
     .mono { font: 400 11px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 1.8px; fill: #6B7891; }
@@ -26,6 +26,6 @@
   <g class="mark m3"><line class="lead" x1="652" y1="172" x2="652" y2="112"/><circle class="dot" cx="652" cy="180" r="2.5"/><text class="peak" x="652" y="100" text-anchor="middle">fastapi</text></g>
 
   <line class="ground" x1="48" y1="272" x2="852" y2="272"/>
-  <text class="name" x="46" y="318">Abhishek Basnet</text>
+  <text class="name" x="46" y="318">Abhishek Man Basnet</text>
   <text class="mono" x="852" y="316" text-anchor="end">backend engineer · nepal</text>
 </svg>
