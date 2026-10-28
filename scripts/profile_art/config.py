@@ -1,5 +1,7 @@
 """Every tunable value in one place. Coordinates are SVG user units."""
 
+from datetime import datetime, time, timezone
+
 from .models import Cloud
 
 # ── Canvas ───────────────────────────────────────────────────────────────────
@@ -59,7 +61,7 @@ SUN_CLEAR = 44                       # px from the sun's centre that free clouds
 SUN_CLOUD = Cloud(758, 106, .55, reach=4)  # on cloudy days: always trims the sun's lower edge
 SUN_CLOUD_CHANCE = .5
 
-# ── Stars (night) ────────────────────────────────────────────────────────────
+# ── Night sky ────────────────────────────────────────────────────────────────
 
 STAR_COUNT = (10, 13)
 STAR_AREA = (56, 52, 844, 152)       # left, top, right, bottom: the sky above the labels
@@ -69,6 +71,40 @@ MOON_CLEAR = 30                      # px from the moon's centre
 METEOR_COUNT = 10
 METEOR_AREA = (52, 62, 848, 150)     # the whole streak, tail to end, stays inside
 METEOR_MOON_CLEAR = 34
+
+MOON_R = 10
+MOON_MIN_LIT = .06                   # never thinner than a slim sliver, even at new moon
+MOON_TILT = -25                      # degrees the lit side leans, for a natural look
+SYNODIC_MONTH = 29.530588853         # days from one new moon to the next
+NEW_MOON_EPOCH = datetime(2000, 1, 6, 18, 14, tzinfo=timezone.utc)
+MOON_VIEWING = time(14, 15)          # UTC; 20:00 in Nepal, when the phase is shown
+
+AURORA_COLORS = ("#A3BE8C", "#8FBCBB")   # Nord green and frost
+AURORA_BASE_Y = (196, 214)           # upper edge of the lower curtain; the ridge hides the rest
+AURORA_WIDTH = (380, 600)            # px of sky each curtain covers
+AURORA_OPACITY = (.10, .16)
+
+SATELLITE_PASS = (25, 40)            # seconds to cross the sky
+SATELLITE_GAP = (40, 80)             # seconds of clear sky between passes
+SATELLITE_Y = (74, 130)              # below the coordinates, above the labels
+SATELLITE_MOON_CLEAR = 28
+
+# ── Day visitors ─────────────────────────────────────────────────────────────
+
+# Birds, the paraglider and the plane share one schedule: only one is ever in the
+# sky, and after it leaves the sky stays empty for VISIT_GAP seconds.
+VISIT_GAP = (5, 15)
+VISIT_FIRST = 6.0                    # seconds after load the first visitor appears
+VISIT_SCHEDULE = 180                 # seconds of schedule rolled before it repeats
+OFFSTAGE = (24, 876)                 # x just outside the left and right edges
+FLIGHT = {"birds": (9, 13), "paraglider": (30, 40), "plane": (16, 22)}   # seconds to cross
+VISIT_Y = {"birds": (74, 140), "paraglider": (70, 124), "plane": (58, 96)}
+VISIT_DRIFT = {"birds": (-10, 10), "paraglider": (8, 20), "plane": (-6, 6)}
+FLOCK_SIZE = (2, 4)
+
+VISITOR_INK = "#4C566A"
+CANOPY = "#D08770"
+CONTRAIL = "#C2CAD6"
 
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
 

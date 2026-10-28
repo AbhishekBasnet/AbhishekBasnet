@@ -21,9 +21,6 @@
       .dot    { fill: var(--accent); }
       .body   { fill: var(--orb); }
       .glow   { fill: var(--glow); }
-      .cloud  { fill: #E5E9F0; }
-      .star, .haze { fill: #ECEFF4; }
-      .haze   { opacity: .18; }
 
       /* 1 · intro, plays once */
       .ridge  { stroke-dasharray: 1; animation: draw 2.6s cubic-bezier(.6, .05, .3, 1) both; }
@@ -49,17 +46,9 @@
       .ripple circle { fill: none; stroke: var(--ripple); stroke-width: 1.6; vector-effect: non-scaling-stroke; opacity: 0;
                        animation: ripple-fade 12s linear 10.2s infinite; }
 
-      /* ambient, always running */
-      .glow       { opacity: .1; transform-box: fill-box; transform-origin: center;
-                    animation: breathe 9s ease-in-out 3s infinite alternate; }
-      .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
-      .cloud      { animation: drift 16.42s ease-in-out -8.21s infinite alternate; }
-
-      /* shooting stars (dark only): the tail stretches out, the head streaks and burns out */
-      .meteor       { opacity: 0; animation: meteor var(--t) linear var(--d) infinite; }
-      .meteor .tail { fill: url(#meteor-tail); transform-box: fill-box; transform-origin: right center;
-                      animation: meteor-tail var(--t) ease-out var(--d) infinite; }
-      .meteor .head { fill: #ECEFF4; }
+      /* ambient */
+      .glow { opacity: .1; transform-box: fill-box; transform-origin: center;
+              animation: breathe 9s ease-in-out 3s infinite alternate; }
 
       @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
       @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -74,16 +63,38 @@
       @keyframes ripple-fade { 0% { opacity: 0; stroke-width: 1.6; } 1% { opacity: .85; stroke-width: 1.6; }
                                22%, 100% { opacity: 0; stroke-width: .3; } }
       @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
-      @keyframes twinkle     { 50% { opacity: .12; } }
-      @keyframes meteor      { 0% { opacity: 0; transform: none; } .25% { opacity: 1; }
-                               1.3%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
-      @keyframes meteor-tail { 0% { transform: scaleX(.15); } .6%, 100% { transform: none; } }
       @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
+
+      /* day: clouds sway in one wind */
+      .cloud { fill: #E5E9F0; animation: drift 11.84s ease-in-out -5.92s infinite alternate; }
+
+      /* day: birds, the paraglider and the plane take turns crossing */
+      .visitor            { opacity: 0; animation: none 186.67s linear var(--d) infinite; }
+      .visitor.birds      { animation-name: fly-birds; }
+      .visitor.paraglider { animation-name: fly-paraglider; }
+      .visitor.plane      { animation-name: fly-plane; }
+      .bird     { fill: none; stroke: #4C566A; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round;
+                  transform-box: fill-box; transform-origin: center; animation: flap .5s ease-in-out infinite alternate; }
+      .glider   { transform-box: fill-box; transform-origin: 50% 0; animation: glide 3.4s ease-in-out infinite alternate; }
+      .canopy   { fill: none; stroke: #D08770; stroke-width: 2.6; stroke-linecap: round; }
+      .lines    { fill: none; stroke: #4C566A; stroke-width: .45; opacity: .7; }
+      .pilot, .plane { fill: #4C566A; }
+      .contrail { fill: url(#contrail); }
+
+      @keyframes fly-birds { 0% { opacity: 0; transform: none; } .54%, 6.27% { opacity: 1; } 6.81%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes fly-paraglider { 0% { opacity: 0; transform: none; } .54%, 18.94% { opacity: 1; } 19.48%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes fly-plane { 0% { opacity: 0; transform: none; } .54%, 10.21% { opacity: 1; } 10.75%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes flap  { to { transform: scaleY(-.45); } }
+      @keyframes glide { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
     </style>
     <filter id="blur" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
     <path id="ridge-line" pathLength="1" d="M48 332 L110 322 L150 326 L210 292 L236 300 L268 264 L300 284 L338 272 L380 296 L420 254 L452 220 L486 246 L516 238 L560 284 L604 272 L652 250 L690 282 L740 306 L790 298 L852 320"/>
+    <linearGradient id="contrail">
+      <stop offset="0" stop-color="#C2CAD6" stop-opacity="0"/>
+      <stop offset="1" stop-color="#C2CAD6" stop-opacity=".9"/>
+    </linearGradient>
   </defs>
 
   <!-- sky -->
@@ -94,47 +105,78 @@
     <circle class="body" cx="792" cy="92" r="11"/>
   </g>
   <g class="sky">
-    <g class="cloud" style="--reach: 12.37px">
-      <rect x="246.76" y="116.82" width="36.74" height="6.12" rx="3.06"/>
-      <circle cx="257.79" cy="116.82" r="6.12"/>
-      <circle cx="267.58" cy="114.37" r="7.96"/>
-      <circle cx="276.15" cy="117.43" r="4.9"/>
+    <g class="cloud" style="--reach: 15.87px">
+      <rect x="83.99" y="132.37" width="43.73" height="7.29" rx="3.64"/>
+      <circle cx="97.11" cy="132.37" r="7.29"/>
+      <circle cx="108.77" cy="129.46" r="9.48"/>
+      <circle cx="118.98" cy="133.1" r="5.83"/>
     </g>
-    <g class="cloud" style="--reach: 9.05px">
-      <rect x="352.27" y="58.99" width="30.11" height="5.02" rx="2.51"/>
-      <circle cx="361.3" cy="58.99" r="5.02"/>
-      <circle cx="369.33" cy="56.98" r="6.52"/>
-      <circle cx="376.36" cy="59.49" r="4.01"/>
+    <g class="cloud" style="--reach: 17.36px">
+      <rect x="331.29" y="90.48" width="46.72" height="7.79" rx="3.89"/>
+      <circle cx="345.31" cy="90.48" r="7.79"/>
+      <circle cx="357.77" cy="87.36" r="10.12"/>
+      <circle cx="368.67" cy="91.26" r="6.23"/>
     </g>
-    <g class="cloud" style="--reach: 22.73px">
-      <rect x="460.31" y="63.41" width="57.46" height="9.58" rx="4.79"/>
-      <circle cx="477.55" cy="63.41" r="9.58"/>
-      <circle cx="492.87" cy="59.57" r="12.45"/>
-      <circle cx="506.28" cy="64.36" r="7.66"/>
+    <g class="cloud" style="--reach: 11.24px">
+      <rect x="385.75" y="58.1" width="34.48" height="5.75" rx="2.87"/>
+      <circle cx="396.09" cy="58.1" r="5.75"/>
+      <circle cx="405.29" cy="55.8" r="7.47"/>
+      <circle cx="413.33" cy="58.67" r="4.6"/>
     </g>
-    <g class="cloud" style="--reach: 9.93px">
-      <rect x="583.64" y="114.61" width="31.87" height="5.31" rx="2.66"/>
-      <circle cx="593.21" cy="114.61" r="5.31"/>
-      <circle cx="601.7" cy="112.49" r="6.9"/>
-      <circle cx="609.14" cy="115.14" r="4.25"/>
+    <g class="cloud" style="--reach: 19.89px">
+      <rect x="508.27" y="74.71" width="51.78" height="8.63" rx="4.31"/>
+      <circle cx="523.8" cy="74.71" r="8.63"/>
+      <circle cx="537.61" cy="71.26" r="11.22"/>
+      <circle cx="549.69" cy="75.58" r="6.9"/>
     </g>
-    <g class="cloud" style="--reach: 10.53px">
-      <rect x="603.19" y="66.52" width="33.06" height="5.51" rx="2.76"/>
-      <circle cx="613.11" cy="66.52" r="5.51"/>
-      <circle cx="621.93" cy="64.32" r="7.16"/>
-      <circle cx="629.64" cy="67.07" r="4.41"/>
+  </g>
+  <g class="visitors">
+    <g transform="translate(876 72.85)">
+      <g class="visitor plane" style="--dx: -852px; --dy: 1.05px; --d: 6s">
+        <g transform="scale(-1 1)">
+          <rect class="contrail" x="-150" y=".1" width="143" height="1" rx=".5"/>
+          <path class="plane" d="M-6 0 H5 Q7 0 7 .6 Q7 1.2 5 1.2 H-5 Z M-6 0 L-7.5 -2.6 H-5.4 L-3.6 0 Z M-1 .8 L-3 2.6 H-1.6 L1.6 .8 Z"/>
+        </g>
+      </g>
     </g>
-    <g class="cloud" style="--reach: 10.47px">
-      <rect x="678.75" y="132.81" width="32.95" height="5.49" rx="2.75"/>
-      <circle cx="688.64" cy="132.81" r="5.49"/>
-      <circle cx="697.42" cy="130.61" r="7.14"/>
-      <circle cx="705.11" cy="133.36" r="4.39"/>
+    <g transform="translate(24 76.9)">
+      <g class="visitor birds" style="--dx: 852px; --dy: 6.29px; --d: 36.06s">
+        <path class="bird" style="animation-delay: -0s" d="M-4.21 0 Q-2.11 -2.53 0 0 Q2.11 -2.53 4.21 0"/>
+          <path class="bird" style="animation-delay: -.17s" d="M-16.71 5.53 Q-14.08 2.36 -11.44 5.53 Q-8.81 2.36 -6.17 5.53"/>
+      </g>
     </g>
-    <g class="cloud" style="--reach: 4px">
-      <rect x="758" y="100.5" width="33" height="5.5" rx="2.75"/>
-      <circle cx="767.9" cy="100.5" r="5.5"/>
-      <circle cx="776.7" cy="98.3" r="7.15"/>
-      <circle cx="784.4" cy="101.05" r="4.4"/>
+    <g transform="translate(876 80.53)">
+      <g class="visitor plane" style="--dx: -852px; --dy: -1.73px; --d: 60.27s">
+        <g transform="scale(-1 1)">
+          <rect class="contrail" x="-150" y=".1" width="143" height="1" rx=".5"/>
+          <path class="plane" d="M-6 0 H5 Q7 0 7 .6 Q7 1.2 5 1.2 H-5 Z M-6 0 L-7.5 -2.6 H-5.4 L-3.6 0 Z M-1 .8 L-3 2.6 H-1.6 L1.6 .8 Z"/>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(24 99.11)">
+      <g class="visitor paraglider" style="--dx: 852px; --dy: 9.96px; --d: 90.28s">
+        <g class="glider">
+            <path class="canopy" d="M-9 -17 Q0 -23 9 -17"/>
+            <path class="lines" d="M-8.5 -16.6 L0 0 M8.5 -16.6 L0 0"/>
+            <circle class="pilot" cy="1.2" r="1.4"/>
+          </g>
+      </g>
+    </g>
+    <g transform="translate(24 78.43)">
+      <g class="visitor plane" style="--dx: 852px; --dy: 5.28px; --d: 135.2s">
+        <rect class="contrail" x="-150" y=".1" width="143" height="1" rx=".5"/>
+          <path class="plane" d="M-6 0 H5 Q7 0 7 .6 Q7 1.2 5 1.2 H-5 Z M-6 0 L-7.5 -2.6 H-5.4 L-3.6 0 Z M-1 .8 L-3 2.6 H-1.6 L1.6 .8 Z"/>
+      </g>
+    </g>
+    <g transform="translate(876 112.73)">
+      <g class="visitor birds" style="--dx: -852px; --dy: 5.46px; --d: 166.68s">
+        <g transform="scale(-1 1)">
+          <path class="bird" style="animation-delay: -0s" d="M-5.43 0 Q-2.71 -3.26 0 0 Q2.71 -3.26 5.43 0"/>
+          <path class="bird" style="animation-delay: -.17s" d="M-13.56 4.21 Q-11.41 1.63 -9.26 4.21 Q-7.11 1.63 -4.96 4.21"/>
+          <path class="bird" style="animation-delay: -.34s" d="M-31.43 -11.29 Q-29.17 -14 -26.91 -11.29 Q-24.64 -14 -22.38 -11.29"/>
+          <path class="bird" style="animation-delay: -.51s" d="M-39.07 11.25 Q-36.78 8.5 -34.48 11.25 Q-32.19 8.5 -29.9 11.25"/>
+        </g>
+      </g>
     </g>
   </g>
 

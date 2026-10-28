@@ -36,7 +36,7 @@ jobs:
         run: python -m unittest discover -s scripts/tests -t scripts
 
       - name: Roll today's sky
-        run: python scripts/build_assets.py --seed "$(TZ=Asia/Kathmandu date +%F)" --out dist
+        run: python scripts/build_assets.py --date "$(TZ=Asia/Kathmandu date +%F)" --out dist
 
       - name: Publish to the output branch
         uses: crazy-max/ghaction-github-pages@v4

@@ -2,7 +2,8 @@
 
 An SVG cannot draw random numbers while it plays, so the randomness is baked in
 here: the same seed always gives the same sky, and the daily build passes the
-date. Every placement is rejection-sampled against the rules in config.
+date. Every placement is rejection-sampled against the rules in config. The moon
+is not random: it shows the real phase for the day.
 """
 
 from __future__ import annotations
@@ -10,13 +11,14 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import replace
+from datetime import date, datetime, timezone
 
 from . import config as cfg
 from .geometry import Box, contains, distance, distance_to_box, inside, overlaps, segment_clear_of
-from .models import Cloud, Meteor, Sky, Star
+from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Visit
 
 
-def roll_sky(seed: str) -> Sky:
+def roll_sky(seed: str, day: date) -> Sky:
     rng = random.Random(seed)
     wind = rng.uniform(*cfg.WIND_PERIOD)
     clouds = place_clouds(rng, cfg.CLOUDS_MIN + (cfg.CLOUDS_EXTRA if rng.random() < .5 else 0))
@@ -25,7 +27,11 @@ def roll_sky(seed: str) -> Sky:
         clouds.append(cfg.SUN_CLOUD)
     meteors = place_meteors(rng)
     stars = place_stars(rng)
-    return Sky(clouds=clouds, cloudy_sun=cloudy_sun, wind=wind, stars=stars, meteors=meteors)
+    flight, visits, visit_cycle = plan_visits(rng)
+    return Sky(clouds=clouds, cloudy_sun=cloudy_sun, wind=wind,
+               visits=visits, flight=flight, visit_cycle=visit_cycle,
+               stars=stars, meteors=meteors, moon=moon_on(day),
+               aurora=shape_aurora(rng), satellite=plan_satellite(rng))
 
 
 # ── Clouds ───────────────────────────────────────────────────────────────────
@@ -122,3 +128,89 @@ def place_stars(rng: random.Random) -> list[Star]:
                               period=rng.uniform(3, 5.4), delay=rng.uniform(4.6, 6.5)))
             if len(stars) == count:
                 return stars
+
+
+# ── Moon ─────────────────────────────────────────────────────────────────────
+
+def moon_on(day: date) -> Moon:
+    """The real phase on the evening of `day`, floored at a slim sliver."""
+    evening = datetime.combine(day, cfg.MOON_VIEWING, tzinfo=timezone.utc)
+    age = (evening - cfg.NEW_MOON_EPOCH).total_seconds() / 86400 % cfg.SYNODIC_MONTH
+    phase = age / cfg.SYNODIC_MONTH
+    lit = (1 - math.cos(2 * math.pi * phase)) / 2
+    return Moon(phase=phase, lit=max(lit, cfg.MOON_MIN_LIT))
+
+
+# ── Aurora ───────────────────────────────────────────────────────────────────
+
+def shape_aurora(rng: random.Random) -> list[Ribbon]:
+    """Two soft curtains low over the ridge; their stretch of sky and wavy upper
+    edges are rolled daily."""
+    ribbons = []
+    for i, color in enumerate(cfg.AURORA_COLORS):
+        base = rng.uniform(*cfg.AURORA_BASE_Y) - i * 22     # the second hangs higher
+        width = rng.uniform(*cfg.AURORA_WIDTH)
+        left = rng.uniform(cfg.LEFT, cfg.RIGHT - width)
+        amp, waves, shift = rng.uniform(8, 20), rng.uniform(1.2, 2.4), rng.uniform(0, 2 * math.pi)
+        span = cfg.RIGHT - cfg.LEFT
+        top = [(x, base - amp * math.sin(2 * math.pi * waves * (x - cfg.LEFT) / span + shift))
+               for x in range(cfg.LEFT - 60, cfg.RIGHT + 61, 40)]
+        ribbons.append(Ribbon(top=top, span=(left, left + width), thickness=rng.uniform(34, 52),
+                              color=color, opacity=rng.uniform(*cfg.AURORA_OPACITY),
+                              sway=rng.uniform(14, 26), period=rng.uniform(18, 30)))
+    return ribbons
+
+
+# ── Satellite ────────────────────────────────────────────────────────────────
+
+def plan_satellite(rng: random.Random) -> Satellite:
+    """A steady dot crossing edge to edge, clear of the moon."""
+    while True:
+        rightward = rng.random() < .5
+        tilt = rng.uniform(-6, 6)
+        angle = tilt if rightward else 180 - tilt
+        x = cfg.OFFSTAGE[0] if rightward else cfg.OFFSTAGE[1]
+        y = rng.uniform(*cfg.SATELLITE_Y)
+        travel = (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]) / math.cos(math.radians(tilt))
+        end = (x + travel * math.cos(math.radians(angle)), y + travel * math.sin(math.radians(angle)))
+        if (cfg.SATELLITE_Y[0] - 10 <= end[1] <= cfg.SATELLITE_Y[1] + 10
+                and segment_clear_of((x, y), end, cfg.ORB, cfg.SATELLITE_MOON_CLEAR)):
+            duration = rng.uniform(*cfg.SATELLITE_PASS)
+            return Satellite(x=x, y=y, angle=angle, travel=travel, duration=duration,
+                             cycle=duration + rng.uniform(*cfg.SATELLITE_GAP), delay=rng.uniform(8, 20))
+
+
+# ── Day visitors ─────────────────────────────────────────────────────────────
+
+def plan_visits(rng: random.Random) -> tuple[dict[str, float], list[Visit], float]:
+    """A schedule where birds, the paraglider and the plane take turns.
+
+    Each visitor crosses edge to edge, then the sky stays empty for VISIT_GAP
+    seconds before the next. No kind follows itself, including across the loop,
+    and every kind appears at least once. Returns the day's crossing time per
+    kind, the visits, and the schedule length.
+    """
+    flight = {kind: rng.uniform(*span) for kind, span in cfg.FLIGHT.items()}
+    kinds = list(cfg.FLIGHT)
+    visits: list[Visit] = []
+    t = 0.0
+    while (t < cfg.VISIT_SCHEDULE or {v.kind for v in visits} != set(kinds)
+           or visits[-1].kind == visits[0].kind):
+        kind = rng.choice([k for k in kinds if not visits or k != visits[-1].kind])
+        visits.append(visit(rng, kind, start=t))
+        t += flight[kind] + rng.uniform(*cfg.VISIT_GAP)
+    return flight, visits, t
+
+
+def visit(rng: random.Random, kind: str, start: float) -> Visit:
+    rightward = rng.random() < .5
+    x = cfg.OFFSTAGE[0] if rightward else cfg.OFFSTAGE[1]
+    dx = (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]) * (1 if rightward else -1)
+    flock: tuple = ()
+    if kind == "birds":
+        # a loose V: the leader in front, the rest trailing and alternating sides
+        size = rng.randint(*cfg.FLOCK_SIZE)
+        flock = tuple((-i * rng.uniform(9, 14), (1 if i % 2 else -1) * i * rng.uniform(3, 6) if i else 0,
+                       rng.uniform(.8, 1.1)) for i in range(size))
+    return Visit(kind=kind, x=x, y=rng.uniform(*cfg.VISIT_Y[kind]), dx=dx,
+                 dy=rng.uniform(*cfg.VISIT_DRIFT[kind]), start=start, flock=flock)

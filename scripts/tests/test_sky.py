@@ -6,16 +6,17 @@
 from __future__ import annotations
 
 import datetime
+import math
 import unittest
 import xml.dom.minidom
 
 from profile_art import config as cfg
-from profile_art.geometry import contains, distance, overlaps
+from profile_art.geometry import contains, distance, overlaps, segment_clear_of
 from profile_art.render import landscape, legend
-from profile_art.sky import cloud_box, cloud_fits, meteor_fits, roll_sky
+from profile_art.sky import cloud_box, cloud_fits, meteor_fits, moon_on, roll_sky
 
-DAYS = [str(datetime.date(2026, 1, 1) + datetime.timedelta(days=d)) for d in range(365)]
-SKIES = [roll_sky(day) for day in DAYS]
+DAYS = [datetime.date(2026, 1, 1) + datetime.timedelta(days=d) for d in range(365)]
+SKIES = [roll_sky(day.isoformat(), day) for day in DAYS]
 
 
 class CloudRules(unittest.TestCase):
@@ -70,13 +71,68 @@ class StarRules(unittest.TestCase):
             self.assertTrue(all(meteor_fits(m) for m in sky.meteors))
 
 
+class VisitorRules(unittest.TestCase):
+    def test_one_visitor_at_a_time_with_5_to_15s_of_empty_sky_between(self):
+        for sky in SKIES:
+            ends = [v.start + sky.flight[v.kind] for v in sky.visits]
+            starts = [v.start for v in sky.visits[1:]] + [sky.visit_cycle]   # the last waits for the loop
+            for end, nxt in zip(ends, starts):
+                self.assertTrue(cfg.VISIT_GAP[0] <= nxt - end <= cfg.VISIT_GAP[1])
+
+    def test_every_kind_appears_and_none_follows_itself_even_across_the_loop(self):
+        for sky in SKIES:
+            kinds = [v.kind for v in sky.visits]
+            self.assertEqual(set(kinds), set(cfg.FLIGHT))
+            for a, b in zip(kinds, kinds[1:] + kinds[:1]):
+                self.assertNotEqual(a, b)
+
+    def test_visitors_cross_edge_to_edge_at_a_sky_height(self):
+        for sky in SKIES:
+            for v in sky.visits:
+                self.assertIn(v.x, cfg.OFFSTAGE)
+                self.assertEqual(abs(v.dx), cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0])
+                low, high = cfg.VISIT_Y[v.kind]
+                self.assertTrue(low <= v.y <= high)
+                if v.kind == "birds":
+                    self.assertTrue(cfg.FLOCK_SIZE[0] <= len(v.flock) <= cfg.FLOCK_SIZE[1])
+
+
+class NightRules(unittest.TestCase):
+    def test_moon_matches_known_phases(self):
+        full, new, quarter = (moon_on(datetime.date.fromisoformat(d)) for d in ("2025-01-13", "2025-01-29", "2025-01-06"))
+        self.assertAlmostEqual(full.phase, .5, delta=.04)
+        self.assertLess(min(new.phase, 1 - new.phase), .04)
+        self.assertAlmostEqual(quarter.phase, .25, delta=.04)
+
+    def test_moon_never_thinner_than_a_sliver(self):
+        for sky in SKIES:
+            self.assertGreaterEqual(sky.moon.lit, cfg.MOON_MIN_LIT)
+
+    def test_satellite_crosses_clear_of_the_moon(self):
+        for sky in SKIES:
+            s = sky.satellite
+            end = (s.x + s.travel * math.cos(math.radians(s.angle)), s.y + s.travel * math.sin(math.radians(s.angle)))
+            self.assertTrue(segment_clear_of((s.x, s.y), end, cfg.ORB, cfg.SATELLITE_MOON_CLEAR))
+            self.assertTrue(cfg.SATELLITE_PASS[0] <= s.duration <= cfg.SATELLITE_PASS[1])
+            self.assertTrue(cfg.SATELLITE_GAP[0] <= s.cycle - s.duration <= cfg.SATELLITE_GAP[1])
+
+    def test_aurora_stays_inside_the_sky(self):
+        for sky in SKIES:
+            self.assertEqual(len(sky.aurora), len(cfg.AURORA_COLORS))
+            for rb in sky.aurora:
+                self.assertTrue(cfg.LEFT <= rb.span[0] < rb.span[1] <= cfg.RIGHT)
+
+
 class Output(unittest.TestCase):
     def test_same_seed_gives_same_sky(self):
-        self.assertEqual(roll_sky("2026-10-28"), roll_sky("2026-10-28"))
+        day = datetime.date(2026, 10, 28)
+        self.assertEqual(roll_sky("2026-10-28", day), roll_sky("2026-10-28", day))
 
     def test_svgs_are_well_formed(self):
+        for sky in SKIES[:30]:
+            for theme in cfg.THEMES:
+                xml.dom.minidom.parseString(landscape(theme, sky))
         for theme in cfg.THEMES:
-            xml.dom.minidom.parseString(landscape(theme, SKIES[0]))
             xml.dom.minidom.parseString(legend(theme))
 
 
