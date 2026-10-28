@@ -17,7 +17,7 @@ Animation timeline (seconds after the image loads):
     3.2 – 4.8   sky, once        clouds or stars fade in
     5.0 →       loop, every 12s  labels glow → light runs along the ridge →
                                  ripple leaves the sun/moon → rest
-    always      ambient          glow breathes, stars twinkle, clouds drift
+    always      ambient          glow breathes, stars twinkle, clouds sway
 """
 
 from __future__ import annotations
@@ -70,12 +70,12 @@ ORB = (792, 92)  # the sun by day, the moon by night
 
 @dataclass(frozen=True)
 class Cloud:
-    x: float          # left edge
+    x: float          # left edge at rest
     y: float          # flat base
     scale: float
-    period: float     # seconds for one drift
-    delay: float
-    near: bool = False  # drifts less; used where a cloud must stay put over something
+    reach: float      # px it sways either side of rest
+    period: float     # seconds for one crossing, left to right
+    phase: float      # 0–1, where in the sway it starts, so clouds move out of step
 
 
 @dataclass(frozen=True)
@@ -89,12 +89,11 @@ class Star:
 
 
 SKY_CLOUDS = [
-    Cloud(108, 126, 0.6, 23, 5.0),
-    Cloud(520, 78, 1.0, 31, 6.0),
-    Cloud(628, 132, 0.5, 20, 5.8),
-    Cloud(746, 108, 0.8, 18, 5.2, near=True),   # trims the sun's lower edge
+    Cloud(108, 126, 0.6, reach=18, period=44, phase=.3),
+    Cloud(520, 78, 1.0, reach=24, period=55, phase=.7),
+    Cloud(628, 132, 0.5, reach=16, period=38, phase=.1),
+    Cloud(750, 108, 0.8, reach=5, period=30, phase=.5),   # stays over the sun's lower edge
 ]
-PEAK_CLOUD = Cloud(487, 270, 0.95, 27, 5.4, near=True)  # in front of the peak right of go
 
 STARS = [
     Star(118, 108, 1.4, .80, 3.6, 4.8), Star(186, 150, 1.1, .60, 4.4, 5.6),
@@ -133,7 +132,8 @@ def ridge_path() -> str:
 
 def cloud(c: Cloud) -> str:
     k = c.scale
-    cls = "cloud near" if c.near else "cloud"
+    # a negative delay starts the sway part-way through, so it is already moving on load
+    timing = f"--reach: {num(c.reach)}px; --t: {num(c.period)}s; --d: -{num(c.phase * c.period)}s"
     parts = [
         f'<rect x="{num(c.x)}" y="{num(c.y - 10*k)}" width="{num(60*k)}" height="{num(10*k)}" rx="{num(5*k)}"/>',
         f'<circle cx="{num(c.x + 18*k)}" cy="{num(c.y - 10*k)}" r="{num(10*k)}"/>',
@@ -141,7 +141,7 @@ def cloud(c: Cloud) -> str:
         f'<circle cx="{num(c.x + 48*k)}" cy="{num(c.y - 9*k)}" r="{num(8*k)}"/>',
     ]
     inner = "\n      ".join(parts)
-    return f'<g class="{cls}" style="--t: {num(c.period)}s; --d: {num(c.delay)}s">\n      {inner}\n    </g>'
+    return f'<g class="cloud" style="{timing}">\n      {inner}\n    </g>'
 
 
 def star(s: Star) -> str:
@@ -214,7 +214,6 @@ STYLE = Template("""
                   animation: breathe 9s ease-in-out 3s infinite alternate; }
     .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
     .cloud      { animation: drift var(--t) ease-in-out var(--d) infinite alternate; }
-    .cloud.near { animation-name: drift-near; }
 
     @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
     @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -230,8 +229,7 @@ STYLE = Template("""
                              $ripple_end, 100% { opacity: 0; stroke-width: .3; } }
     @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
     @keyframes twinkle     { 50% { opacity: .12; } }
-    @keyframes drift       { to { transform: translateX(14px); } }
-    @keyframes drift-near  { to { transform: translateX(6px); } }
+    @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
 
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
   """)
@@ -278,7 +276,6 @@ def landscape(theme: str) -> str:
     d = ridge_path()
     crescent = (f'\n    <mask id="crescent">\n      <circle cx="{cx}" cy="{cy}" r="10" fill="#fff"/>\n'
                 f'      <circle cx="{cx + 5}" cy="{cy - 4.5}" r="8.6" fill="#000"/>\n    </mask>') if theme == "dark" else ""
-    front = (f'\n  <g class="sky">\n    {cloud(PEAK_CLOUD)}\n  </g>') if theme == "light" else ""
     summits = "\n".join(summit(i, x, y, label) for i, (x, y, label) in enumerate(SUMMITS))
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" viewBox="{VIEW_X} {VIEW_Y} {WIDTH} {HEIGHT}" role="img" aria-labelledby="title">
   <title id="title">{TITLE}</title>
@@ -296,7 +293,7 @@ def landscape(theme: str) -> str:
   <!-- range: the ridge, then two copies for the light that runs along it -->
   <use class="ridge" href="#ridge-line"/>
   <use class="trace halo" href="#ridge-line" filter="url(#blur)"/>
-  <use class="trace core" href="#ridge-line"/>{front}
+  <use class="trace core" href="#ridge-line"/>
 
   <!-- summits -->
 {summits}

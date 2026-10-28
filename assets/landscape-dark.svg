@@ -54,7 +54,6 @@
                     animation: breathe 9s ease-in-out 3s infinite alternate; }
       .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
       .cloud      { animation: drift var(--t) ease-in-out var(--d) infinite alternate; }
-      .cloud.near { animation-name: drift-near; }
 
       @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
       @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -70,8 +69,7 @@
                                22%, 100% { opacity: 0; stroke-width: .3; } }
       @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
       @keyframes twinkle     { 50% { opacity: .12; } }
-      @keyframes drift       { to { transform: translateX(14px); } }
-      @keyframes drift-near  { to { transform: translateX(6px); } }
+      @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
     </style>

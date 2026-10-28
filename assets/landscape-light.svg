@@ -54,7 +54,6 @@
                     animation: breathe 9s ease-in-out 3s infinite alternate; }
       .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
       .cloud      { animation: drift var(--t) ease-in-out var(--d) infinite alternate; }
-      .cloud.near { animation-name: drift-near; }
 
       @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
       @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -70,8 +69,7 @@
                                22%, 100% { opacity: 0; stroke-width: .3; } }
       @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
       @keyframes twinkle     { 50% { opacity: .12; } }
-      @keyframes drift       { to { transform: translateX(14px); } }
-      @keyframes drift-near  { to { transform: translateX(6px); } }
+      @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
     </style>
@@ -87,29 +85,29 @@
     <circle class="body" cx="792" cy="92" r="11"/>
   </g>
   <g class="sky">
-    <g class="cloud" style="--t: 23s; --d: 5s">
+    <g class="cloud" style="--reach: 18px; --t: 44s; --d: -13.2s">
       <rect x="108" y="120" width="36" height="6" rx="3"/>
       <circle cx="118.8" cy="120" r="6"/>
       <circle cx="128.4" cy="117.6" r="7.8"/>
       <circle cx="136.8" cy="120.6" r="4.8"/>
     </g>
-    <g class="cloud" style="--t: 31s; --d: 6s">
+    <g class="cloud" style="--reach: 24px; --t: 55s; --d: -38.5s">
       <rect x="520" y="68" width="60" height="10" rx="5"/>
       <circle cx="538" cy="68" r="10"/>
       <circle cx="554" cy="64" r="13"/>
       <circle cx="568" cy="69" r="8"/>
     </g>
-    <g class="cloud" style="--t: 20s; --d: 5.8s">
+    <g class="cloud" style="--reach: 16px; --t: 38s; --d: -3.8s">
       <rect x="628" y="127" width="30" height="5" rx="2.5"/>
       <circle cx="637" cy="127" r="5"/>
       <circle cx="645" cy="125" r="6.5"/>
       <circle cx="652" cy="127.5" r="4"/>
     </g>
-    <g class="cloud near" style="--t: 18s; --d: 5.2s">
-      <rect x="746" y="100" width="48" height="8" rx="4"/>
-      <circle cx="760.4" cy="100" r="8"/>
-      <circle cx="773.2" cy="96.8" r="10.4"/>
-      <circle cx="784.4" cy="100.8" r="6.4"/>
+    <g class="cloud" style="--reach: 5px; --t: 30s; --d: -15s">
+      <rect x="750" y="100" width="48" height="8" rx="4"/>
+      <circle cx="764.4" cy="100" r="8"/>
+      <circle cx="777.2" cy="96.8" r="10.4"/>
+      <circle cx="788.4" cy="100.8" r="6.4"/>
     </g>
   </g>
 
@@ -117,14 +115,6 @@
   <use class="ridge" href="#ridge-line"/>
   <use class="trace halo" href="#ridge-line" filter="url(#blur)"/>
   <use class="trace core" href="#ridge-line"/>
-  <g class="sky">
-    <g class="cloud near" style="--t: 27s; --d: 5.4s">
-      <rect x="487" y="260.5" width="57" height="9.5" rx="4.75"/>
-      <circle cx="504.1" cy="260.5" r="9.5"/>
-      <circle cx="519.3" cy="256.7" r="12.35"/>
-      <circle cx="532.6" cy="261.45" r="7.6"/>
-    </g>
-  </g>
 
   <!-- summits -->
   <g class="summit" style="--i: 0">
