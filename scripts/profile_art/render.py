@@ -7,7 +7,7 @@ from string import Template
 from textwrap import dedent, indent
 
 from .config import (
-    AURORA_COLORS, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GLIDER_GROWTH, GLIDER_WING, GROUND_Y,
+    AURORA_COLORS, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GLIDER_BAND, GLIDER_GROWTH, GLIDER_WING, GROUND_Y,
     HEIGHT, LABEL_GLOW, LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB,
     RIDGE, RIGHT, RIPPLE_AT, RIPPLE_LEN, ROLE, SANS, SATELLITE_HULL, SATELLITE_PANEL,
     SATELLITE_TRIM, SATELLITE_TUMBLE, SEQUENCE_START, SNOW, SUMMITS, THEMES, TITLE, TRACE_AT,
@@ -184,14 +184,16 @@ def parachute() -> str:
 
 
 def hang_glider() -> str:
-    """A swept delta wing over an A-frame bar, the pilot lying prone beneath; it
-    rides gentle thermals up and down as it glides."""
-    return """<g class="soar"><g transform="scale(1.3)"><g class="bank">
-            <path class="wing" d="M13 -11 L-13 -15 L-9 -8 Z"/>
-            <path class="keel" d="M13 -11 L-10.5 -11.6"/>
-            <path class="frame" d="M1 -10.6 L-2 -3 H4 Z M1 -10.6 V-4.6"/>
-            <rect class="pilot" x="-5" y="-4.6" width="7.5" height="2" rx="1"/>
-            <circle class="pilot" cx="3.6" cy="-3.6" r="1.25"/>
+    """Seen three-quarters from the front, as hang gliders usually are from the
+    ground: a wide curved sail with a lighter centre panel, the A-frame below and
+    the pilot hanging from the keel. It rides gentle thermals as it glides."""
+    return """<g class="soar"><g transform="scale(1.3) skewY(-7)"><g class="bank">
+            <path class="sail" d="M-15 -8.5 Q-8 -13.5 0 -15.5 Q8 -13.5 15 -8.5 Q13 -7.8 11.6 -7 Q6 -10.6 0 -11.6 Q-6 -10.6 -11.6 -7 Q-13 -7.8 -15 -8.5 Z"/>
+            <path class="sail-band" d="M-5 -13.6 Q0 -15.5 5 -13.6 L4 -10.9 Q0 -11.7 -4 -10.9 Z"/>
+            <path class="leading-edge" d="M-15 -8.5 Q-8 -13.5 0 -15.5 Q8 -13.5 15 -8.5"/>
+            <path class="frame" d="M0 -11.5 L-3.6 -2.4 H3.6 Z M0 -11.5 V-6.6"/>
+            <ellipse class="pilot" cy="-4.4" rx="2.2" ry="1.1"/>
+            <circle class="pilot" cy="-5.6" r="1.3"/>
           </g></g></g>"""
 
 
@@ -310,8 +312,9 @@ DAY_STYLE = Template("""
     .soar  { animation: soar 4.5s ease-in-out infinite alternate; }
     .descent { transform-box: fill-box; transform-origin: center; animation: descent ${cycle}s linear var(--d) infinite; }
     .chute { fill: $canopy; }
-    .wing  { fill: $wing; }
-    .keel  { fill: none; stroke: $ink_day; stroke-width: .6; opacity: .6; }
+    .sail  { fill: $wing; }
+    .sail-band { fill: $wing_band; }
+    .leading-edge { fill: none; stroke: #ECEFF4; stroke-width: .7; stroke-linecap: round; opacity: .8; }
     .frame { fill: none; stroke: $ink_day; stroke-width: .6; stroke-linejoin: round; }
     .lines, .diver { fill: none; stroke: $ink_day; stroke-width: .45; stroke-linecap: round; }
     .diver { stroke-width: .9; }
@@ -470,7 +473,7 @@ def style(theme: str, sky: Sky) -> str:
     if theme == "light":
         css += DAY_STYLE.substitute(
             cloud=CLOUD_FILL, wind=num(sky.wind), wind_half=num(sky.wind / 2),
-            cycle=num(sky.visit_cycle), ink_day=VISITOR_INK, canopy=CANOPY, wing=GLIDER_WING,
+            cycle=num(sky.visit_cycle), ink_day=VISITOR_INK, canopy=CANOPY, wing=GLIDER_WING, wing_band=GLIDER_BAND,
             **{f"fly_{kind}": crossing(f"fly-{kind}", sky.flight[kind], sky.visit_cycle)
                for kind in sky.flight if kind != "glider"},
             fly_glider=glide(sky.flight["glider"], sky.visit_cycle),

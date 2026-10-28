@@ -155,6 +155,7 @@ GLIDER_GROWTH = 1.6                  # how much bigger the glider gets as it com
 VISITOR_INK = "#4C566A"
 CANOPY = "#D08770"                   # parachute
 GLIDER_WING = "#B48EAD"
+GLIDER_BAND = "#88C0D0"              # the lighter centre panel of the sail
 CONTRAIL = "#C2CAD6"
 
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
