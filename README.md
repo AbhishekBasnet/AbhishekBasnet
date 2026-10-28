@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/horizon-dark.svg">
-  <img alt="Abhishek Man Basnet, backend engineer — flutter, go, fastapi" src="./assets/horizon-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/range-dark.svg">
+  <img alt="Abhishek Man Basnet, backend engineer — flutter, go, fastapi" src="./assets/range-light.svg" width="100%">
 </picture>
 
 <picture>

@@ -10,20 +10,28 @@
     .mark { animation: show 0.8s ease-out backwards; }
     .m1 { animation-delay: 1.6s; } .m2 { animation-delay: 2.0s; } .m3 { animation-delay: 2.4s; }
     .sun { fill: #BF616A; animation: rise 3s ease-out backwards; }
+    .pulse { transform-box: fill-box; transform-origin: center; animation: grow 1.4s ease-in-out; }
+    .pulse .peak { animation: tint 1.4s ease-in-out; animation-delay: inherit; }
+    .pulse .glow { fill: #5E81AC; opacity: 0; animation: glow 1.4s ease-in-out; animation-delay: inherit; }
+    .p1 { animation-delay: 5s; } .p2 { animation-delay: 5.7s; } .p3 { animation-delay: 6.4s; }
     @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
     @keyframes show { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-    @media (prefers-reduced-motion: reduce) { .ridge, .sun, .mark { animation: none; } }
+    @keyframes grow { 0%, 100% { transform: none; } 45% { transform: scale(1.14); } }
+    @keyframes tint { 0%, 100% { fill: #2E3440; } 45% { fill: #5E81AC; } }
+    @keyframes glow { 0%, 100% { opacity: 0; } 45% { opacity: 0.85; } }
+    @media (prefers-reduced-motion: reduce) { .ridge, .sun, .mark, .pulse, .pulse .peak, .pulse .glow { animation: none; } }
   </style>
+  <filter id="soft" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
 
   <text class="mono" x="48" y="56">28.39° N   84.12° E</text>
   <circle class="sun" cx="792" cy="118" r="6"/>
 
   <path class="ridge" pathLength="1" d="M48 262 L110 252 L150 256 L210 222 L236 230 L268 194 L300 214 L338 202 L380 226 L420 184 L452 150 L486 176 L516 168 L560 214 L604 202 L652 180 L690 212 L740 236 L790 228 L852 250"/>
 
-  <g class="mark m1"><line class="lead" x1="268" y1="186" x2="268" y2="112"/><circle class="dot" cx="268" cy="194" r="2.5"/><text class="peak" x="268" y="100" text-anchor="middle">flutter</text></g>
-  <g class="mark m2"><line class="lead" x1="452" y1="142" x2="452" y2="112"/><circle class="dot" cx="452" cy="150" r="2.5"/><text class="peak" x="452" y="100" text-anchor="middle">go</text></g>
-  <g class="mark m3"><line class="lead" x1="652" y1="172" x2="652" y2="112"/><circle class="dot" cx="652" cy="180" r="2.5"/><text class="peak" x="652" y="100" text-anchor="middle">fastapi</text></g>
+  <g class="mark m1"><line class="lead" x1="268" y1="186" x2="268" y2="112"/><circle class="dot" cx="268" cy="194" r="2.5"/><g class="pulse p1"><text class="peak glow" filter="url(#soft)" x="268" y="100" text-anchor="middle">flutter</text><text class="peak" x="268" y="100" text-anchor="middle">flutter</text></g></g>
+  <g class="mark m2"><line class="lead" x1="452" y1="142" x2="452" y2="112"/><circle class="dot" cx="452" cy="150" r="2.5"/><g class="pulse p2"><text class="peak glow" filter="url(#soft)" x="452" y="100" text-anchor="middle">go</text><text class="peak" x="452" y="100" text-anchor="middle">go</text></g></g>
+  <g class="mark m3"><line class="lead" x1="652" y1="172" x2="652" y2="112"/><circle class="dot" cx="652" cy="180" r="2.5"/><g class="pulse p3"><text class="peak glow" filter="url(#soft)" x="652" y="100" text-anchor="middle">fastapi</text><text class="peak" x="652" y="100" text-anchor="middle">fastapi</text></g></g>
 
   <line class="ground" x1="48" y1="272" x2="852" y2="272"/>
   <text class="name" x="46" y="318">Abhishek Man Basnet</text>
