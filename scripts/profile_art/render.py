@@ -8,7 +8,7 @@ from textwrap import dedent, indent
 from .config import (
     AURORA_COLORS, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GROUND_Y, HEIGHT, LABEL_GLOW, LABEL_STAGGER, LABEL_Y, LEFT,
     LEGEND, LOOP, LOOP_START, MONO, MOON_R, MOON_TILT, NAME, ORB, RIDGE, RIGHT, RIPPLE_AT,
-    RIPPLE_LEN, ROLE, SANS, SNOW, SUMMITS, THEMES, TITLE, TRACE_AT, TRACE_LEN, VIEW_X, VIEW_Y,
+    RIPPLE_LEN, ROLE, SANS, SATELLITE_HULL, SATELLITE_PANEL, SATELLITE_TRIM, SNOW, SUMMITS, THEMES, TITLE, TRACE_AT, TRACE_LEN, VIEW_X, VIEW_Y,
     VISIT_FIRST, VISITOR_INK, WIDTH,
 )
 from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Visit
@@ -100,8 +100,19 @@ def ribbon(i: int, rb: Ribbon) -> str:
 
 
 def satellite(s: Satellite) -> str:
-    return (f'<g transform="translate({num(s.x)} {num(s.y)}) rotate({num(s.angle)})">'
-            f'<circle class="satellite" r=".9" style="--travel: {num(s.travel)}px"/></g>')
+    """A cylinder body between two solar-panel wings, kept level whichever way it flies."""
+    return f"""<g transform="translate({num(s.x)} {num(s.y)}) rotate({num(s.angle)})">
+    <g class="satellite" style="--travel: {num(s.travel)}px">
+      <g transform="rotate({num(-s.angle - 18)})">
+        <g class="craft">
+          <rect class="panel" x="-11" y="-2" width="7" height="4" rx=".4"/>
+          <rect class="panel" x="4" y="-2" width="7" height="4" rx=".4"/>
+          <path class="trim" d="M-7.5 -2 V2 M7.5 -2 V2 M-4 0 H-2 M2 0 H4"/>
+          <rect class="hull" x="-2" y="-3.2" width="4" height="6.4" rx="1.4"/>
+        </g>
+      </g>
+    </g>
+  </g>"""
 
 
 # ── Day visitors ─────────────────────────────────────────────────────────────
@@ -257,13 +268,18 @@ NIGHT_STYLE = Template("""
     /* night: aurora curtains drift and shimmer; a satellite passes now and then */
     .aurora      { animation: drift var(--t) ease-in-out calc(var(--t) / -2) infinite alternate; }
     .aurora path { animation: shimmer 7s ease-in-out var(--d) infinite alternate; }
-    .satellite   { fill: $snow; opacity: 0; animation: satellite ${sat_cycle}s linear ${sat_delay}s infinite; }
+    .satellite   { opacity: 0; animation: satellite ${sat_cycle}s linear ${sat_delay}s infinite; }
+    .craft       { transform-box: fill-box; transform-origin: center; animation: tumble 16s ease-in-out infinite alternate; }
+    .craft .hull  { fill: $sat_hull; }
+    .craft .panel { fill: $sat_panel; stroke: $sat_trim; stroke-width: .4; }
+    .craft .trim  { fill: none; stroke: $sat_trim; stroke-width: .5; }
 
     @keyframes twinkle     { 50% { opacity: .12; } }
     @keyframes meteor      { 0% { opacity: 0; transform: none; } .25% { opacity: 1; }
                              1.3%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
     @keyframes meteor-tail { 0% { transform: scaleX(.15); } .6%, 100% { transform: none; } }
     @keyframes shimmer     { from { opacity: .55; } to { opacity: 1; } }
+    @keyframes tumble      { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
     $satellite
 """)
 
@@ -298,7 +314,8 @@ def style(theme: str, sky: Sky) -> str:
         sat = sky.satellite
         css += NIGHT_STYLE.substitute(
             snow=SNOW, sat_cycle=num(sat.cycle), sat_delay=num(sat.delay),
-            satellite=crossing("satellite", sat.duration, sat.cycle, peak=.85, move="translateX(var(--travel))"),
+            sat_hull=SATELLITE_HULL, sat_panel=SATELLITE_PANEL, sat_trim=SATELLITE_TRIM,
+            satellite=crossing("satellite", sat.duration, sat.cycle, move="translateX(var(--travel))"),
         )
     css += REDUCED_MOTION
     return "\n" + indent(dedent(css).strip(), " " * 6) + "\n    "

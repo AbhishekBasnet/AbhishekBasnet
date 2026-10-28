@@ -87,7 +87,10 @@ AURORA_OPACITY = (.10, .16)
 SATELLITE_PASS = (25, 40)            # seconds to cross the sky
 SATELLITE_GAP = (40, 80)             # seconds of clear sky between passes
 SATELLITE_Y = (74, 130)              # below the coordinates, above the labels
-SATELLITE_MOON_CLEAR = 28
+SATELLITE_MOON_CLEAR = 36
+SATELLITE_HULL = "#D8DEE9"
+SATELLITE_PANEL = "#5E81AC"
+SATELLITE_TRIM = "#88C0D0"
 
 # ── Day visitors ─────────────────────────────────────────────────────────────
 

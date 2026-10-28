@@ -79,14 +79,19 @@
       /* night: aurora curtains drift and shimmer; a satellite passes now and then */
       .aurora      { animation: drift var(--t) ease-in-out calc(var(--t) / -2) infinite alternate; }
       .aurora path { animation: shimmer 7s ease-in-out var(--d) infinite alternate; }
-      .satellite   { fill: #ECEFF4; opacity: 0; animation: satellite 80.07s linear 12.77s infinite; }
+      .satellite   { opacity: 0; animation: satellite 83.13s linear 10.89s infinite; }
+      .craft       { transform-box: fill-box; transform-origin: center; animation: tumble 16s ease-in-out infinite alternate; }
+      .craft .hull  { fill: #D8DEE9; }
+      .craft .panel { fill: #5E81AC; stroke: #88C0D0; stroke-width: .4; }
+      .craft .trim  { fill: none; stroke: #88C0D0; stroke-width: .5; }
 
       @keyframes twinkle     { 50% { opacity: .12; } }
       @keyframes meteor      { 0% { opacity: 0; transform: none; } .25% { opacity: 1; }
                                1.3%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
       @keyframes meteor-tail { 0% { transform: scaleX(.15); } .6%, 100% { transform: none; } }
       @keyframes shimmer     { from { opacity: .55; } to { opacity: 1; } }
-      @keyframes satellite { 0% { opacity: 0; transform: none; } 1.25%, 40.93% { opacity: .85; } 42.18%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes tumble      { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+      @keyframes satellite { 0% { opacity: 0; transform: none; } 1.2%, 35.66% { opacity: 1; } 36.86%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
     </style>
@@ -213,7 +218,18 @@
       </g>
     </g>
   </g>
-  <g transform="translate(876 124.07) rotate(178.98)"><circle class="satellite" r=".9" style="--travel: 852.13px"/></g>
+  <g transform="translate(24 108.77) rotate(1.68)">
+    <g class="satellite" style="--travel: 852.37px">
+      <g transform="rotate(-19.68)">
+        <g class="craft">
+          <rect class="panel" x="-11" y="-2" width="7" height="4" rx=".4"/>
+          <rect class="panel" x="4" y="-2" width="7" height="4" rx=".4"/>
+          <path class="trim" d="M-7.5 -2 V2 M7.5 -2 V2 M-4 0 H-2 M2 0 H4"/>
+          <rect class="hull" x="-2" y="-3.2" width="4" height="6.4" rx="1.4"/>
+        </g>
+      </g>
+    </g>
+  </g>
 
   <!-- range: the ridge, then two copies for the light that runs along it -->
   <use class="ridge" href="#ridge-line"/>
