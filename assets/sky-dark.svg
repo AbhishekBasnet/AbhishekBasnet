@@ -9,7 +9,11 @@
     .dot { fill: #88C0D0; }
     .mark { animation: show 0.8s ease-out backwards; }
     .m1 { animation-delay: 1.6s; } .m2 { animation-delay: 2.0s; } .m3 { animation-delay: 2.4s; }
-    .sun { fill: #BF616A; animation: rise 3s ease-out backwards; }
+    .sun { animation: rise 3s ease-out backwards; }
+    .sky { animation: appear 1.6s ease-out 3.2s backwards; }
+    .star { fill: #ECEFF4; animation: twinkle 4s ease-in-out infinite; }
+    .cloud { fill: #E5E9F0; }
+    .drift { animation: drift 22s ease-in-out 4.8s infinite alternate; }
     .pulse { transform-box: fill-box; transform-origin: center; animation: grow 12s ease-in-out infinite; }
     .pulse .peak { animation: tint 12s ease-in-out infinite; animation-delay: inherit; }
     .pulse .glow { fill: #88C0D0; opacity: 0; animation: glow 12s ease-in-out infinite; animation-delay: inherit; }
@@ -17,7 +21,7 @@
     .trace { fill: none; stroke-dasharray: 0.08 1.2; stroke-dashoffset: 0.08; opacity: 0; animation: trace 12s ease-in-out 8s infinite; }
     .trace.line { stroke: #ECEFF4; stroke-width: 2; stroke-linecap: round; }
     .trace.halo { stroke: #88C0D0; stroke-width: 5; stroke-linecap: round; }
-    .ripple { fill: none; stroke: #BF616A; stroke-width: 1.25; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; opacity: 0; animation: ripple 12s ease-out 10.2s infinite; }
+    .ripple { fill: none; stroke: #D8DEE9; stroke-width: 1.25; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; opacity: 0; animation: ripple 12s ease-out 10.2s infinite; }
     @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
     @keyframes show { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
@@ -25,14 +29,36 @@
     @keyframes tint { 0%, 11.7%, 100% { fill: #ECEFF4; } 5.25% { fill: #88C0D0; } }
     @keyframes glow { 0%, 11.7%, 100% { opacity: 0; } 5.25% { opacity: 0.85; } }
     @keyframes trace { 0% { stroke-dashoffset: 0.08; opacity: 0; } 1.5%, 18.5% { opacity: 1; } 20%, 100% { stroke-dashoffset: -1; opacity: 0; } }
-    @keyframes ripple { 0% { transform: none; opacity: 0; } 1% { opacity: 0.9; } 13.3%, 100% { transform: scale(6); opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) { .ridge, .sun, .mark, .pulse, .pulse .peak, .pulse .glow, .trace, .ripple { animation: none; } }
+    @keyframes ripple { 0% { transform: none; opacity: 0; } 1% { opacity: 0.9; } 13.3%, 100% { transform: scale(4.2); opacity: 0; } }
+    @keyframes appear { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+    @keyframes twinkle { 50% { opacity: 0.12; } }
+    @keyframes drift { to { transform: translateX(14px); } }
+    @keyframes drift-near { to { transform: translateX(6px); } }
+    @media (prefers-reduced-motion: reduce) { .ridge, .sun, .mark, .pulse, .pulse .peak, .pulse .glow, .trace, .ripple, .sky, .star, .drift { animation: none; } }
   </style>
   <filter id="soft" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
 
   <text class="mono" x="48" y="56">28.39° N   84.12° E</text>
-  <circle class="ripple" cx="792" cy="118" r="6"/>
-  <circle class="sun" cx="792" cy="118" r="6"/>
+  <mask id="crescent"><circle cx="792" cy="116" r="10" fill="#fff"/><circle cx="797" cy="111.5" r="8.6" fill="#000"/></mask>
+  <circle class="ripple" cx="792" cy="116" r="10"/>
+  <g class="sun">
+    <circle cx="792" cy="116" r="20" fill="#E5E9F0" opacity="0.07" filter="url(#soft)"/>
+    <circle cx="792" cy="116" r="10" fill="#E5E9F0" mask="url(#crescent)"/>
+  </g>
+  <g class="sky">
+    <circle cx="372" cy="62" r="5" fill="#ECEFF4" opacity="0.18" filter="url(#soft)"/>
+    <circle class="star" cx="118" cy="96" r="1.4" style="opacity:0.8;animation-duration:3.6s;animation-delay:4.8s"/>
+    <circle class="star" cx="186" cy="130" r="1.1" style="opacity:0.6;animation-duration:4.4s;animation-delay:5.6s"/>
+    <circle class="star" cx="232" cy="70" r="1.5" style="opacity:0.9;animation-duration:3.1s;animation-delay:5.1s"/>
+    <circle class="star" cx="338" cy="112" r="1.0" style="opacity:0.55;animation-duration:5.0s;animation-delay:6.0s"/>
+    <circle class="star" cx="372" cy="62" r="1.8" style="opacity:1.0;animation-duration:4.2s;animation-delay:4.9s"/>
+    <circle class="star" cx="520" cy="74" r="1.2" style="opacity:0.7;animation-duration:3.4s;animation-delay:5.3s"/>
+    <circle class="star" cx="560" cy="126" r="1.0" style="opacity:0.55;animation-duration:4.8s;animation-delay:6.4s"/>
+    <circle class="star" cx="604" cy="58" r="1.4" style="opacity:0.85;animation-duration:3.8s;animation-delay:5.8s"/>
+    <circle class="star" cx="712" cy="84" r="1.1" style="opacity:0.65;animation-duration:4.6s;animation-delay:5.2s"/>
+    <circle class="star" cx="846" cy="70" r="1.4" style="opacity:0.8;animation-duration:3.3s;animation-delay:6.1s"/>
+    <circle class="star" cx="838" cy="134" r="1.0" style="opacity:0.55;animation-duration:5.2s;animation-delay:5.5s"/>
+  </g>
 
   <path class="ridge" pathLength="1" d="M48 262 L110 252 L150 256 L210 222 L236 230 L268 194 L300 214 L338 202 L380 226 L420 184 L452 150 L486 176 L516 168 L560 214 L604 202 L652 180 L690 212 L740 236 L790 228 L852 250"/>
   <path class="trace halo" filter="url(#soft)" pathLength="1" d="M48 262 L110 252 L150 256 L210 222 L236 230 L268 194 L300 214 L338 202 L380 226 L420 184 L452 150 L486 176 L516 168 L560 214 L604 202 L652 180 L690 212 L740 236 L790 228 L852 250"/>

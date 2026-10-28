@@ -9,7 +9,11 @@
     .dot { fill: #5E81AC; }
     .mark { animation: show 0.8s ease-out backwards; }
     .m1 { animation-delay: 1.6s; } .m2 { animation-delay: 2.0s; } .m3 { animation-delay: 2.4s; }
-    .sun { fill: #BF616A; animation: rise 3s ease-out backwards; }
+    .sun { animation: rise 3s ease-out backwards; }
+    .sky { animation: appear 1.6s ease-out 3.2s backwards; }
+    .star { fill: #ECEFF4; animation: twinkle 4s ease-in-out infinite; }
+    .cloud { fill: #E5E9F0; }
+    .drift { animation: drift 22s ease-in-out 4.8s infinite alternate; }
     .pulse { transform-box: fill-box; transform-origin: center; animation: grow 12s ease-in-out infinite; }
     .pulse .peak { animation: tint 12s ease-in-out infinite; animation-delay: inherit; }
     .pulse .glow { fill: #5E81AC; opacity: 0; animation: glow 12s ease-in-out infinite; animation-delay: inherit; }
@@ -25,14 +29,23 @@
     @keyframes tint { 0%, 11.7%, 100% { fill: #2E3440; } 5.25% { fill: #5E81AC; } }
     @keyframes glow { 0%, 11.7%, 100% { opacity: 0; } 5.25% { opacity: 0.85; } }
     @keyframes trace { 0% { stroke-dashoffset: 0.08; opacity: 0; } 1.5%, 18.5% { opacity: 1; } 20%, 100% { stroke-dashoffset: -1; opacity: 0; } }
-    @keyframes ripple { 0% { transform: none; opacity: 0; } 1% { opacity: 0.9; } 13.3%, 100% { transform: scale(6); opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) { .ridge, .sun, .mark, .pulse, .pulse .peak, .pulse .glow, .trace, .ripple { animation: none; } }
+    @keyframes ripple { 0% { transform: none; opacity: 0; } 1% { opacity: 0.9; } 13.3%, 100% { transform: scale(4.2); opacity: 0; } }
+    @keyframes appear { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+    @keyframes twinkle { 50% { opacity: 0.12; } }
+    @keyframes drift { to { transform: translateX(14px); } }
+    @keyframes drift-near { to { transform: translateX(6px); } }
+    @media (prefers-reduced-motion: reduce) { .ridge, .sun, .mark, .pulse, .pulse .peak, .pulse .glow, .trace, .ripple, .sky, .star, .drift { animation: none; } }
   </style>
   <filter id="soft" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
 
   <text class="mono" x="48" y="56">28.39° N   84.12° E</text>
-  <circle class="ripple" cx="792" cy="118" r="6"/>
-  <circle class="sun" cx="792" cy="118" r="6"/>
+  <circle class="ripple" cx="792" cy="118" r="9"/>
+  <circle class="sun" cx="792" cy="118" r="9" fill="#BF616A"/>
+  <g class="sky">
+    <g class="drift" style="animation-name:drift;animation-duration:26s;animation-delay:4.8s"><rect class="cloud" x="96.0" y="125.0" width="42.0" height="7.0" rx="3.5"/><circle class="cloud" cx="108.6" cy="125.0" r="7.0"/><circle class="cloud" cx="119.8" cy="122.2" r="9.1"/><circle class="cloud" cx="129.6" cy="125.7" r="5.6"/></g>
+    <g class="drift" style="animation-name:drift;animation-duration:31s;animation-delay:6.0s"><rect class="cloud" x="520.0" y="64.0" width="60.0" height="10.0" rx="5.0"/><circle class="cloud" cx="538.0" cy="64.0" r="10.0"/><circle class="cloud" cx="554.0" cy="60.0" r="13.0"/><circle class="cloud" cx="568.0" cy="65.0" r="8.0"/></g>
+    <g class="drift" style="animation-name:drift-near;animation-duration:18s;animation-delay:5.2s"><rect class="cloud" x="746.0" y="125.0" width="48.0" height="8.0" rx="4.0"/><circle class="cloud" cx="760.4" cy="125.0" r="8.0"/><circle class="cloud" cx="773.2" cy="121.8" r="10.4"/><circle class="cloud" cx="784.4" cy="125.8" r="6.4"/></g>
+  </g>
 
   <path class="ridge" pathLength="1" d="M48 262 L110 252 L150 256 L210 222 L236 230 L268 194 L300 214 L338 202 L380 226 L420 184 L452 150 L486 176 L516 168 L560 214 L604 202 L652 180 L690 212 L740 236 L790 228 L852 250"/>
   <path class="trace halo" filter="url(#soft)" pathLength="1" d="M48 262 L110 252 L150 256 L210 222 L236 230 L268 194 L300 214 L338 202 L380 226 L420 184 L452 150 L486 176 L516 168 L560 214 L604 202 L652 180 L690 212 L740 236 L790 228 L852 250"/>
