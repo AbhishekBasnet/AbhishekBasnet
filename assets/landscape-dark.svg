@@ -53,7 +53,7 @@
       .glow       { opacity: .1; transform-box: fill-box; transform-origin: center;
                     animation: breathe 9s ease-in-out 3s infinite alternate; }
       .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
-      .cloud      { animation: drift var(--t) ease-in-out var(--d) infinite alternate; }
+      .cloud      { animation: drift 14s ease-in-out -7s infinite alternate; }
 
       @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
       @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }

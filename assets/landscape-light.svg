@@ -53,7 +53,7 @@
       .glow       { opacity: .1; transform-box: fill-box; transform-origin: center;
                     animation: breathe 9s ease-in-out 3s infinite alternate; }
       .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
-      .cloud      { animation: drift var(--t) ease-in-out var(--d) infinite alternate; }
+      .cloud      { animation: drift 14s ease-in-out -7s infinite alternate; }
 
       @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
       @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -85,29 +85,35 @@
     <circle class="body" cx="792" cy="92" r="11"/>
   </g>
   <g class="sky">
-    <g class="cloud" style="--reach: 18px; --t: 44s; --d: -13.2s">
+    <g class="cloud" style="--reach: 12px">
       <rect x="108" y="120" width="36" height="6" rx="3"/>
       <circle cx="118.8" cy="120" r="6"/>
       <circle cx="128.4" cy="117.6" r="7.8"/>
       <circle cx="136.8" cy="120.6" r="4.8"/>
     </g>
-    <g class="cloud" style="--reach: 24px; --t: 55s; --d: -38.5s">
+    <g class="cloud" style="--reach: 16.5px">
+      <rect x="322" y="108.5" width="45" height="7.5" rx="3.75"/>
+      <circle cx="335.5" cy="108.5" r="7.5"/>
+      <circle cx="347.5" cy="105.5" r="9.75"/>
+      <circle cx="358" cy="109.25" r="6"/>
+    </g>
+    <g class="cloud" style="--reach: 24px">
       <rect x="520" y="68" width="60" height="10" rx="5"/>
       <circle cx="538" cy="68" r="10"/>
       <circle cx="554" cy="64" r="13"/>
       <circle cx="568" cy="69" r="8"/>
     </g>
-    <g class="cloud" style="--reach: 16px; --t: 38s; --d: -3.8s">
+    <g class="cloud" style="--reach: 9px">
       <rect x="628" y="127" width="30" height="5" rx="2.5"/>
       <circle cx="637" cy="127" r="5"/>
       <circle cx="645" cy="125" r="6.5"/>
       <circle cx="652" cy="127.5" r="4"/>
     </g>
-    <g class="cloud" style="--reach: 5px; --t: 30s; --d: -15s">
-      <rect x="750" y="100" width="48" height="8" rx="4"/>
-      <circle cx="764.4" cy="100" r="8"/>
-      <circle cx="777.2" cy="96.8" r="10.4"/>
-      <circle cx="788.4" cy="100.8" r="6.4"/>
+    <g class="cloud" style="--reach: 4px">
+      <rect x="758" y="100.5" width="33" height="5.5" rx="2.75"/>
+      <circle cx="767.9" cy="100.5" r="5.5"/>
+      <circle cx="776.7" cy="98.3" r="7.15"/>
+      <circle cx="784.4" cy="101.05" r="4.4"/>
     </g>
   </g>
 

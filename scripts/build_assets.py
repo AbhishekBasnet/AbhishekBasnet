@@ -72,10 +72,18 @@ ORB = (792, 92)  # the sun by day, the moon by night
 class Cloud:
     x: float          # left edge at rest
     y: float          # flat base
-    scale: float
-    reach: float      # px it sways either side of rest
-    period: float     # seconds for one crossing, left to right
-    phase: float      # 0–1, where in the sway it starts, so clouds move out of step
+    scale: float      # 1 = the largest cloud; also sets how far it sways
+    reach: float | None = None  # override the sway, for a cloud that must stay over something
+
+
+# One wind moves every cloud the same way at the same time. Bigger clouds read as
+# nearer, so they sway further in the same time and look faster.
+WIND_PERIOD = 14   # seconds for one crossing, then it turns back
+
+
+def sway(scale: float) -> float:
+    """px a cloud of this size travels either side of rest."""
+    return 30 * scale - 6
 
 
 @dataclass(frozen=True)
@@ -89,10 +97,11 @@ class Star:
 
 
 SKY_CLOUDS = [
-    Cloud(108, 126, 0.6, reach=18, period=44, phase=.3),
-    Cloud(520, 78, 1.0, reach=24, period=55, phase=.7),
-    Cloud(628, 132, 0.5, reach=16, period=38, phase=.1),
-    Cloud(750, 108, 0.8, reach=5, period=30, phase=.5),   # stays over the sun's lower edge
+    Cloud(108, 126, 0.6),
+    Cloud(322, 116, 0.75),   # between flutter and go
+    Cloud(520, 78, 1.0),
+    Cloud(628, 132, 0.5),
+    Cloud(758, 106, 0.55, reach=4),   # anchored: always trims the sun's lower edge
 ]
 
 STARS = [
@@ -132,8 +141,7 @@ def ridge_path() -> str:
 
 def cloud(c: Cloud) -> str:
     k = c.scale
-    # a negative delay starts the sway part-way through, so it is already moving on load
-    timing = f"--reach: {num(c.reach)}px; --t: {num(c.period)}s; --d: -{num(c.phase * c.period)}s"
+    timing = f"--reach: {num(sway(k) if c.reach is None else c.reach)}px"
     parts = [
         f'<rect x="{num(c.x)}" y="{num(c.y - 10*k)}" width="{num(60*k)}" height="{num(10*k)}" rx="{num(5*k)}"/>',
         f'<circle cx="{num(c.x + 18*k)}" cy="{num(c.y - 10*k)}" r="{num(10*k)}"/>',
@@ -213,7 +221,7 @@ STYLE = Template("""
     .glow       { opacity: .1; transform-box: fill-box; transform-origin: center;
                   animation: breathe 9s ease-in-out 3s infinite alternate; }
     .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
-    .cloud      { animation: drift var(--t) ease-in-out var(--d) infinite alternate; }
+    .cloud      { animation: drift ${wind}s ease-in-out -${wind_half}s infinite alternate; }
 
     @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
     @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -239,6 +247,7 @@ def style(theme: str) -> str:
     css = STYLE.substitute(
         THEMES[theme], sans=SANS, mono=MONO, snow=SNOW, cloud=CLOUD,
         loop=num(LOOP), loop_start=num(LOOP_START), stagger=num(LABEL_STAGGER),
+        wind=num(WIND_PERIOD), wind_half=num(WIND_PERIOD / 2),
         label_peak=pct(LABEL_GLOW * .45), label_end=pct(LABEL_GLOW),
         trace_at=num(LOOP_START + TRACE_AT), trace_in=pct(.18), trace_out=pct(TRACE_LEN - .18),
         trace_end=pct(TRACE_LEN),
