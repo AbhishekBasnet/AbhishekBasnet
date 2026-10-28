@@ -20,6 +20,18 @@ THEMES = {
     "dark": dict(ink="#ECEFF4", muted="#8F9BB3", accent="#88C0D0", rule="#3B4252",
                  orb="#E5E9F0", glow="#E5E9F0", ripple="#D8DEE9"),
 }
+# The portfolio site (AbhishekBasnet.github.io) shows the same sky as a soft
+# backdrop in its own palette, copied from its css/tokens.css. Its light page is
+# grey-green, so clouds there are white to stand out.
+SITE_THEMES = {
+    "light": dict(ink="#2b3138", muted="#6b7680", accent="#4f7a94", rule="#d6dbd8",
+                  orb="#BF616A", glow="#D08770", ripple="#BF616A"),
+    "dark": dict(ink="#dfe4e2", muted="#94a0a8", accent="#8fb5cc", rule="#36404a",
+                 orb="#E5E9F0", glow="#E5E9F0", ripple="#D8DEE9"),
+}
+SITE_CLOUD = "#FFFFFF"
+BACKDROP_HEIGHT = 314                # just the sky and the ridge, without the caption below
+
 SNOW = "#ECEFF4"
 CLOUD_FILL = "#E5E9F0"
 

@@ -11,7 +11,7 @@ import xml.dom.minidom
 
 from profile_art import config as cfg
 from profile_art.geometry import contains, distance, height_on, overlaps
-from profile_art.render import landscape, legend
+from profile_art.render import backdrop, landscape, legend
 from profile_art.sky import cloud_box, cloud_fits, meteor_fits, moon_on, roll_sky, satellite_path
 
 DAYS = [datetime.date(2026, 1, 1) + datetime.timedelta(days=d) for d in range(365)]
@@ -191,10 +191,19 @@ class Output(unittest.TestCase):
             for name, colour in palette.items():
                 self.assertIn(f"--{name}: {colour};", svg)
 
+    def test_site_backdrop_uses_the_site_palette_and_carries_no_text(self):
+        for theme, palette in cfg.SITE_THEMES.items():
+            svg = backdrop(theme, SKIES[0])
+            for name, colour in palette.items():
+                self.assertIn(f"--{name}: {colour};", svg)
+            self.assertNotIn(cfg.NAME, svg)
+            self.assertNotIn('class="label', svg)
+
     def test_svgs_are_well_formed(self):
         for sky in SKIES[:30]:
             for theme in cfg.THEMES:
                 xml.dom.minidom.parseString(landscape(theme, sky))
+                xml.dom.minidom.parseString(backdrop(theme, sky))
         for theme in cfg.THEMES:
             xml.dom.minidom.parseString(legend(theme))
 

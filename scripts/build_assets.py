@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Build the artwork for the GitHub profile README.
 
-Writes four SVGs:
+Writes six SVGs:
 
-    landscape-light.svg  landscape-dark.svg   header: sky, ridge, summits, name
+    landscape-light.svg  landscape-dark.svg   profile header: sky, ridge, summits, name
     legend-light.svg     legend-dark.svg      key for the three summits
+    backdrop-light.svg   backdrop-dark.svg    portfolio site backdrop: sky and ridge only
 
     python3 scripts/build_assets.py                          # today's sky into assets/
     python3 scripts/build_assets.py --date 2026-10-28 --out dist
@@ -33,7 +34,7 @@ from datetime import date
 from pathlib import Path
 
 from profile_art.config import THEMES
-from profile_art.render import landscape, legend
+from profile_art.render import backdrop, landscape, legend
 from profile_art.sky import roll_sky
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
@@ -53,6 +54,7 @@ def main() -> None:
     for theme in THEMES:
         (args.out / f"landscape-{theme}.svg").write_text(landscape(theme, sky), encoding="utf-8")
         (args.out / f"legend-{theme}.svg").write_text(legend(theme), encoding="utf-8")
+        (args.out / f"backdrop-{theme}.svg").write_text(backdrop(theme, sky), encoding="utf-8")
 
     sun = "cloud over the sun" if sky.cloudy_sun else "clear sun"
     print(f"sky '{seed}': {len(sky.clouds)} clouds, {sun}, wind {sky.wind:.1f}s, "
