@@ -9,7 +9,12 @@ Writes four SVGs into assets/:
 The README picks the light or dark file with <picture>. To change the art,
 edit the constants below and run:
 
-    python3 scripts/build_assets.py
+    python3 scripts/build_assets.py                # preview into assets/
+    python3 scripts/build_assets.py --seed 2026-10-28 --out dist
+
+The sky (cloud layout, wind, stars, shooting stars) is rolled from --seed. A daily
+GitHub Action (.github/workflows/sky.yml) builds with the date as the seed and
+publishes to the `output` branch, which is what the profile shows.
 
 Animation timeline (seconds after the image loads):
 
@@ -23,6 +28,7 @@ Animation timeline (seconds after the image loads):
 
 from __future__ import annotations
 
+import argparse
 import math
 import random
 from dataclasses import dataclass, replace
@@ -81,12 +87,27 @@ class Cloud:
 
 # One wind moves every cloud the same way at the same time. Bigger clouds read as
 # nearer, so they sway further in the same time and look faster.
-WIND_PERIOD = 14   # seconds for one crossing, then it turns back
+WIND_PERIOD = (11, 18)   # seconds for one crossing, rolled daily
 
 
 def sway(scale: float) -> float:
     """px a cloud of this size travels either side of rest."""
     return 30 * scale - 6
+
+
+def reach_of(c: Cloud) -> float:
+    return sway(c.scale) if c.reach is None else c.reach
+
+
+# Daily clouds are placed at random inside these rules
+CLOUDS_MIN, CLOUDS_EXTRA = 4, 2      # always 4, and on half of all days 2 more
+CLOUD_SCALE = (.5, .85)              # the first cloud is always larger, 0.85–1
+CLOUD_AREA = (52, 46, 848, 140)      # left, top, right, lowest base: the sky above the labels
+CLOUD_GAP = 12                       # px clear between clouds at every point of their sway
+KEEP_CLEAR = [(40, 40, 224, 64)]     # boxes no cloud may touch: the coordinates
+SUN_CLEAR = 44                       # px from the sun's centre that free clouds stay out of
+SUN_CLOUD = Cloud(758, 106, 0.55, reach=4)  # on cloudy days: always trims the sun's lower edge
+SUN_CLOUD_CHANCE = .5
 
 
 @dataclass(frozen=True)
@@ -99,23 +120,11 @@ class Star:
     delay: float
 
 
-SKY_CLOUDS = [
-    Cloud(108, 126, 0.6),
-    Cloud(322, 116, 0.75),   # between flutter and go
-    Cloud(520, 78, 1.0),
-    Cloud(628, 132, 0.5),
-    Cloud(758, 106, 0.55, reach=4),   # anchored: always trims the sun's lower edge
-]
-
-STARS = [
-    Star(118, 108, 1.4, .80, 3.6, 4.8), Star(186, 150, 1.1, .60, 4.4, 5.6),
-    Star(236, 80, 1.5, .90, 3.1, 5.1), Star(338, 130, 1.0, .55, 5.0, 6.0),
-    Star(372, 64, 1.8, 1.0, 4.2, 4.9), Star(520, 96, 1.2, .70, 3.4, 5.3),
-    Star(566, 148, 1.0, .55, 4.8, 6.4), Star(612, 66, 1.4, .85, 3.8, 5.8),
-    Star(712, 124, 1.1, .65, 4.6, 5.2), Star(848, 70, 1.4, .80, 3.3, 6.1),
-    Star(836, 150, 1.0, .55, 5.2, 5.5),
-]
-BRIGHT_STAR = STARS[4]
+# Daily stars are scattered at random inside these rules
+STAR_COUNT = (10, 13)
+STAR_AREA = (56, 52, 844, 152)       # left, top, right, bottom: the sky above the labels
+STAR_SPACING = 48                    # px every star keeps from every other, so none clump
+MOON_CLEAR = 30                      # px from the moon's centre
 
 
 @dataclass(frozen=True)
@@ -131,18 +140,16 @@ class Meteor:
 
 
 METEOR_COUNT = 10
-METEOR_SEED = 7       # change for a different arrangement
 METEOR_SKY = (52, 62, 848, 150)  # left, top, right, bottom the whole streak must stay inside
 
 
-def meteors() -> list[Meteor]:
+def meteors(rng: random.Random) -> list[Meteor]:
     """Shooting stars with seeded-random placement, size and timing.
 
     An SVG cannot draw random numbers while it plays, so the randomness is baked
     in here. Each meteor repeats on its own period, so together they never fall
     into a rhythm a viewer would notice.
     """
-    rng = random.Random(METEOR_SEED)
     found: list[Meteor] = []
     while len(found) < METEOR_COUNT:
         # alternate to the right and to the left, always downwards
@@ -174,6 +181,90 @@ def meteor_fits(m: Meteor) -> bool:
             return False
     return True
 
+
+# ── The day's sky ────────────────────────────────────────────────────────────
+
+@dataclass(frozen=True)
+class Sky:
+    clouds: list[Cloud]
+    wind: float              # seconds per crossing
+    meteors: list[Meteor]
+    stars: list[Star]        # brightest first
+
+
+def roll_sky(seed: str) -> Sky:
+    """Everything that changes from day to day, rolled from one seed."""
+    rng = random.Random(seed)
+    wind = rng.uniform(*WIND_PERIOD)
+    clouds = place_clouds(rng, CLOUDS_MIN + (CLOUDS_EXTRA if rng.random() < .5 else 0))
+    if rng.random() < SUN_CLOUD_CHANCE:
+        clouds.append(SUN_CLOUD)
+    return Sky(clouds, wind, meteors(rng), place_stars(rng))
+
+
+def place_stars(rng: random.Random) -> list[Star]:
+    """Spaced-out random stars: mostly small and faint, a few brighter."""
+    left, top, right, bottom = STAR_AREA
+    count = rng.randint(*STAR_COUNT)
+    while True:
+        stars: list[Star] = []
+        for _ in range(count * 60):
+            x, y = round(rng.uniform(left, right)), round(rng.uniform(top, bottom))
+            near_moon = math.hypot(x - ORB[0], y - ORB[1]) < MOON_CLEAR
+            on_text = any(k[0] <= x <= k[2] and k[1] <= y <= k[3] for k in KEEP_CLEAR)
+            crowded = any(math.hypot(x - s.x, y - s.y) < STAR_SPACING for s in stars)
+            if near_moon or on_text or crowded:
+                continue
+            # the first is the bright one; the rest skew small, and brighter stars shine steadier
+            size = 1.0 if not stars else rng.random() ** 2 * .75
+            stars.append(Star(x=x, y=y, r=.9 + .9 * size, opacity=.5 + .5 * size,
+                              period=rng.uniform(3, 5.4), delay=rng.uniform(4.6, 6.5)))
+            if len(stars) == count:
+                return stars
+
+
+def cloud_box(c: Cloud) -> tuple[float, float, float, float]:
+    """Area a cloud covers across its whole sway: left, top, right, bottom."""
+    reach, k = reach_of(c), c.scale
+    return c.x - reach, c.y - 27 * k, c.x + 60 * k + reach, c.y
+
+
+def overlaps(a: tuple, b: tuple, gap: float = 0) -> bool:
+    return a[0] < b[2] + gap and b[0] < a[2] + gap and a[1] < b[3] + gap and b[1] < a[3] + gap
+
+
+def cloud_fits(c: Cloud, taken: list[tuple]) -> bool:
+    box = cloud_box(c)
+    left, top, right, base = CLOUD_AREA
+    if box[0] < left or box[1] < top or box[2] > right or box[3] > base:
+        return False
+    if any(overlaps(box, k) for k in KEEP_CLEAR) or any(overlaps(box, t, CLOUD_GAP) for t in taken):
+        return False
+    # nearest point of the box to the sun
+    sx, sy = ORB
+    nx, ny = min(max(sx, box[0]), box[2]), min(max(sy, box[1]), box[3])
+    return math.hypot(sx - nx, sy - ny) > SUN_CLEAR
+
+
+def place_clouds(rng: random.Random, count: int) -> list[Cloud]:
+    """Scatter clouds with no overlaps; the spot over the sun is always held for SUN_CLOUD."""
+    left, top, right, base = CLOUD_AREA
+    while True:
+        taken, placed = [cloud_box(SUN_CLOUD)], []
+        for i in range(count):
+            for _ in range(400):
+                k = rng.uniform(.85, 1.0) if i == 0 else rng.uniform(*CLOUD_SCALE)
+                c = Cloud(x=rng.uniform(left, right - 60 * k), y=rng.uniform(top + 27 * k, base), scale=k)
+                if cloud_fits(c, taken):
+                    taken.append(cloud_box(c))
+                    placed.append(c)
+                    break
+            else:
+                break   # this layout boxed itself in; start again
+        if len(placed) == count:
+            return sorted(placed, key=lambda c: c.x)
+
+
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
 
 LOOP = 12.0
@@ -201,7 +292,7 @@ def ridge_path() -> str:
 
 def cloud(c: Cloud) -> str:
     k = c.scale
-    timing = f"--reach: {num(sway(k) if c.reach is None else c.reach)}px"
+    timing = f"--reach: {num(reach_of(c))}px"
     parts = [
         f'<rect x="{num(c.x)}" y="{num(c.y - 10*k)}" width="{num(60*k)}" height="{num(10*k)}" rx="{num(5*k)}"/>',
         f'<circle cx="{num(c.x + 18*k)}" cy="{num(c.y - 10*k)}" r="{num(10*k)}"/>',
@@ -213,8 +304,8 @@ def cloud(c: Cloud) -> str:
 
 
 def star(s: Star) -> str:
-    return (f'<circle class="star" cx="{s.x}" cy="{s.y}" r="{num(s.r)}" '
-            f'style="--t: {num(s.period)}s; --d: {num(s.delay)}s; opacity: {num(s.opacity)}"/>')
+    timing = f"--t: {num(s.period)}s; --d: {num(s.delay)}s; opacity: {num(s.opacity)}"
+    return f'<circle class="star" cx="{s.x}" cy="{s.y}" r="{num(s.r)}" style="{timing}"/>'
 
 
 def meteor(m: Meteor) -> str:
@@ -322,11 +413,11 @@ STYLE = Template("""
   """)
 
 
-def style(theme: str) -> str:
+def style(theme: str, sky: Sky) -> str:
     css = STYLE.substitute(
         THEMES[theme], sans=SANS, mono=MONO, snow=SNOW, cloud=CLOUD,
         loop=num(LOOP), loop_start=num(LOOP_START), stagger=num(LABEL_STAGGER),
-        wind=num(WIND_PERIOD), wind_half=num(WIND_PERIOD / 2),
+        wind=num(sky.wind), wind_half=num(sky.wind / 2),
         label_peak=pct(LABEL_GLOW * .45), label_end=pct(LABEL_GLOW),
         trace_at=num(LOOP_START + TRACE_AT), trace_in=pct(.18), trace_out=pct(TRACE_LEN - .18),
         trace_end=pct(TRACE_LEN),
@@ -335,10 +426,10 @@ def style(theme: str) -> str:
     return "\n" + indent(dedent(css).strip(), " " * 6) + "\n    "
 
 
-def sky(theme: str) -> str:
+def sky_layer(theme: str, sky: Sky) -> str:
     cx, cy = ORB
     if theme == "light":
-        clouds = "\n    ".join(cloud(c) for c in SKY_CLOUDS)
+        clouds = "\n    ".join(cloud(c) for c in sky.clouds)
         return f"""  <g class="ripple"><circle cx="{cx}" cy="{cy}" r="11"/></g>
   <g class="orb">
     <circle class="glow" cx="{cx}" cy="{cy}" r="24" filter="url(#blur)"/>
@@ -347,21 +438,22 @@ def sky(theme: str) -> str:
   <g class="sky">
     {clouds}
   </g>"""
-    stars = "\n    ".join(star(s) for s in STARS)
-    shooting = "\n    ".join(meteor(m) for m in meteors())
+    stars = "\n    ".join(star(s) for s in sky.stars)
+    bright = sky.stars[0]
+    shooting = "\n    ".join(meteor(m) for m in sky.meteors)
     return f"""  <g class="ripple"><circle cx="{cx}" cy="{cy}" r="10"/></g>
   <g class="orb">
     <circle class="glow" cx="{cx}" cy="{cy}" r="22" filter="url(#blur)"/>
     <circle class="body" cx="{cx}" cy="{cy}" r="10" mask="url(#crescent)"/>
   </g>
   <g class="sky">
-    <circle class="haze" cx="{BRIGHT_STAR.x}" cy="{BRIGHT_STAR.y}" r="5" filter="url(#blur)"/>
+    <circle class="haze" cx="{bright.x}" cy="{bright.y}" r="5" filter="url(#blur)"/>
     {stars}
     {shooting}
   </g>"""
 
 
-def landscape(theme: str) -> str:
+def landscape(theme: str, sky: Sky) -> str:
     cx, cy = ORB
     d = ridge_path()
     night_defs = f"""
@@ -378,14 +470,14 @@ def landscape(theme: str) -> str:
   <title id="title">{TITLE}</title>
   <!-- generated by scripts/build_assets.py, edit that instead -->
   <defs>
-    <style>{style(theme)}</style>
+    <style>{style(theme, sky)}</style>
     <filter id="blur" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
     <path id="ridge-line" pathLength="1" d="{d}"/>{night_defs}
   </defs>
 
   <!-- sky -->
   <text class="meta" x="{LEFT}" y="56">{COORDS}</text>
-{sky(theme)}
+{sky_layer(theme, sky)}
 
   <!-- range: the ridge, then two copies for the light that runs along it -->
   <use class="ridge" href="#ridge-line"/>
@@ -447,12 +539,20 @@ def legend(theme: str) -> str:
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    ASSETS.mkdir(exist_ok=True)
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--seed", default="preview", help="rolls the sky; the daily build passes the date")
+    parser.add_argument("--out", type=Path, default=ASSETS, help="directory to write the SVGs to")
+    args = parser.parse_args()
+
+    sky = roll_sky(args.seed)
+    args.out.mkdir(parents=True, exist_ok=True)
     for theme in THEMES:
-        for name, build in (("landscape", landscape), ("legend", legend)):
-            path = ASSETS / f"{name}-{theme}.svg"
-            path.write_text(build(theme), encoding="utf-8")
-            print(f"wrote {path.relative_to(ASSETS.parent)}")
+        (args.out / f"landscape-{theme}.svg").write_text(landscape(theme, sky), encoding="utf-8")
+        (args.out / f"legend-{theme}.svg").write_text(legend(theme), encoding="utf-8")
+
+    sun = "cloud over the sun" if SUN_CLOUD in sky.clouds else "clear sun"
+    print(f"sky '{args.seed}': {len(sky.clouds)} clouds, {sun}, wind {sky.wind:.1f}s, "
+          f"{len(sky.stars)} stars → {args.out}")
 
 
 if __name__ == "__main__":

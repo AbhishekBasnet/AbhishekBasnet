@@ -53,7 +53,7 @@
       .glow       { opacity: .1; transform-box: fill-box; transform-origin: center;
                     animation: breathe 9s ease-in-out 3s infinite alternate; }
       .star       { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
-      .cloud      { animation: drift 14s ease-in-out -7s infinite alternate; }
+      .cloud      { animation: drift 16.42s ease-in-out -8.21s infinite alternate; }
 
       /* shooting stars (dark only): the tail stretches out, the head streaks and burns out */
       .meteor       { opacity: 0; animation: meteor var(--t) linear var(--d) infinite; }
@@ -94,29 +94,41 @@
     <circle class="body" cx="792" cy="92" r="11"/>
   </g>
   <g class="sky">
-    <g class="cloud" style="--reach: 12px">
-      <rect x="108" y="120" width="36" height="6" rx="3"/>
-      <circle cx="118.8" cy="120" r="6"/>
-      <circle cx="128.4" cy="117.6" r="7.8"/>
-      <circle cx="136.8" cy="120.6" r="4.8"/>
+    <g class="cloud" style="--reach: 12.37px">
+      <rect x="246.76" y="116.82" width="36.74" height="6.12" rx="3.06"/>
+      <circle cx="257.79" cy="116.82" r="6.12"/>
+      <circle cx="267.58" cy="114.37" r="7.96"/>
+      <circle cx="276.15" cy="117.43" r="4.9"/>
     </g>
-    <g class="cloud" style="--reach: 16.5px">
-      <rect x="322" y="108.5" width="45" height="7.5" rx="3.75"/>
-      <circle cx="335.5" cy="108.5" r="7.5"/>
-      <circle cx="347.5" cy="105.5" r="9.75"/>
-      <circle cx="358" cy="109.25" r="6"/>
+    <g class="cloud" style="--reach: 9.05px">
+      <rect x="352.27" y="58.99" width="30.11" height="5.02" rx="2.51"/>
+      <circle cx="361.3" cy="58.99" r="5.02"/>
+      <circle cx="369.33" cy="56.98" r="6.52"/>
+      <circle cx="376.36" cy="59.49" r="4.01"/>
     </g>
-    <g class="cloud" style="--reach: 24px">
-      <rect x="520" y="68" width="60" height="10" rx="5"/>
-      <circle cx="538" cy="68" r="10"/>
-      <circle cx="554" cy="64" r="13"/>
-      <circle cx="568" cy="69" r="8"/>
+    <g class="cloud" style="--reach: 22.73px">
+      <rect x="460.31" y="63.41" width="57.46" height="9.58" rx="4.79"/>
+      <circle cx="477.55" cy="63.41" r="9.58"/>
+      <circle cx="492.87" cy="59.57" r="12.45"/>
+      <circle cx="506.28" cy="64.36" r="7.66"/>
     </g>
-    <g class="cloud" style="--reach: 9px">
-      <rect x="628" y="127" width="30" height="5" rx="2.5"/>
-      <circle cx="637" cy="127" r="5"/>
-      <circle cx="645" cy="125" r="6.5"/>
-      <circle cx="652" cy="127.5" r="4"/>
+    <g class="cloud" style="--reach: 9.93px">
+      <rect x="583.64" y="114.61" width="31.87" height="5.31" rx="2.66"/>
+      <circle cx="593.21" cy="114.61" r="5.31"/>
+      <circle cx="601.7" cy="112.49" r="6.9"/>
+      <circle cx="609.14" cy="115.14" r="4.25"/>
+    </g>
+    <g class="cloud" style="--reach: 10.53px">
+      <rect x="603.19" y="66.52" width="33.06" height="5.51" rx="2.76"/>
+      <circle cx="613.11" cy="66.52" r="5.51"/>
+      <circle cx="621.93" cy="64.32" r="7.16"/>
+      <circle cx="629.64" cy="67.07" r="4.41"/>
+    </g>
+    <g class="cloud" style="--reach: 10.47px">
+      <rect x="678.75" y="132.81" width="32.95" height="5.49" rx="2.75"/>
+      <circle cx="688.64" cy="132.81" r="5.49"/>
+      <circle cx="697.42" cy="130.61" r="7.14"/>
+      <circle cx="705.11" cy="133.36" r="4.39"/>
     </g>
     <g class="cloud" style="--reach: 4px">
       <rect x="758" y="100.5" width="33" height="5.5" rx="2.75"/>
