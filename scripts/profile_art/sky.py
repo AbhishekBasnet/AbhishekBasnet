@@ -215,10 +215,11 @@ def ufo_parks_well(x: float, y: float) -> bool:
             and all(abs(x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS))
 
 
-def plan_ufos(rng: random.Random) -> tuple[list[Ufo], tuple[float, float, float], float]:
-    """The night's UFOs taking turns. Returns them, the seconds to rise, park and
-    leave, and the full cycle."""
-    times = (rng.uniform(*cfg.UFO_RISE), rng.uniform(*cfg.UFO_PARK), rng.uniform(*cfg.UFO_LEAVE))
+def plan_ufos(rng: random.Random) -> tuple[list[Ufo], tuple[float, float, float, float], float]:
+    """The day's UFOs taking turns. Returns them, the seconds to rise, park, approach
+    and whip off, and the full cycle."""
+    times = (rng.uniform(*cfg.UFO_RISE), rng.uniform(*cfg.UFO_PARK),
+             rng.uniform(*cfg.UFO_APPROACH), rng.uniform(*cfg.UFO_WHIP))
     ufos, t = [], rng.uniform(*cfg.UFO_FIRST)
     first = t
     for _ in range(cfg.UFOS):
@@ -228,14 +229,15 @@ def plan_ufos(rng: random.Random) -> tuple[list[Ufo], tuple[float, float, float]
 
 
 def ufo(rng: random.Random, start: float, attempts: int = 10_000) -> Ufo:
+    """A parking spot over the ridge and a far point in the sky to vanish at."""
+    left, top, right, bottom = cfg.UFO_FAR_AREA
     for _ in range(attempts):
         x, y = rng.uniform(cfg.LEFT + 30, cfg.RIGHT - 30), rng.uniform(*cfg.UFO_PARK_Y)
-        if ufo_parks_well(x, y):
-            angle = math.radians(rng.uniform(*cfg.UFO_LEAVE_ANGLE))
-            distance_ = rng.uniform(*cfg.UFO_LEAVE_DISTANCE)
+        far = rng.uniform(left, right), rng.uniform(top, bottom)
+        if ufo_parks_well(x, y) and distance((x, y), far) >= cfg.UFO_WHIP_MIN:
             # start far enough down that it is fully hidden behind the ridge
             return Ufo(x=x, y=y, rise=height_on(cfg.RIDGE, x) - y + 16,
-                       dx=distance_ * math.cos(angle), dy=distance_ * math.sin(angle), start=start)
+                       dx=far[0] - x, dy=far[1] - y, start=start)
     raise RuntimeError("no UFO parking spot fits the rules in config")
 
 
@@ -271,24 +273,51 @@ def plan_visits(rng: random.Random) -> tuple[dict[str, float], list[Visit], floa
 def daily_routes(rng: random.Random, kind: str) -> list[Route]:
     """ROUTES paths for the day: a random mix of directions (at least one each way),
     each a little above or below the day's height for this kind."""
+    low, high = cfg.VISIT_Y[kind]
+    height = rng.uniform(low + cfg.ROUTE_JITTER, high - cfg.ROUTE_JITTER)
+    heights = [height + rng.uniform(-cfg.ROUTE_JITTER, cfg.ROUTE_JITTER) for _ in range(cfg.ROUTES)]
+    if kind == "parachute":
+        return parachute_routes(rng, heights)
+    span = cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]
+    return [Route(edge(d), y, d * span, rng.uniform(*cfg.SINK[kind])) for d, y in zip(mixed_directions(rng), heights)]
+
+
+def mixed_directions(rng: random.Random) -> list[int]:
+    """ROUTES directions, 1 rightwards and -1 leftwards, with at least one of each."""
     lefts = rng.randint(1, cfg.ROUTES - 1)
     directions = [-1] * lefts + [1] * (cfg.ROUTES - lefts)
     rng.shuffle(directions)
-    low, high = cfg.VISIT_Y[kind]
-    height = rng.uniform(low + cfg.ROUTE_JITTER, high - cfg.ROUTE_JITTER)
-    return [route(rng, kind, d, height + rng.uniform(-cfg.ROUTE_JITTER, cfg.ROUTE_JITTER)) for d in directions]
+    return directions
 
 
-def route(rng: random.Random, kind: str, direction: int, y: float) -> Route:
-    x = cfg.OFFSTAGE[0] if direction > 0 else cfg.OFFSTAGE[1]
-    if kind == "parachute":
-        # drifts in on the wind while it comes down, until the ridge hides it
-        return Route(x, y, direction * rng.uniform(*cfg.PARACHUTE_DRIFT), cfg.PARACHUTE_LANDING_Y - y)
-    return Route(x, y, direction * (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]), rng.uniform(*cfg.SINK[kind]))
+def edge(direction: int) -> float:
+    """Where something flying in that direction enters, just off the edge."""
+    return cfg.OFFSTAGE[0] if direction > 0 else cfg.OFFSTAGE[1]
+
+
+def parachute_routes(rng: random.Random, heights: list[float], attempts: int = 10_000) -> list[Route]:
+    """Landing spots spread along the ridge. Each parachute drifts in from a side far
+    enough away to come down gently, until the ridge hides it."""
+    left, right = cfg.PARACHUTE_LANDING_X
+    for _ in range(attempts):
+        spots = sorted(rng.uniform(left, right) for _ in heights)
+        if any(b - a < cfg.PARACHUTE_SPACING for a, b in zip(spots, spots[1:])):
+            continue
+        directions = [d if abs(x - edge(d)) >= cfg.PARACHUTE_MIN_DRIFT else -d
+                      for x, d in zip(spots, mixed_directions(rng))]
+        if set(directions) != {1, -1}:
+            continue
+        routes = [Route(edge(d), y, x - edge(d), cfg.PARACHUTE_LANDING_Y - y)
+                  for x, d, y in zip(spots, directions, heights)]
+        rng.shuffle(routes)
+        return routes
+    raise RuntimeError("no set of parachute landings fits the rules in config")
 
 
 def bird_route(rng: random.Random) -> Route:
-    return route(rng, "birds", rng.choice((1, -1)), rng.uniform(*cfg.VISIT_Y["birds"]))
+    direction = rng.choice((1, -1))
+    return Route(edge(direction), rng.uniform(*cfg.VISIT_Y["birds"]),
+                 direction * (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]), rng.uniform(*cfg.SINK["birds"]))
 
 
 def flock(rng: random.Random) -> tuple[tuple[float, float, float], ...]:

@@ -96,6 +96,13 @@ class VisitorRules(unittest.TestCase):
                 low, high = cfg.VISIT_Y[kind]
                 self.assertTrue(all(low <= h <= high for h in heights))
 
+    def test_parachute_landing_spots_are_spread_along_the_ridge(self):
+        for sky in SKIES:
+            spots = sorted({v.route.x + v.route.dx for v in sky.visits if v.kind == "parachute"})
+            self.assertEqual(len(spots), cfg.ROUTES)
+            self.assertTrue(all(cfg.PARACHUTE_LANDING_X[0] <= x <= cfg.PARACHUTE_LANDING_X[1] for x in spots))
+            self.assertTrue(all(b - a >= cfg.PARACHUTE_SPACING for a, b in zip(spots, spots[1:])))
+
     def test_visitors_enter_from_off_an_edge(self):
         for sky in SKIES:
             for v in sky.visits:
@@ -110,7 +117,7 @@ class VisitorRules(unittest.TestCase):
                 r = v.route
                 if v.kind == "parachute":
                     self.assertGreater(r.y + r.dy, ridge_top)
-                    self.assertTrue(cfg.PARACHUTE_DRIFT[0] <= abs(r.dx) <= cfg.PARACHUTE_DRIFT[1])
+                    self.assertGreaterEqual(abs(r.dx), cfg.PARACHUTE_MIN_DRIFT)
                 elif v.kind == "glider":
                     self.assertTrue(cfg.SINK["glider"][0] <= r.dy <= cfg.SINK["glider"][1])
                     self.assertEqual(abs(r.dx), cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0])
@@ -153,7 +160,9 @@ class NightRules(unittest.TestCase):
                 self.assertGreater(u.y + u.rise, ridge)                       # starts hidden
                 self.assertGreaterEqual(ridge - u.y, cfg.UFO_ABOVE_RIDGE)     # parks clear
                 self.assertTrue(all(abs(u.x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS))
-                self.assertLess(u.dy, 0)                                      # leaves upwards
+                far = (u.x + u.dx, u.y + u.dy)                                # vanishes in the sky
+                self.assertTrue(contains(cfg.UFO_FAR_AREA, far))
+                self.assertGreaterEqual(distance((u.x, u.y), far), cfg.UFO_WHIP_MIN)
 
     def test_aurora_stays_inside_the_sky_and_has_room_to_flow(self):
         for sky in SKIES:

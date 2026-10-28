@@ -10,7 +10,7 @@ Writes four SVGs:
     python3 scripts/build_assets.py --date 2026-10-28 --out dist
 
 --date sets the moon phase and, unless --seed is given, seeds everything random:
-clouds, wind, day visitors, stars, shooting stars, aurora and satellite. A daily
+clouds, wind, day visitors, UFOs, stars, shooting stars, aurora and satellites. A daily
 GitHub Action (.github/workflows/sky.yml) builds with the Nepal date and
 publishes to the `output` branch, which is what the profile shows. Tunable values
 live in profile_art/config.py.
@@ -19,11 +19,11 @@ Animation timeline (seconds after the image loads):
 
     0.0 – 3.2   intro, once      ridge draws, summits fade up, sun/moon rises
     3.2 – 4.8   sky, once        clouds or stars fade in
-    5.0 →       loop, every 12s  labels glow → light runs along the ridge →
-                                 ripple leaves the sun/moon → rest
-    always      ambient          glow breathes, clouds sway, stars twinkle, aurora shimmers
-    6.0 →       day visitors     birds, paraglider, plane take turns, 5–15s of empty sky between
-    now & then  night visitors   shooting stars, a satellite pass
+    4.0 – 11.8  sequence, once   labels glow → light runs along the ridge → ripple
+    always      ambient          glow breathes, clouds sway, stars twinkle, aurora flows
+    6.0 →       day visitors     birds, parachute, hang glider, plane take turns
+    now & then  both             UFOs rise from behind the ridge and whip off
+    now & then  night visitors   shooting stars, satellites
 """
 
 from __future__ import annotations

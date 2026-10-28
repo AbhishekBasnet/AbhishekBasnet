@@ -10,7 +10,7 @@ from .config import (
     AURORA_COLORS, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GLIDER_WING, GROUND_Y, HEIGHT, LABEL_GLOW,
     LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB, RIDGE, RIGHT, RIPPLE_AT,
     RIPPLE_LEN, ROLE, SANS, SATELLITE_HULL, SATELLITE_PANEL, SATELLITE_TRIM, SATELLITE_TUMBLE,
-    SEQUENCE_START, SNOW, SUMMITS, THEMES, TITLE, TRACE_AT, TRACE_LEN, UFO_COLORS,
+    SEQUENCE_START, SNOW, SUMMITS, THEMES, TITLE, TRACE_AT, TRACE_LEN, UFO_APPROACH_SCALE, UFO_COLORS,
     VIEW_X, VIEW_Y, VISIT_FIRST, VISITOR_INK, WIDTH,
 )
 from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Ufo, Visit
@@ -125,17 +125,22 @@ def satellite(s: Satellite) -> str:
 
 
 def ufo(u: Ufo) -> str:
-    """A saucer with a dome, an underglow and three blinking lights."""
+    """A saucer with a dome, an underglow and three blinking lights hung under the
+    rim, where they show against the sky rather than the hull."""
     motion = f"--rise: {num(u.rise)}px; --dx: {num(u.dx)}px; --dy: {num(u.dy)}px; --d: {num(u.start)}s"
-    lights = "".join(f'<circle class="light" cx="{x}" cy=".7" r=".75" style="animation-delay: -{num(i * .3)}s"/>'
-                     for i, x in enumerate((-5, 0, 5)))
+    lights = "".join(f'<g class="light" style="animation-delay: -{num(i * .3)}s">'
+                     f'<circle class="bloom" cx="{x}" cy="3" r="2.2" filter="url(#spark)"/>'
+                     f'<circle cx="{x}" cy="3" r="1.1"/></g>'
+                     for i, x in enumerate((-5.5, 0, 5.5)))
     return f"""<g transform="translate({num(u.x)} {num(u.y)})">
       <g class="ufo" style="{motion}">
+        <g class="ufo-size">
         <g class="hover">
           <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
           <path class="dome" d="M-4.2 -1.6 A4.2 3.8 0 0 1 4.2 -1.6 Z"/>
           <ellipse class="saucer" rx="10" ry="2.6"/>
           {lights}
+        </g>
         </g>
       </g>
     </g>"""
@@ -163,11 +168,15 @@ def parachute() -> str:
 
 
 def hang_glider() -> str:
-    return """<g class="bank">
-            <path class="wing" d="M-11 -6 Q0 -10 11 -6 L0 -4 Z"/>
-            <path class="lines" d="M-3.5 -4.6 L-1.5 0 H1.5 L3.5 -4.6 M0 -4.4 V-1"/>
-            <rect class="pilot" x="-3" y="-1.6" width="6" height="1.5" rx=".75"/>
-          </g>"""
+    """A swept delta wing over an A-frame bar, the pilot lying prone beneath; it
+    rides gentle thermals up and down as it glides."""
+    return """<g class="soar"><g transform="scale(1.3)"><g class="bank">
+            <path class="wing" d="M13 -11 L-13 -15 L-9 -8 Z"/>
+            <path class="keel" d="M13 -11 L-10.5 -11.6"/>
+            <path class="frame" d="M1 -10.6 L-2 -3 H4 Z M1 -10.6 V-4.6"/>
+            <rect class="pilot" x="-5" y="-4.6" width="7.5" height="2" rx="1"/>
+            <circle class="pilot" cx="3.6" cy="-3.6" r="1.25"/>
+          </g></g></g>"""
 
 
 def plane() -> str:
@@ -280,8 +289,11 @@ DAY_STYLE = Template("""
              transform-box: fill-box; transform-origin: center; animation: flap .5s ease-in-out infinite alternate; }
     .swing { transform-box: fill-box; transform-origin: 50% 0; animation: sway 3.4s ease-in-out infinite alternate; }
     .bank  { transform-box: fill-box; transform-origin: center; animation: bank 5s ease-in-out infinite alternate; }
+    .soar  { animation: soar 4.5s ease-in-out infinite alternate; }
     .chute { fill: $canopy; }
     .wing  { fill: $wing; }
+    .keel  { fill: none; stroke: $ink_day; stroke-width: .6; opacity: .6; }
+    .frame { fill: none; stroke: $ink_day; stroke-width: .6; stroke-linejoin: round; }
     .lines, .diver { fill: none; stroke: $ink_day; stroke-width: .45; stroke-linecap: round; }
     .diver { stroke-width: .9; }
     .pilot, .plane { fill: $ink_day; }
@@ -294,6 +306,7 @@ DAY_STYLE = Template("""
     @keyframes flap { to { transform: scaleY(-.45); } }
     @keyframes sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
     @keyframes bank { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+    @keyframes soar { from { transform: translateY(-6px); } to { transform: translateY(6px); } }
 """)
 
 NIGHT_STYLE = Template("""
@@ -331,14 +344,17 @@ NIGHT_STYLE = Template("""
 """)
 
 UFO_STYLE = Template("""
-    /* day and night: UFOs rise from behind the ridge, park, then leave for space */
+    /* day and night: UFOs rise from behind the ridge, park, come closer, whip off */
     .ufo       { opacity: 0; transform-box: fill-box; transform-origin: center;
                  animation: ufo ${cycle}s linear var(--d) infinite; }
+    .ufo-size  { transform-box: fill-box; transform-origin: center;
+                 animation: ufo-size ${cycle}s linear var(--d) infinite; }
     .hover     { animation: bob 1.8s ease-in-out infinite alternate; }
     .saucer    { fill: $hull; }
     .dome      { fill: $dome; opacity: .8; }
     .underglow { fill: $dome; opacity: .35; }
     .light     { fill: $light; animation: blink .9s steps(2) infinite; }
+    .bloom     { opacity: .7; }
 
     $visit
     @keyframes bob   { from { transform: translateY(-1.5px); } to { transform: translateY(1.5px); } }
@@ -366,14 +382,24 @@ def arc(name: str, duration: float, cycle: float) -> str:
             f"{share(duration, cycle)}, 100% {{ transform: none; }} }}")
 
 
-def ufo_visit(rise: float, park: float, leave: float, cycle: float) -> str:
-    """Keyframes: up from behind the ridge (easing to a stop), parked, then away
-    with growing speed, shrinking as it goes."""
-    up, away = "cubic-bezier(.2, .7, .3, 1)", "cubic-bezier(.6, 0, .9, .4)"
-    return (f"@keyframes ufo {{ 0% {{ opacity: 1; transform: translateY(var(--rise)); animation-timing-function: {up}; }} "
-            f"{share(rise, cycle)} {{ opacity: 1; transform: none; }} "
-            f"{share(rise + park, cycle)} {{ opacity: 1; transform: none; animation-timing-function: {away}; }} "
-            f"{share(rise + park + leave, cycle)}, 100% {{ opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.2); }} }}")
+def ufo_visit(rise: float, park: float, approach: float, whip: float, cycle: float) -> str:
+    """Two sets of keyframes. `ufo` moves it: up from behind the ridge, parked, a
+    little forward, then whipped off with growing speed. `ufo-size` scales it: it
+    swells as it comes closer, then dwindles fast as it races away, so it is a
+    small dot well before it vanishes."""
+    up, near, away = "cubic-bezier(.2, .7, .3, 1)", "ease-in-out", "cubic-bezier(.45, 0, .75, .4)"
+    dwindle = "cubic-bezier(.35, .35, .55, 1)"
+    t1, t2, t3, t4 = rise, rise + park, rise + park + approach, rise + park + approach + whip
+    move = (f"@keyframes ufo {{ 0% {{ opacity: 1; transform: translateY(var(--rise)); animation-timing-function: {up}; }} "
+            f"{share(t1, cycle)} {{ opacity: 1; transform: none; }} "
+            f"{share(t2, cycle)} {{ opacity: 1; transform: none; animation-timing-function: {near}; }} "
+            f"{share(t3, cycle)} {{ opacity: 1; transform: translateY(4px); animation-timing-function: {away}; }} "
+            f"{share(t3 + whip * .92, cycle)} {{ opacity: 1; }} "
+            f"{share(t4, cycle)}, 100% {{ opacity: 0; transform: translate(var(--dx), var(--dy)); }} }}")
+    size = (f"@keyframes ufo-size {{ 0%, {share(t2, cycle)} {{ transform: none; animation-timing-function: {near}; }} "
+            f"{share(t3, cycle)} {{ transform: scale({num(UFO_APPROACH_SCALE)}); animation-timing-function: {dwindle}; }} "
+            f"{share(t4, cycle)}, 100% {{ transform: scale(.05); }} }}")
+    return move + "\n    " + size
 
 
 def style(theme: str, sky: Sky) -> str:
@@ -506,6 +532,7 @@ def landscape(theme: str, sky: Sky) -> str:
   <defs>
     <style>{style(theme, sky)}</style>
     <filter id="blur" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
+    <filter id="spark" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.1"/></filter>
     <path id="ridge-line" pathLength="1" d="{ridge_path()}"/>
     <clipPath id="above-ridge"><path d="{above_ridge_path()}"/></clipPath>{defs(theme, sky)}
   </defs>

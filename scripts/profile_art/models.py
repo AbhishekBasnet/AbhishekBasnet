@@ -90,7 +90,8 @@ class Visit:
 
 @dataclass(frozen=True)
 class Ufo:
-    """Rises `rise` px from behind the ridge to park at (x, y), then leaves by (dx, dy)."""
+    """Rises `rise` px from behind the ridge to park at (x, y), comes closer, then
+    whips off to vanish (dx, dy) away."""
     x: float
     y: float
     rise: float
@@ -115,6 +116,6 @@ class Sky:
     satellites: list[Satellite]   # night: take turns, one per pass
     satellite_pass: float         # night: seconds each pass takes
     satellite_cycle: float        # night: seconds before the first comes round again
-    ufos: list[Ufo]               # night: take turns
-    ufo_times: tuple[float, float, float]   # night: seconds to rise, park and leave
+    ufos: list[Ufo]               # day and night: take turns
+    ufo_times: tuple[float, float, float, float]   # seconds to rise, park, approach and whip off
     ufo_cycle: float              # night: seconds before the first comes round again

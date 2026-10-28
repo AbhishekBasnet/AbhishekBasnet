@@ -102,17 +102,19 @@ SATELLITE_HULL = "#D8DEE9"
 SATELLITE_PANEL = "#5E81AC"
 SATELLITE_TRIM = "#88C0D0"
 
-# Four UFOs a day, by day and by night: each rises from behind the ridge, parks
-# for a moment, then leaves for space in its own direction, shrinking as it goes.
+# Four UFOs a day, by day and by night: each rises from behind the ridge, parks,
+# comes a little closer, then whips off into the far sky until it is a dot and gone.
 UFOS = 4
 UFO_FIRST = (25, 45)                 # seconds after load the first one rises
 UFO_GAP = (40, 180)                  # seconds of empty sky between flights
-UFO_RISE, UFO_PARK, UFO_LEAVE = (2.2, 3.2), (3, 5), (1, 1.6)   # seconds, rolled daily
+UFO_RISE, UFO_PARK = (2.2, 3.2), (3, 5)          # seconds, rolled daily
+UFO_APPROACH, UFO_WHIP = (.6, .9), (1.1, 1.6)
+UFO_APPROACH_SCALE = 1.6             # how much bigger it looks when it comes closer
 UFO_PARK_Y = (178, 214)              # below the labels, above the ridge
 UFO_ABOVE_RIDGE = 22                 # px it parks clear of the ridge line
 UFO_CLEAR_OF_LEADERS = 30            # px from the summit leader lines
-UFO_LEAVE_DISTANCE = (460, 620)
-UFO_LEAVE_ANGLE = (-160, -20)        # degrees clockwise from east: always upwards
+UFO_FAR_AREA = (70, 52, 830, 140)    # where in the sky it vanishes: left, top, right, bottom
+UFO_WHIP_MIN = 240                   # px at least between parking and vanishing
 UFO_COLORS = {                       # the hull is darker by day so it shows against white
     "light": dict(hull="#4C566A", dome="#88C0D0", light="#EBCB8B"),
     "dark": dict(hull="#D8DEE9", dome="#88C0D0", light="#EBCB8B"),
@@ -137,7 +139,9 @@ ROUTE_KINDS = ("parachute", "glider", "plane")
 ROUTES = 4
 ROUTE_JITTER = 10                    # px a route sits above or below the day's height
 SINK = {"birds": (-10, 10), "glider": (24, 60), "plane": (-14, 14)}   # px lost (+) or gained (-) crossing
-PARACHUTE_DRIFT = (260, 440)         # px it drifts in from the edge while it comes down
+PARACHUTE_LANDING_X = (110, 790)     # the day's landing spots are spread along the ridge
+PARACHUTE_SPACING = 120              # px at least between two landing spots
+PARACHUTE_MIN_DRIFT = 160            # px at least it drifts in, so it comes down gently
 PARACHUTE_LANDING_Y = 360            # it sinks to here; the ridge hides it well before
 
 VISITOR_INK = "#4C566A"
