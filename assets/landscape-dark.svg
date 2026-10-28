@@ -70,16 +70,16 @@
       .star { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
 
       /* night: shooting stars stretch out, streak and burn out */
-      .meteor       { opacity: 0; animation: meteor var(--t) linear var(--d) infinite; }
+      .meteor       { opacity: 0; animation: none var(--t) linear var(--d) infinite; }
       .meteor .tail { fill: url(#meteor-tail); transform-box: fill-box; transform-origin: right center;
-                      animation: meteor-tail var(--t) ease-out var(--d) infinite; }
+                      animation: none var(--t) ease-out var(--d) infinite; }
       .meteor .head { fill: #ECEFF4; }
 
       /* night: aurora folds flow sideways and shimmer; a satellite arcs over now and then */
       .aurora      { animation: flow var(--t) linear infinite; }
       .aurora path { animation: shimmer 7s ease-in-out var(--d) infinite alternate; }
-      .satellite   { opacity: 0; animation: satellite 355.8s linear var(--d) infinite; }
-      .orbit       { animation: orbit 355.8s linear var(--d) infinite; }
+      .satellite   { opacity: 0; animation: satellite 144.12s linear var(--d) infinite; }
+      .orbit       { animation: orbit 144.12s linear var(--d) infinite; }
       .craft       { transform-box: fill-box; transform-origin: center; animation: tumble 16s ease-in-out infinite alternate; }
       .craft .hull  { fill: #D8DEE9; }
       .craft .panel { fill: #5E81AC; stroke: #88C0D0; stroke-width: .4; }
@@ -87,19 +87,28 @@
 
 
       @keyframes twinkle     { 50% { opacity: .12; } }
-      @keyframes meteor      { 0% { opacity: 0; transform: none; } .25% { opacity: 1; }
-                               1.3%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
-      @keyframes meteor-tail { 0% { transform: scaleX(.15); } .6%, 100% { transform: none; } }
+      @keyframes meteor-0 { 0% { opacity: 0; transform: none; } .29% { opacity: 1; } 1.45%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes meteor-tail-0 { 0% { transform: scaleX(.15); } .65%, 100% { transform: none; } }
+      @keyframes meteor-1 { 0% { opacity: 0; transform: none; } .31% { opacity: 1; } 1.57%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes meteor-tail-1 { 0% { transform: scaleX(.15); } .71%, 100% { transform: none; } }
+      @keyframes meteor-2 { 0% { opacity: 0; transform: none; } .33% { opacity: 1; } 1.63%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes meteor-tail-2 { 0% { transform: scaleX(.15); } .73%, 100% { transform: none; } }
+      @keyframes meteor-3 { 0% { opacity: 0; transform: none; } .27% { opacity: 1; } 1.35%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes meteor-tail-3 { 0% { transform: scaleX(.15); } .61%, 100% { transform: none; } }
+      @keyframes meteor-4 { 0% { opacity: 0; transform: none; } .38% { opacity: 1; } 1.92%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes meteor-tail-4 { 0% { transform: scaleX(.15); } .86%, 100% { transform: none; } }
+      @keyframes meteor-5 { 0% { opacity: 0; transform: none; } .56% { opacity: 1; } 2.78%, 100% { opacity: 0; transform: translateX(var(--travel)); } }
+      @keyframes meteor-tail-5 { 0% { transform: scaleX(.15); } 1.25%, 100% { transform: none; } }
       @keyframes flow        { to { transform: translateX(var(--wave)); } }
       @keyframes shimmer     { from { opacity: .55; } to { opacity: 1; } }
       @keyframes tumble      { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
-      @keyframes satellite { 0% { opacity: 0; transform: none; } .28%, 8.9% { opacity: 1; } 9.18%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes orbit { 0% { transform: none; animation-timing-function: cubic-bezier(.25, .46, .45, .94); } 4.59% { transform: translateY(var(--arc)); animation-timing-function: cubic-bezier(.55, .085, .68, .53); } 9.18%, 100% { transform: none; } }
+      @keyframes satellite { 0% { opacity: 0; transform: none; } .69%, 12.04% { opacity: 1; } 12.74%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes orbit { 0% { transform: none; animation-timing-function: cubic-bezier(.25, .46, .45, .94); } 6.37% { transform: translateY(var(--arc)); animation-timing-function: cubic-bezier(.55, .085, .68, .53); } 12.74%, 100% { transform: none; } }
 
       /* day and night: UFOs arrive (from behind the ridge or the far sky), park,
          come closer, then whip off */
       .ufo, .ufo-size, .ting   { transform-box: fill-box; transform-origin: center;
-                                 animation: none 526.4s linear var(--d) infinite; }
+                                 animation: none 143.65s linear var(--d) infinite; }
       .ufo, .ting              { opacity: 0; }
       .ufo.from-ridge          { animation-name: ufo-ridge; }
       .ufo.from-sky            { animation-name: ufo-sky; }
@@ -116,12 +125,12 @@
       .ting-star { fill: #ECEFF4; }
       .ting-glow { fill: #EBCB8B; opacity: .8; }
 
-      @keyframes ufo-ridge { 0% { opacity: 1; transform: translateY(var(--rise)); animation-timing-function: cubic-bezier(.2, .7, .3, 1); } .52% { opacity: 1; transform: none; } 1.31% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 1.44% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 1.65% { opacity: 1; } 1.67%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes ufo-sky { 0% { opacity: 0; transform: translate(var(--ax), var(--ay)); animation-timing-function: cubic-bezier(.15, .6, .3, 1); } .03% { opacity: 1; } .52% { opacity: 1; transform: none; } 1.31% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 1.44% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 1.65% { opacity: 1; } 1.67%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes ufo-size-ridge { 0%, 1.31% { transform: none; animation-timing-function: ease-in-out; } 1.44% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 1.67%, 100% { transform: scale(.05); } }
-      @keyframes ufo-size-sky { 0% { transform: scale(.05); animation-timing-function: cubic-bezier(.6, 0, .8, .5); } .52%, 1.31% { transform: none; animation-timing-function: ease-in-out; } 1.44% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 1.67%, 100% { transform: scale(.05); } }
-      @keyframes ting-in { 0% { opacity: 0; transform: scale(0); } .02% { opacity: 1; transform: scale(1) rotate(45deg); } .09%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
-      @keyframes ting-out { 0%, 1.66% { opacity: 0; transform: scale(0); } 1.7% { opacity: 1; transform: scale(1) rotate(45deg); } 1.77%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
+      @keyframes ufo-ridge { 0% { opacity: 1; transform: translateY(var(--rise)); animation-timing-function: cubic-bezier(.2, .7, .3, 1); } 1.51% { opacity: 1; transform: none; } 3.55% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 4.07% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 4.98% { opacity: 1; } 5.06%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes ufo-sky { 0% { opacity: 0; transform: translate(var(--ax), var(--ay)); animation-timing-function: cubic-bezier(.15, .6, .3, 1); } .1% { opacity: 1; } 1.51% { opacity: 1; transform: none; } 3.55% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 4.07% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 4.98% { opacity: 1; } 5.06%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes ufo-size-ridge { 0%, 3.55% { transform: none; animation-timing-function: ease-in-out; } 4.07% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 5.06%, 100% { transform: scale(.05); } }
+      @keyframes ufo-size-sky { 0% { transform: scale(.05); animation-timing-function: cubic-bezier(.6, 0, .8, .5); } 1.51%, 3.55% { transform: none; animation-timing-function: ease-in-out; } 4.07% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 5.06%, 100% { transform: scale(.05); } }
+      @keyframes ting-in { 0% { opacity: 0; transform: scale(0); } .09% { opacity: 1; transform: scale(1) rotate(45deg); } .35%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
+      @keyframes ting-out { 0%, 5.03% { opacity: 0; transform: scale(0); } 5.15% { opacity: 1; transform: scale(1) rotate(45deg); } 5.41%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
       @keyframes bob   { from { transform: translateY(-1.5px); } to { transform: translateY(1.5px); } }
       @keyframes blink { 50% { opacity: .2; } }
 
@@ -153,10 +162,10 @@
       <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
     <mask id="aurora-window-0" maskUnits="userSpaceOnUse">
-      <rect x="351.17" y="36" width="441.58" height="370" fill="url(#fade-ends)"/>
+      <rect x="325.99" y="36" width="489.87" height="370" fill="url(#fade-ends)"/>
     </mask>
     <mask id="aurora-window-1" maskUnits="userSpaceOnUse">
-      <rect x="196.66" y="36" width="393.63" height="370" fill="url(#fade-ends)"/>
+      <rect x="193.3" y="36" width="516.92" height="370" fill="url(#fade-ends)"/>
     </mask>
     <filter id="haze" x="-10%" y="-60%" width="120%" height="220%"><feGaussianBlur stdDeviation="6"/></filter>
   </defs>
@@ -171,89 +180,68 @@
   <g class="sky">
     <g clip-path="url(#above-ridge)">
       <g filter="url(#haze)">
-      <g mask="url(#aurora-window-0)" opacity=".12">
-        <g class="aurora" style="--wave: 233.74px; --t: 33.74s; --d: -0s"><path fill="url(#aurora-0)" d="M117.43 205.62 C123.92 206.76 143.4 209.94 156.38 212.47 C169.37 215 182.36 218.49 195.34 220.78 C208.33 223.07 221.31 228.12 234.3 226.2 C247.28 224.29 260.27 214.16 273.25 209.3 C286.24 204.44 299.22 197.64 312.21 197.03 C325.2 196.42 338.18 203.05 351.17 205.62 C364.15 208.19 377.14 209.94 390.12 212.47 C403.11 215 416.09 218.49 429.08 220.78 C442.06 223.07 455.05 228.12 468.03 226.2 C481.02 224.29 494.01 214.16 506.99 209.3 C519.98 204.44 532.96 197.64 545.95 197.03 C558.93 196.42 571.92 203.05 584.9 205.62 C597.89 208.19 610.87 209.94 623.86 212.47 C636.85 215 649.83 218.49 662.82 220.78 C675.8 223.07 688.79 228.12 701.77 226.2 C714.76 224.29 727.74 214.16 740.73 209.3 C753.71 204.44 766.7 197.64 779.68 197.03 C792.67 196.42 805.66 203.05 818.64 205.62 C831.63 208.19 844.61 209.94 857.6 212.47 C870.58 215 883.57 218.49 896.55 220.78 C909.54 223.07 922.52 228.12 935.51 226.2 C948.5 224.29 961.48 214.16 974.47 209.3 C987.45 204.44 1000.44 197.64 1013.42 197.03 C1026.41 196.42 1045.89 204.19 1052.38 205.62 L1052.38 255.1 C1045.89 253.66 1026.41 245.89 1013.42 246.51 C1000.44 247.12 987.45 253.91 974.47 258.77 C961.48 263.64 948.5 273.76 935.51 275.68 C922.52 277.59 909.54 272.55 896.55 270.26 C883.57 267.97 870.58 264.47 857.6 261.94 C844.61 259.42 831.63 257.67 818.64 255.1 C805.66 252.52 792.67 245.89 779.68 246.51 C766.7 247.12 753.71 253.91 740.73 258.77 C727.74 263.64 714.76 273.76 701.77 275.68 C688.79 277.59 675.8 272.55 662.82 270.26 C649.83 267.97 636.85 264.47 623.86 261.94 C610.87 259.42 597.89 257.67 584.9 255.1 C571.92 252.52 558.93 245.89 545.95 246.51 C532.96 247.12 519.98 253.91 506.99 258.77 C494.01 263.64 481.02 273.76 468.03 275.68 C455.05 277.59 442.06 272.55 429.08 270.26 C416.09 267.97 403.11 264.47 390.12 261.94 C377.14 259.42 364.15 257.67 351.17 255.1 C338.18 252.52 325.2 245.89 312.21 246.51 C299.22 247.12 286.24 253.91 273.25 258.77 C260.27 263.64 247.28 273.76 234.3 275.68 C221.31 277.59 208.33 272.55 195.34 270.26 C182.36 267.97 169.37 264.47 156.38 261.94 C143.4 259.42 123.92 256.24 117.43 255.1Z"/></g>
+      <g mask="url(#aurora-window-0)" opacity=".16">
+        <g class="aurora" style="--wave: -174.21px; --t: 31.19s; --d: -0s"><path fill="url(#aurora-0)" d="M151.78 215.79 C156.62 214.01 171.13 208.19 180.81 205.14 C190.49 202.09 200.17 197.85 209.85 197.46 C219.53 197.07 229.2 201.17 238.88 202.8 C248.56 204.42 258.24 205.59 267.92 207.21 C277.6 208.83 287.27 211.09 296.95 212.52 C306.63 213.95 316.31 217.02 325.99 215.79 C335.67 214.56 345.34 208.19 355.02 205.14 C364.7 202.09 374.38 197.85 384.06 197.46 C393.74 197.07 403.41 201.17 413.09 202.8 C422.77 204.42 432.45 205.59 442.13 207.21 C451.81 208.83 461.48 211.09 471.16 212.52 C480.84 213.95 490.52 217.02 500.2 215.79 C509.88 214.56 519.55 208.19 529.23 205.14 C538.91 202.09 548.59 197.85 558.27 197.46 C567.95 197.07 577.62 201.17 587.3 202.8 C596.98 204.42 606.66 205.59 616.34 207.21 C626.02 208.83 635.69 211.09 645.37 212.52 C655.05 213.95 664.73 217.02 674.41 215.79 C684.09 214.56 693.76 208.19 703.44 205.14 C713.12 202.09 722.8 197.85 732.48 197.46 C742.16 197.07 751.83 201.17 761.51 202.8 C771.19 204.42 780.87 205.59 790.55 207.21 C800.23 208.83 809.9 211.09 819.58 212.52 C829.26 213.95 838.94 217.02 848.62 215.79 C858.3 214.56 867.97 208.19 877.65 205.14 C887.33 202.09 897.01 197.85 906.69 197.46 C916.37 197.07 926.04 201.17 935.72 202.8 C945.4 204.42 955.08 205.59 964.76 207.21 C974.44 208.83 988.95 211.64 993.79 212.52 L993.79 262.51 C988.95 261.63 974.44 258.82 964.76 257.2 C955.08 255.58 945.4 254.41 935.72 252.79 C926.04 251.16 916.37 247.06 906.69 247.45 C897.01 247.84 887.33 252.08 877.65 255.13 C867.97 258.18 858.3 264.55 848.62 265.78 C838.94 267.01 829.26 263.94 819.58 262.51 C809.9 261.08 800.23 258.82 790.55 257.2 C780.87 255.58 771.19 254.41 761.51 252.79 C751.83 251.16 742.16 247.06 732.48 247.45 C722.8 247.84 713.12 252.08 703.44 255.13 C693.76 258.18 684.09 264.55 674.41 265.78 C664.73 267.01 655.05 263.94 645.37 262.51 C635.69 261.08 626.02 258.82 616.34 257.2 C606.66 255.58 596.98 254.41 587.3 252.79 C577.62 251.16 567.95 247.06 558.27 247.45 C548.59 247.84 538.91 252.08 529.23 255.13 C519.55 258.18 509.88 264.55 500.2 265.78 C490.52 267.01 480.84 263.94 471.16 262.51 C461.48 261.08 451.81 258.82 442.13 257.2 C432.45 255.58 422.77 254.41 413.09 252.79 C403.41 251.16 393.74 247.06 384.06 247.45 C374.38 247.84 364.7 252.08 355.02 255.13 C345.34 258.18 335.67 264.55 325.99 265.78 C316.31 267.01 306.63 263.94 296.95 262.51 C287.27 261.08 277.6 258.82 267.92 257.2 C258.24 255.58 248.56 254.41 238.88 252.79 C229.2 251.16 219.53 247.06 209.85 247.45 C200.17 247.84 190.49 252.08 180.81 255.13 C171.13 258.18 156.62 264 151.78 265.78Z"/></g>
       </g>
-      <g mask="url(#aurora-window-1)" opacity=".12">
-        <g class="aurora" style="--wave: 251.58px; --t: 31.21s; --d: -3.5s"><path fill="url(#aurora-1)" d="M-54.93 174.03 C-47.94 175.4 -26.98 179.74 -13 182.2 C.98 184.67 14.95 186.83 28.93 188.83 C42.91 190.83 56.89 191.67 70.86 194.19 C84.84 196.72 98.82 204.59 112.79 203.96 C126.77 203.34 140.75 195.42 154.72 190.43 C168.7 185.44 182.68 175.41 196.66 174.03 C210.63 172.66 224.61 179.74 238.59 182.2 C252.56 184.67 266.54 186.83 280.52 188.83 C294.49 190.83 308.47 191.67 322.45 194.19 C336.42 196.72 350.4 204.59 364.38 203.96 C378.36 203.34 392.33 195.42 406.31 190.43 C420.29 185.44 434.26 175.41 448.24 174.03 C462.22 172.66 476.19 179.74 490.17 182.2 C504.15 184.67 518.12 186.83 532.1 188.83 C546.08 190.83 560.06 191.67 574.03 194.19 C588.01 196.72 601.99 204.59 615.96 203.96 C629.94 203.34 643.92 195.42 657.89 190.43 C671.87 185.44 685.85 175.41 699.82 174.03 C713.8 172.66 727.78 179.74 741.76 182.2 C755.73 184.67 769.71 186.83 783.69 188.83 C797.66 190.83 811.64 191.67 825.62 194.19 C839.59 196.72 860.56 202.34 867.55 203.96 L867.55 249.47 C860.56 247.85 839.59 242.23 825.62 239.71 C811.64 237.18 797.66 236.34 783.69 234.34 C769.71 232.34 755.73 230.18 741.76 227.72 C727.78 225.25 713.8 218.17 699.82 219.55 C685.85 220.92 671.87 230.95 657.89 235.94 C643.92 240.93 629.94 248.85 615.96 249.47 C601.99 250.1 588.01 242.23 574.03 239.71 C560.06 237.18 546.08 236.34 532.1 234.34 C518.12 232.34 504.15 230.18 490.17 227.72 C476.19 225.25 462.22 218.17 448.24 219.55 C434.26 220.92 420.29 230.95 406.31 235.94 C392.33 240.93 378.36 248.85 364.38 249.47 C350.4 250.1 336.42 242.23 322.45 239.71 C308.47 237.18 294.49 236.34 280.52 234.34 C266.54 232.34 252.56 230.18 238.59 227.72 C224.61 225.25 210.63 218.17 196.66 219.55 C182.68 220.92 168.7 230.95 154.72 235.94 C140.75 240.93 126.77 248.85 112.79 249.47 C98.82 250.1 84.84 242.23 70.86 239.71 C56.89 237.18 42.91 236.34 28.93 234.34 C14.95 232.34 .98 230.18 -13 227.72 C-26.98 225.25 -47.94 220.91 -54.93 219.55Z"/></g>
+      <g mask="url(#aurora-window-1)" opacity=".13">
+        <g class="aurora" style="--wave: -172.46px; --t: 25.36s; --d: -3.5s"><path fill="url(#aurora-1)" d="M20.85 178.46 C25.64 176.15 40.01 165.53 49.59 164.58 C59.17 163.62 68.75 170.31 78.33 172.73 C87.91 175.15 97.49 176.91 107.07 179.11 C116.66 181.3 126.24 183.5 135.82 185.88 C145.4 188.27 154.98 194.63 164.56 193.39 C174.14 192.15 183.72 183.26 193.3 178.46 C202.88 173.66 212.47 165.53 222.05 164.58 C231.63 163.62 241.21 170.31 250.79 172.73 C260.37 175.15 269.95 176.91 279.53 179.11 C289.11 181.3 298.69 183.5 308.27 185.88 C317.86 188.27 327.44 194.63 337.02 193.39 C346.6 192.15 356.18 183.26 365.76 178.46 C375.34 173.66 384.92 165.53 394.5 164.58 C404.08 163.62 413.66 170.31 423.25 172.73 C432.83 175.15 442.41 176.91 451.99 179.11 C461.57 181.3 471.15 183.5 480.73 185.88 C490.31 188.27 499.89 194.63 509.47 193.39 C519.06 192.15 528.64 183.26 538.22 178.46 C547.8 173.66 557.38 165.53 566.96 164.58 C576.54 163.62 586.12 170.31 595.7 172.73 C605.28 175.15 614.86 176.91 624.45 179.11 C634.03 181.3 643.61 183.5 653.19 185.88 C662.77 188.27 672.35 194.63 681.93 193.39 C691.51 192.15 701.09 183.26 710.67 178.46 C720.25 173.66 729.84 165.53 739.42 164.58 C749 163.62 758.58 170.31 768.16 172.73 C777.74 175.15 787.32 176.91 796.9 179.11 C806.48 181.3 816.06 183.5 825.65 185.88 C835.23 188.27 844.81 194.63 854.39 193.39 C863.97 192.15 878.34 180.95 883.13 178.46 L883.13 225.73 C878.34 228.22 863.97 239.43 854.39 240.66 C844.81 241.9 835.23 235.54 825.65 233.16 C816.06 230.78 806.48 228.57 796.9 226.38 C787.32 224.19 777.74 222.42 768.16 220 C758.58 217.58 749 210.89 739.42 211.85 C729.84 212.8 720.25 220.93 710.67 225.73 C701.09 230.53 691.51 239.43 681.93 240.66 C672.35 241.9 662.77 235.54 653.19 233.16 C643.61 230.78 634.03 228.57 624.45 226.38 C614.86 224.19 605.28 222.42 595.7 220 C586.12 217.58 576.54 210.89 566.96 211.85 C557.38 212.8 547.8 220.93 538.22 225.73 C528.64 230.53 519.06 239.43 509.47 240.66 C499.89 241.9 490.31 235.54 480.73 233.16 C471.15 230.78 461.57 228.57 451.99 226.38 C442.41 224.19 432.83 222.42 423.25 220 C413.66 217.58 404.08 210.89 394.5 211.85 C384.92 212.8 375.34 220.93 365.76 225.73 C356.18 230.53 346.6 239.43 337.02 240.66 C327.44 241.9 317.86 235.54 308.27 233.16 C298.69 230.78 289.11 228.57 279.53 226.38 C269.95 224.19 260.37 222.42 250.79 220 C241.21 217.58 231.63 210.89 222.05 211.85 C212.47 212.8 202.88 220.93 193.3 225.73 C183.72 230.53 174.14 239.43 164.56 240.66 C154.98 241.9 145.4 235.54 135.82 233.16 C126.24 230.78 116.66 228.57 107.07 226.38 C97.49 224.19 87.91 222.42 78.33 220 C68.75 217.58 59.17 210.89 49.59 211.85 C40.01 212.8 25.64 223.42 20.85 225.73Z"/></g>
       </g>
       </g>
     </g>
-    <circle class="haze" cx="214" cy="85" r="5" filter="url(#blur)"/>
-    <circle class="star" cx="214" cy="85" r="1.8" style="--t: 3.81s; --d: 4.72s; opacity: 1"/>
-    <circle class="star" cx="694" cy="103" r="1.52" style="--t: 5.04s; --d: 5.45s; opacity: .85"/>
-    <circle class="star" cx="145" cy="65" r="1" style="--t: 4.97s; --d: 6.29s; opacity: .56"/>
-    <circle class="star" cx="737" cy="58" r="1.04" style="--t: 4.11s; --d: 4.8s; opacity: .58"/>
-    <circle class="star" cx="448" cy="128" r="1.49" style="--t: 3.15s; --d: 6.23s; opacity: .83"/>
-    <circle class="star" cx="169" cy="131" r="1.1" style="--t: 3.45s; --d: 5.37s; opacity: .61"/>
-    <circle class="star" cx="550" cy="139" r="1.23" style="--t: 3.84s; --d: 5.79s; opacity: .68"/>
-    <circle class="star" cx="121" cy="138" r="1.36" style="--t: 3.32s; --d: 5.19s; opacity: .75"/>
-    <circle class="star" cx="372" cy="91" r="1.07" style="--t: 4.77s; --d: 5s; opacity: .6"/>
-    <circle class="star" cx="561" cy="91" r=".9" style="--t: 4.96s; --d: 5s; opacity: .5"/>
+    <circle class="haze" cx="352" cy="115" r="5" filter="url(#blur)"/>
+    <circle class="star" cx="352" cy="115" r="1.8" style="--t: 5.08s; --d: 5.43s; opacity: 1"/>
+    <circle class="star" cx="124" cy="66" r=".9" style="--t: 3.84s; --d: 6.45s; opacity: .5"/>
+    <circle class="star" cx="215" cy="120" r="1.28" style="--t: 4.96s; --d: 6.36s; opacity: .71"/>
+    <circle class="star" cx="710" cy="89" r="1.13" style="--t: 4.6s; --d: 5.65s; opacity: .63"/>
+    <circle class="star" cx="454" cy="88" r=".95" style="--t: 3.94s; --d: 6.16s; opacity: .53"/>
+    <circle class="star" cx="585" cy="101" r="1.15" style="--t: 5.15s; --d: 6.07s; opacity: .64"/>
+    <circle class="star" cx="297" cy="148" r="1.08" style="--t: 3.44s; --d: 6.5s; opacity: .6"/>
+    <circle class="star" cx="173" cy="86" r="1.13" style="--t: 4.69s; --d: 6.37s; opacity: .63"/>
+    <circle class="star" cx="756" cy="144" r=".94" style="--t: 4.61s; --d: 5.68s; opacity: .52"/>
+    <circle class="star" cx="623" cy="55" r=".97" style="--t: 3.46s; --d: 4.96s; opacity: .54"/>
+    <circle class="star" cx="518" cy="140" r=".99" style="--t: 4.42s; --d: 5.31s; opacity: .55"/>
+    <circle class="star" cx="791" cy="55" r="1.23" style="--t: 3.47s; --d: 5.44s; opacity: .68"/>
+    <circle class="star" cx="79" cy="150" r=".9" style="--t: 3.25s; --d: 6.23s; opacity: .5"/>
     <g transform="translate(509.28 99.75) rotate(18.94)">
-      <g class="meteor" style="--travel: 109.09px; --t: 91.05s; --d: 6.5s">
-        <rect class="tail" x="-55.3" y="-.43" width="55.3" height=".86" rx=".43"/>
+      <g class="meteor" style="--travel: 109.09px; --t: 58.34s; --d: 4.5s; animation-name: meteor-0">
+        <rect class="tail" style="animation-name: meteor-tail-0" x="-55.3" y="-.43" width="55.3" height=".86" rx=".43"/>
         <circle class="head" r=".65"/>
       </g>
     </g>
-    <g transform="translate(506.85 100.73) rotate(155.19)">
-      <g class="meteor" style="--travel: 103.05px; --t: 54.55s; --d: 16.16s">
-        <rect class="tail" x="-39.06" y="-.69" width="39.06" height="1.39" rx=".69"/>
-        <circle class="head" r="1.04"/>
+    <g transform="translate(310.04 91.61) rotate(160.86)">
+      <g class="meteor" style="--travel: 86.23px; --t: 56.37s; --d: 12.54s; animation-name: meteor-1">
+        <rect class="tail" style="animation-name: meteor-tail-1" x="-72.97" y="-.6" width="72.97" height="1.2" rx=".6"/>
+        <circle class="head" r=".9"/>
       </g>
     </g>
-    <g transform="translate(425.28 86.34) rotate(22.78)">
-      <g class="meteor" style="--travel: 88.62px; --t: 91.13s; --d: 26.74s">
-        <rect class="tail" x="-47.36" y="-.65" width="47.36" height="1.3" rx=".65"/>
-        <circle class="head" r=".97"/>
+    <g transform="translate(545.2 90.98) rotate(24.18)">
+      <g class="meteor" style="--travel: 97.49px; --t: 56.32s; --d: 16.37s; animation-name: meteor-2">
+        <rect class="tail" style="animation-name: meteor-tail-2" x="-45.14" y="-.63" width="45.14" height="1.26" rx=".63"/>
+        <circle class="head" r=".94"/>
       </g>
     </g>
-    <g transform="translate(452.63 91.2) rotate(156.23)">
-      <g class="meteor" style="--travel: 110.21px; --t: 66.85s; --d: 27.16s">
-        <rect class="tail" x="-59.07" y="-.69" width="59.07" height="1.38" rx=".69"/>
-        <circle class="head" r="1.04"/>
-      </g>
-    </g>
-    <g transform="translate(635.76 97.1) rotate(19.28)">
-      <g class="meteor" style="--travel: 96.05px; --t: 102.69s; --d: 41.85s">
-        <rect class="tail" x="-68.87" y="-.42" width="68.87" height=".85" rx=".42"/>
+    <g transform="translate(260.2 89) rotate(153.21)">
+      <g class="meteor" style="--travel: 84.79px; --t: 59.77s; --d: 18.83s; animation-name: meteor-3">
+        <rect class="tail" style="animation-name: meteor-tail-3" x="-49.43" y="-.43" width="49.43" height=".85" rx=".43"/>
         <circle class="head" r=".64"/>
       </g>
     </g>
-    <g transform="translate(148.41 95.31) rotate(149.68)">
-      <g class="meteor" style="--travel: 75.86px; --t: 92.75s; --d: 45.13s">
-        <rect class="tail" x="-41.66" y="-.44" width="41.66" height=".87" rx=".44"/>
-        <circle class="head" r=".65"/>
+    <g transform="translate(543.13 86.54) rotate(31.44)">
+      <g class="meteor" style="--travel: 105.33px; --t: 47.87s; --d: 31.79s; animation-name: meteor-4">
+        <rect class="tail" style="animation-name: meteor-tail-4" x="-38.16" y="-.49" width="38.16" height=".98" rx=".49"/>
+        <circle class="head" r=".74"/>
       </g>
     </g>
-    <g transform="translate(196.42 86.45) rotate(23.87)">
-      <g class="meteor" style="--travel: 114.67px; --t: 79.96s; --d: 46.75s">
-        <rect class="tail" x="-42.39" y="-.44" width="42.39" height=".88" rx=".44"/>
-        <circle class="head" r=".66"/>
-      </g>
-    </g>
-    <g transform="translate(275.1 78.6) rotate(161.23)">
-      <g class="meteor" style="--travel: 61.83px; --t: 83.92s; --d: 53.12s">
-        <rect class="tail" x="-38.99" y="-.56" width="38.99" height="1.13" rx=".56"/>
-        <circle class="head" r=".85"/>
-      </g>
-    </g>
-    <g transform="translate(246.83 94.96) rotate(24.11)">
-      <g class="meteor" style="--travel: 117.24px; --t: 76.9s; --d: 57.56s">
-        <rect class="tail" x="-47.9" y="-.56" width="47.9" height="1.11" rx=".56"/>
+    <g transform="translate(316.8 103.62) rotate(147.76)">
+      <g class="meteor" style="--travel: 84.9px; --t: 35.94s; --d: 35.04s; animation-name: meteor-5">
+        <rect class="tail" style="animation-name: meteor-tail-5" x="-74.25" y="-.56" width="74.25" height="1.12" rx=".56"/>
         <circle class="head" r=".84"/>
-      </g>
-    </g>
-    <g transform="translate(353.81 102.22) rotate(148.56)">
-      <g class="meteor" style="--travel: 82.38px; --t: 50.46s; --d: 58.26s">
-        <rect class="tail" x="-44.16" y="-.47" width="44.16" height=".93" rx=".47"/>
-        <circle class="head" r=".7"/>
       </g>
     </g>
   </g>
   <g class="ufos" clip-path="url(#above-ridge)">
-    <g transform="translate(377.03 204.1)">
-      <g class="ufo from-sky" style="--rise: 106.2px; --dx: 367.91px; --dy: -126.91px; --d: 17.18s; --ax: -262.53px; --ay: -66.9px">
+    <g transform="translate(397.01 197.12)">
+      <g class="ufo from-sky" style="--rise: 97.02px; --dx: 308.66px; --dy: -142.39px; --d: 9.05s; --ax: -266.71px; --ay: -115.99px">
         <g class="ufo-size">
         <g class="hover">
           <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
@@ -263,21 +251,21 @@
         </g>
         </g>
       </g>
-      <g transform="translate(367.91 -126.91)">
-        <g class="ting leave" style="--d: 17.18s">
+      <g transform="translate(308.66 -142.39)">
+        <g class="ting leave" style="--d: 9.05s">
           <circle class="ting-glow" r="4" filter="url(#spark)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
-      <g transform="translate(-262.53 -66.9)">
-        <g class="ting arrive" style="--d: 17.18s">
+      <g transform="translate(-266.71 -115.99)">
+        <g class="ting arrive" style="--d: 9.05s">
           <circle class="ting-glow" r="4" filter="url(#spark)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
-    <g transform="translate(421.58 190.92)">
-      <g class="ufo from-sky" style="--rise: 77.4px; --dx: -280.56px; --dy: -54.13px; --d: 157.4s; --ax: 302.11px; --ay: -62px">
+    <g transform="translate(497.94 193.39)">
+      <g class="ufo from-ridge" style="--rise: 65.43px; --dx: 269.82px; --dy: -106.34px; --d: 36.57s">
         <g class="ufo-size">
         <g class="hover">
           <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
@@ -287,21 +275,15 @@
         </g>
         </g>
       </g>
-      <g transform="translate(-280.56 -54.13)">
-        <g class="ting leave" style="--d: 157.4s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
-          <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
-        </g>
-      </g>
-      <g transform="translate(302.11 -62)">
-        <g class="ting arrive" style="--d: 157.4s">
+      <g transform="translate(269.82 -106.34)">
+        <g class="ting leave" style="--d: 36.57s">
           <circle class="ting-glow" r="4" filter="url(#spark)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
-    <g transform="translate(309.82 192.14)">
-      <g class="ufo from-ridge" style="--rise: 104.75px; --dx: -233.14px; --dy: -114.15px; --d: 233.18s">
+    <g transform="translate(124.21 188.07)">
+      <g class="ufo from-sky" style="--rise: 151.35px; --dx: 657.31px; --dy: -86.06px; --d: 81.05s; --ax: 436.56px; --ay: -68.97px">
         <g class="ufo-size">
         <g class="hover">
           <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
@@ -311,15 +293,21 @@
         </g>
         </g>
       </g>
-      <g transform="translate(-233.14 -114.15)">
-        <g class="ting leave" style="--d: 233.18s">
+      <g transform="translate(657.31 -86.06)">
+        <g class="ting leave" style="--d: 81.05s">
+          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+          <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
+        </g>
+      </g>
+      <g transform="translate(436.56 -68.97)">
+        <g class="ting arrive" style="--d: 81.05s">
           <circle class="ting-glow" r="4" filter="url(#spark)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
-    <g transform="translate(797.85 188.05)">
-      <g class="ufo from-sky" style="--rise: 128.74px; --dx: -254.86px; --dy: -91.51px; --d: 406.36s; --ax: -633.18px; --ay: -99.78px">
+    <g transform="translate(524.53 196.22)">
+      <g class="ufo from-sky" style="--rise: 66.7px; --dx: -432.39px; --dy: -136.72px; --d: 114.24s; --ax: 251.38px; --ay: -81.17px">
         <g class="ufo-size">
         <g class="hover">
           <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
@@ -329,24 +317,24 @@
         </g>
         </g>
       </g>
-      <g transform="translate(-254.86 -91.51)">
-        <g class="ting leave" style="--d: 406.36s">
+      <g transform="translate(-432.39 -136.72)">
+        <g class="ting leave" style="--d: 114.24s">
           <circle class="ting-glow" r="4" filter="url(#spark)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
-      <g transform="translate(-633.18 -99.78)">
-        <g class="ting arrive" style="--d: 406.36s">
+      <g transform="translate(251.38 -81.17)">
+        <g class="ting arrive" style="--d: 114.24s">
           <circle class="ting-glow" r="4" filter="url(#spark)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
   </g>
-  <g transform="translate(24 113.45)">
-    <g class="satellite" style="--dx: 852px; --dy: 12.5px; --d: 8.29s">
-      <g class="orbit" style="--arc: -27.8px">
-        <g transform="rotate(-19.88)">
+  <g transform="translate(876 126.79)">
+    <g class="satellite" style="--dx: -852px; --dy: 5.16px; --d: 7.11s">
+      <g class="orbit" style="--arc: -38.47px">
+        <g transform="rotate(19.64)">
           <g class="craft">
             <rect class="panel" x="-11" y="-2" width="7" height="4" rx=".4"/>
             <rect class="panel" x="4" y="-2" width="7" height="4" rx=".4"/>
@@ -357,10 +345,10 @@
       </g>
     </g>
   </g>
-  <g transform="translate(24 109.06)">
-    <g class="satellite" style="--dx: 852px; --dy: 20.14px; --d: 89.44s">
-      <g class="orbit" style="--arc: -18.68px">
-        <g transform="rotate(-21.03)">
+  <g transform="translate(876 74.3)">
+    <g class="satellite" style="--dx: -852px; --dy: 11.92px; --d: 49.39s">
+      <g class="orbit" style="--arc: -19.56px">
+        <g transform="rotate(-16.05)">
           <g class="craft">
             <rect class="panel" x="-11" y="-2" width="7" height="4" rx=".4"/>
             <rect class="panel" x="4" y="-2" width="7" height="4" rx=".4"/>
@@ -371,10 +359,10 @@
       </g>
     </g>
   </g>
-  <g transform="translate(876 131.85)">
-    <g class="satellite" style="--dx: -852px; --dy: -57.73px; --d: 175.36s">
-      <g class="orbit" style="--arc: -32.67px">
-        <g transform="rotate(2.58)">
+  <g transform="translate(876 136.15)">
+    <g class="satellite" style="--dx: -852px; --dy: -50.33px; --d: 82.28s">
+      <g class="orbit" style="--arc: -25.16px">
+        <g transform="rotate(3.19)">
           <g class="craft">
             <rect class="panel" x="-11" y="-2" width="7" height="4" rx=".4"/>
             <rect class="panel" x="4" y="-2" width="7" height="4" rx=".4"/>
@@ -385,10 +373,10 @@
       </g>
     </g>
   </g>
-  <g transform="translate(876 129.86)">
-    <g class="satellite" style="--dx: -852px; --dy: -6.64px; --d: 285.62s">
-      <g class="orbit" style="--arc: -25.84px">
-        <g transform="rotate(21.16)">
+  <g transform="translate(876 127.45)">
+    <g class="satellite" style="--dx: -852px; --dy: -47.71px; --d: 121.8s">
+      <g class="orbit" style="--arc: -27.43px">
+        <g transform="rotate(.68)">
           <g class="craft">
             <rect class="panel" x="-11" y="-2" width="7" height="4" rx=".4"/>
             <rect class="panel" x="4" y="-2" width="7" height="4" rx=".4"/>

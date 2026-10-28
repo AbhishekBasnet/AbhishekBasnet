@@ -21,9 +21,9 @@ Animation timeline (seconds after the image loads):
     3.2 – 4.8   sky, once        clouds or stars fade in
     4.0 – 11.8  sequence, once   labels glow → light runs along the ridge → ripple
     always      ambient          glow breathes, clouds sway, stars twinkle, aurora flows
-    6.0 →       day visitors     birds, parachute, hang glider, plane take turns
-    now & then  both             UFOs rise from behind the ridge and whip off
-    now & then  night visitors   shooting stars, satellites
+    4.5 →       day visitors     birds, parachute, paraglider, plane take turns, 2–6s apart
+    7 – 10 →    both             UFOs arrive, park and whip off, 20–45s apart
+    4.5 →       night visitors   shooting stars; satellites from 5–8s, 10–25s apart
 """
 
 from __future__ import annotations

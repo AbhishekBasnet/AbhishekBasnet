@@ -93,18 +93,18 @@ def meteor_fits(m: Meteor) -> bool:
 
 def place_meteors(rng: random.Random) -> list[Meteor]:
     """Each meteor repeats on its own period, so together they never fall into a
-    rhythm a viewer would notice."""
+    rhythm a viewer would notice; its streak lasts the same whatever the period."""
     found: list[Meteor] = []
     while len(found) < cfg.METEOR_COUNT:
         # alternate to the right and to the left, always downwards
         angle = rng.uniform(18, 38) if len(found) % 2 == 0 else rng.uniform(142, 162)
         m = Meteor(x=rng.uniform(70, 830), y=rng.uniform(62, 104), angle=angle,
                    length=rng.uniform(36, 84), width=rng.uniform(.8, 1.4), travel=rng.uniform(60, 120),
-                   period=rng.uniform(45, 110), delay=0)
+                   period=rng.uniform(*cfg.METEOR_PERIOD), flight=rng.uniform(*cfg.METEOR_FLIGHT), delay=0)
         if meteor_fits(m):
             found.append(m)
-    # the first falls soon after the sky appears, the rest within the first minute
-    delays = [6.5] + sorted(rng.uniform(9, 66) for _ in found[1:])
+    # the first falls soon after the sky appears, the rest start within the window
+    delays = [cfg.METEOR_FIRST] + sorted(rng.uniform(*cfg.METEOR_SPREAD) for _ in found[1:])
     return [replace(m, delay=d) for m, d in zip(found, delays)]
 
 
@@ -255,10 +255,10 @@ def ufo(rng: random.Random, start: float, from_sky: bool, attempts: int = 10_000
 # ── Day visitors ─────────────────────────────────────────────────────────────
 
 def plan_visits(rng: random.Random) -> tuple[dict[str, float], list[Visit], float]:
-    """A schedule where birds, the parachute, the hang glider and the plane take turns.
+    """A schedule where birds, the parachute, the paraglider and the plane take turns.
 
     Each visitor crosses, then the sky stays empty for VISIT_GAP seconds before the
-    next. The parachute, glider and plane work through their day's routes in turn;
+    next. The parachute, paraglider and plane work through their day's routes in turn;
     birds take a fresh path every time. No kind follows itself, including across
     the loop, and the schedule runs until every route has been flown. Returns the
     day's crossing time per kind, the visits, and the schedule length.

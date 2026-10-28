@@ -64,10 +64,12 @@ class StarRules(unittest.TestCase):
         for sky in SKIES:
             self.assertEqual(sky.stars[0].r, max(s.r for s in sky.stars))
 
-    def test_meteors_fit(self):
+    def test_meteors_fit_and_streak_for_a_visible_moment(self):
         for sky in SKIES:
             self.assertEqual(len(sky.meteors), cfg.METEOR_COUNT)
             self.assertTrue(all(meteor_fits(m) for m in sky.meteors))
+            for m in sky.meteors:
+                self.assertTrue(cfg.METEOR_FLIGHT[0] <= m.flight <= cfg.METEOR_FLIGHT[1] < m.period)
 
 
 class VisitorRules(unittest.TestCase):
@@ -111,7 +113,7 @@ class VisitorRules(unittest.TestCase):
                 if v.kind == "birds":
                     self.assertTrue(cfg.FLOCK_SIZE[0] <= len(v.flock) <= cfg.FLOCK_SIZE[1])
 
-    def test_parachute_and_glider_land_behind_the_ridge(self):
+    def test_parachute_and_paraglider_land_behind_the_ridge(self):
         for sky in SKIES:
             for v in sky.visits:
                 if v.kind in cfg.LANDINGS:

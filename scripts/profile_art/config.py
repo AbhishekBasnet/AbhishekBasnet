@@ -68,7 +68,10 @@ STAR_AREA = (56, 52, 844, 152)       # left, top, right, bottom: the sky above t
 STAR_SPACING = 48                    # px every star keeps from every other, so none clump
 MOON_CLEAR = 30                      # px from the moon's centre
 
-METEOR_COUNT = 10
+METEOR_COUNT = 6
+METEOR_PERIOD = (30, 70)             # seconds between one meteor's appearances
+METEOR_FLIGHT = (.6, 1.1)            # seconds a streak lasts, however often it comes
+METEOR_FIRST, METEOR_SPREAD = 4.5, (8, 36)   # the first falls at 4.5s, the rest start within this window
 METEOR_AREA = (52, 62, 848, 150)     # the whole streak, tail to end, stays inside
 METEOR_MOON_CLEAR = 34
 
@@ -89,9 +92,9 @@ AURORA_FLOW = (22, 34)               # seconds for the folds to move one wave al
 # Four satellites a day take turns, one per pass. Each flies its own arc and the
 # whole craft (body and wings together) leans its own way.
 SATELLITES = 4
-SATELLITE_PASS = (25, 40)            # seconds to cross the sky, rolled daily
-SATELLITE_GAP = (40, 80)             # seconds of clear sky between passes
-SATELLITE_FIRST = (8, 20)            # seconds after load the first one appears
+SATELLITE_PASS = (14, 20)            # seconds to cross the sky, rolled daily
+SATELLITE_GAP = (10, 25)             # seconds of clear sky between passes
+SATELLITE_FIRST = (5, 8)             # seconds after load the first one appears
 SATELLITE_Y = (74, 140)              # ends of the pass: below the coordinates, above the labels
 SATELLITE_ARC = (18, 40)             # px the middle of the pass rises
 SATELLITE_TOP = 58                   # the arc never rises above this
@@ -106,9 +109,9 @@ SATELLITE_TRIM = "#88C0D0"
 # little closer, then whips off into the far sky until it is a dot and gone. Some
 # rise from behind the ridge and some swoop in from the far sky (at least one each).
 UFOS = 4
-UFO_FIRST = (12, 18)                 # seconds after load the first one arrives
-UFO_GAP = (40, 180)                  # seconds of empty sky between flights
-UFO_RISE, UFO_PARK = (2.2, 3.2), (3, 5)          # seconds to arrive and to stay parked, rolled daily
+UFO_FIRST = (7, 10)                  # seconds after load the first one arrives
+UFO_GAP = (20, 45)                   # seconds of empty sky between flights
+UFO_RISE, UFO_PARK = (1.8, 2.4), (2.5, 3.5)      # seconds to arrive and to stay parked, rolled daily
 UFO_APPROACH, UFO_WHIP = (.6, .9), (1.1, 1.6)
 UFO_APPROACH_SCALE = 1.6             # how much bigger it looks when it comes closer
 UFO_PARK_Y = (178, 214)              # below the labels, above the ridge
@@ -125,37 +128,35 @@ UFO_COLORS = {                       # the hull is darker by day so it shows aga
 
 # ── Day visitors ─────────────────────────────────────────────────────────────
 
-# Birds, the parachute, the hang glider and the plane share one schedule: only one
+# Birds, the parachute, the paraglider and the plane share one schedule: only one
 # is ever in the sky, and after it leaves the sky stays empty for VISIT_GAP seconds.
-VISIT_GAP = (5, 15)
-VISIT_FIRST = 6.0                    # seconds after load the first visitor appears
+VISIT_GAP = (2, 6)
+VISIT_FIRST = 4.5                    # seconds after load the first visitor appears
 VISIT_SCHEDULE = 180                 # at least this many seconds before the schedule repeats
 OFFSTAGE = (24, 876)                 # x just outside the left and right edges
-FLIGHT = {"birds": (9, 13), "parachute": (24, 32), "glider": (28, 38), "plane": (16, 22)}   # seconds
-VISIT_Y = {"birds": (74, 140), "parachute": (66, 100), "glider": (70, 116), "plane": (58, 96)}
+FLIGHT = {"birds": (6, 8), "parachute": (10, 13), "paraglider": (11, 14), "plane": (9, 12)}   # seconds
+VISIT_Y = {"birds": (74, 140), "parachute": (66, 100), "paraglider": (70, 116), "plane": (58, 96)}
 FLOCK_SIZE = (2, 4)
 
-# The parachute, glider and plane each fly ROUTES routes a day, taken in turn. The
+# The parachute, paraglider and plane each fly ROUTES routes a day, taken in turn. The
 # mix of directions is rolled (at least one each way), and every route sits a little
 # above or below the kind's height for the day.
-ROUTE_KINDS = ("parachute", "glider", "plane")
+ROUTE_KINDS = ("parachute", "paraglider", "plane")
 ROUTES = 4
 ROUTE_JITTER = 10                    # px a route sits above or below the day's height
 SINK = {"birds": (-10, 10), "plane": (-14, 14)}   # px lost (+) or gained (-) crossing
 
-# The parachute and the hang glider come down behind the ridge at the day's landing
-# spots: the parachute anywhere along it, the glider somewhere in the middle.
+# The parachute and the paraglider come down behind the ridge at the day's landing
+# spots: the parachute anywhere along it, the paraglider somewhere in the middle.
 LANDINGS = {   # x range of the spots, px at least between spots, px below the ridge it aims for
     "parachute": dict(area=(110, 790), spacing=120, depth=70),
-    "glider": dict(area=(300, 600), spacing=50, depth=24),   # shallow, so it glides rather than dives
+    "paraglider": dict(area=(300, 600), spacing=50, depth=24),   # shallow, so it glides rather than dives
 }
 LANDING_MIN_DRIFT = 160              # px at least it travels in, so it comes down gently
-GLIDER_GROWTH = 1.6                  # how much bigger the glider gets as it comes towards us
+PARAGLIDER_GROWTH = 1.6              # how much bigger the paraglider gets as it comes towards us
 
 VISITOR_INK = "#4C566A"
-CANOPY = "#D08770"                   # parachute
-GLIDER_WING = "#B48EAD"
-GLIDER_BAND = "#88C0D0"              # the lighter centre panel of the sail
+CANOPY = "#D08770"                   # parachute and paraglider
 CONTRAIL = "#C2CAD6"
 
 # ── Timeline (seconds) ───────────────────────────────────────────────────────

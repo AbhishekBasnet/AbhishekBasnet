@@ -32,6 +32,7 @@ class Meteor:
     width: float
     travel: float     # px the head covers before it burns out
     period: float     # seconds between its appearances
+    flight: float     # seconds the streak lasts
     delay: float      # first appearance, seconds after load
 
 
@@ -81,8 +82,8 @@ class Route:
 
 @dataclass(frozen=True)
 class Visit:
-    """One crossing by a bird flock, the parachute, the hang glider or the plane."""
-    kind: str         # "birds", "parachute", "glider" or "plane"
+    """One crossing by a bird flock, the parachute, the paraglider or the plane."""
+    kind: str         # "birds", "parachute", "paraglider" or "plane"
     route: Route
     start: float      # seconds into the schedule
     flock: tuple[tuple[float, float, float], ...] = ()   # birds only: offset x, offset y, size
