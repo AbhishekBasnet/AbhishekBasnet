@@ -216,28 +216,39 @@ def ufo_parks_well(x: float, y: float) -> bool:
 
 
 def plan_ufos(rng: random.Random) -> tuple[list[Ufo], tuple[float, float, float, float], float]:
-    """The day's UFOs taking turns. Returns them, the seconds to rise, park, approach
-    and whip off, and the full cycle."""
+    """The day's UFOs taking turns, a random mix of ridge and sky arrivals. Returns
+    them, the seconds to arrive, park, approach and whip off, and the full cycle."""
     times = (rng.uniform(*cfg.UFO_RISE), rng.uniform(*cfg.UFO_PARK),
              rng.uniform(*cfg.UFO_APPROACH), rng.uniform(*cfg.UFO_WHIP))
+    from_sky = rng.randint(1, cfg.UFOS - 1)
+    arrivals = [True] * from_sky + [False] * (cfg.UFOS - from_sky)
+    rng.shuffle(arrivals)
     ufos, t = [], rng.uniform(*cfg.UFO_FIRST)
     first = t
-    for _ in range(cfg.UFOS):
-        ufos.append(ufo(rng, start=t))
+    for sky_arrival in arrivals:
+        ufos.append(ufo(rng, start=t, from_sky=sky_arrival))
         t += sum(times) + rng.uniform(*cfg.UFO_GAP)
     return ufos, times, t - first
 
 
-def ufo(rng: random.Random, start: float, attempts: int = 10_000) -> Ufo:
-    """A parking spot over the ridge and a far point in the sky to vanish at."""
+def far_point(rng: random.Random) -> tuple[float, float]:
     left, top, right, bottom = cfg.UFO_FAR_AREA
+    return rng.uniform(left, right), rng.uniform(top, bottom)
+
+
+def ufo(rng: random.Random, start: float, from_sky: bool, attempts: int = 10_000) -> Ufo:
+    """A parking spot over the ridge, a far point to vanish at and, for a sky
+    arrival, another far point to appear at."""
     for _ in range(attempts):
         x, y = rng.uniform(cfg.LEFT + 30, cfg.RIGHT - 30), rng.uniform(*cfg.UFO_PARK_Y)
-        far = rng.uniform(left, right), rng.uniform(top, bottom)
-        if ufo_parks_well(x, y) and distance((x, y), far) >= cfg.UFO_WHIP_MIN:
-            # start far enough down that it is fully hidden behind the ridge
-            return Ufo(x=x, y=y, rise=height_on(cfg.RIDGE, x) - y + 16,
-                       dx=far[0] - x, dy=far[1] - y, start=start)
+        exit_, entry = far_point(rng), far_point(rng)
+        if not ufo_parks_well(x, y) or distance((x, y), exit_) < cfg.UFO_WHIP_MIN:
+            continue
+        if from_sky and (distance((x, y), entry) < cfg.UFO_WHIP_MIN or distance(entry, exit_) < cfg.UFO_PATHS_APART):
+            continue
+        # a ridge arrival starts far enough down to be fully hidden behind the ridge
+        return Ufo(x=x, y=y, rise=height_on(cfg.RIDGE, x) - y + 16, dx=exit_[0] - x, dy=exit_[1] - y,
+                   start=start, arrive=(entry[0] - x, entry[1] - y) if from_sky else None)
     raise RuntimeError("no UFO parking spot fits the rules in config")
 
 
@@ -276,8 +287,8 @@ def daily_routes(rng: random.Random, kind: str) -> list[Route]:
     low, high = cfg.VISIT_Y[kind]
     height = rng.uniform(low + cfg.ROUTE_JITTER, high - cfg.ROUTE_JITTER)
     heights = [height + rng.uniform(-cfg.ROUTE_JITTER, cfg.ROUTE_JITTER) for _ in range(cfg.ROUTES)]
-    if kind == "parachute":
-        return parachute_routes(rng, heights)
+    if kind in cfg.LANDINGS:
+        return landing_routes(rng, kind, heights)
     span = cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]
     return [Route(edge(d), y, d * span, rng.uniform(*cfg.SINK[kind])) for d, y in zip(mixed_directions(rng), heights)]
 
@@ -295,23 +306,23 @@ def edge(direction: int) -> float:
     return cfg.OFFSTAGE[0] if direction > 0 else cfg.OFFSTAGE[1]
 
 
-def parachute_routes(rng: random.Random, heights: list[float], attempts: int = 10_000) -> list[Route]:
-    """Landing spots spread along the ridge. Each parachute drifts in from a side far
-    enough away to come down gently, until the ridge hides it."""
-    left, right = cfg.PARACHUTE_LANDING_X
+def landing_routes(rng: random.Random, kind: str, heights: list[float], attempts: int = 10_000) -> list[Route]:
+    """Landing spots spread over the kind's stretch of ridge. Each comes in from a
+    side far enough away to come down gently, until the ridge hides it."""
+    rules = cfg.LANDINGS[kind]
     for _ in range(attempts):
-        spots = sorted(rng.uniform(left, right) for _ in heights)
-        if any(b - a < cfg.PARACHUTE_SPACING for a, b in zip(spots, spots[1:])):
+        spots = sorted(rng.uniform(*rules["area"]) for _ in heights)
+        if any(b - a < rules["spacing"] for a, b in zip(spots, spots[1:])):
             continue
-        directions = [d if abs(x - edge(d)) >= cfg.PARACHUTE_MIN_DRIFT else -d
+        directions = [d if abs(x - edge(d)) >= cfg.LANDING_MIN_DRIFT else -d
                       for x, d in zip(spots, mixed_directions(rng))]
         if set(directions) != {1, -1}:
             continue
-        routes = [Route(edge(d), y, x - edge(d), cfg.PARACHUTE_LANDING_Y - y)
+        routes = [Route(edge(d), y, x - edge(d), height_on(cfg.RIDGE, x) + rules["depth"] - y)
                   for x, d, y in zip(spots, directions, heights)]
         rng.shuffle(routes)
         return routes
-    raise RuntimeError("no set of parachute landings fits the rules in config")
+    raise RuntimeError(f"no set of {kind} landings fits the rules in config")
 
 
 def bird_route(rng: random.Random) -> Route:

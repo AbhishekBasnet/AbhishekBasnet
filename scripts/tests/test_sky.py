@@ -96,12 +96,13 @@ class VisitorRules(unittest.TestCase):
                 low, high = cfg.VISIT_Y[kind]
                 self.assertTrue(all(low <= h <= high for h in heights))
 
-    def test_parachute_landing_spots_are_spread_along_the_ridge(self):
+    def test_landing_spots_are_spread_over_each_kinds_stretch_of_ridge(self):
         for sky in SKIES:
-            spots = sorted({v.route.x + v.route.dx for v in sky.visits if v.kind == "parachute"})
-            self.assertEqual(len(spots), cfg.ROUTES)
-            self.assertTrue(all(cfg.PARACHUTE_LANDING_X[0] <= x <= cfg.PARACHUTE_LANDING_X[1] for x in spots))
-            self.assertTrue(all(b - a >= cfg.PARACHUTE_SPACING for a, b in zip(spots, spots[1:])))
+            for kind, rules in cfg.LANDINGS.items():
+                spots = sorted({v.route.x + v.route.dx for v in sky.visits if v.kind == kind})
+                self.assertEqual(len(spots), cfg.ROUTES)
+                self.assertTrue(all(rules["area"][0] <= x <= rules["area"][1] for x in spots))
+                self.assertTrue(all(b - a >= rules["spacing"] for a, b in zip(spots, spots[1:])))
 
     def test_visitors_enter_from_off_an_edge(self):
         for sky in SKIES:
@@ -110,17 +111,13 @@ class VisitorRules(unittest.TestCase):
                 if v.kind == "birds":
                     self.assertTrue(cfg.FLOCK_SIZE[0] <= len(v.flock) <= cfg.FLOCK_SIZE[1])
 
-    def test_parachute_lands_behind_the_ridge_and_the_glider_sinks_gently(self):
-        ridge_top = min(y for _, y in cfg.RIDGE)
+    def test_parachute_and_glider_land_behind_the_ridge(self):
         for sky in SKIES:
             for v in sky.visits:
-                r = v.route
-                if v.kind == "parachute":
-                    self.assertGreater(r.y + r.dy, ridge_top)
-                    self.assertGreaterEqual(abs(r.dx), cfg.PARACHUTE_MIN_DRIFT)
-                elif v.kind == "glider":
-                    self.assertTrue(cfg.SINK["glider"][0] <= r.dy <= cfg.SINK["glider"][1])
-                    self.assertEqual(abs(r.dx), cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0])
+                if v.kind in cfg.LANDINGS:
+                    r = v.route
+                    self.assertGreater(r.y + r.dy, height_on(cfg.RIDGE, r.x + r.dx))
+                    self.assertGreaterEqual(abs(r.dx), cfg.LANDING_MIN_DRIFT)
 
 
 class NightRules(unittest.TestCase):
@@ -148,17 +145,23 @@ class NightRules(unittest.TestCase):
                 self.assertLessEqual(abs(s.lean) + cfg.SATELLITE_TUMBLE, 30)
             self.assertTrue(cfg.SATELLITE_PASS[0] <= sky.satellite_pass <= cfg.SATELLITE_PASS[1])
 
-    def test_ufos_rise_from_behind_the_ridge_park_clear_and_leave_upwards(self):
+    def test_ufos_arrive_both_ways_park_clear_and_vanish_in_the_sky(self):
         for sky in SKIES:
             self.assertEqual(len(sky.ufos), cfg.UFOS)
+            self.assertEqual({u.arrive is None for u in sky.ufos}, {True, False})   # at least one of each
             visit = sum(sky.ufo_times)
             starts = [u.start for u in sky.ufos] + [sky.ufos[0].start + sky.ufo_cycle]
             for a, b in zip(starts, starts[1:]):
                 self.assertTrue(cfg.UFO_GAP[0] <= b - a - visit <= cfg.UFO_GAP[1])
             for u in sky.ufos:
                 ridge = height_on(cfg.RIDGE, u.x)
-                self.assertGreater(u.y + u.rise, ridge)                       # starts hidden
+                self.assertGreater(u.y + u.rise, ridge)                       # a ridge arrival starts hidden
                 self.assertGreaterEqual(ridge - u.y, cfg.UFO_ABOVE_RIDGE)     # parks clear
+                if u.arrive:                                                  # a sky arrival appears far off
+                    entry = (u.x + u.arrive[0], u.y + u.arrive[1])
+                    self.assertTrue(contains(cfg.UFO_FAR_AREA, entry))
+                    self.assertGreaterEqual(distance((u.x, u.y), entry), cfg.UFO_WHIP_MIN)
+                    self.assertGreaterEqual(distance(entry, (u.x + u.dx, u.y + u.dy)), cfg.UFO_PATHS_APART)
                 self.assertTrue(all(abs(u.x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS))
                 far = (u.x + u.dx, u.y + u.dy)                                # vanishes in the sky
                 self.assertTrue(contains(cfg.UFO_FAR_AREA, far))

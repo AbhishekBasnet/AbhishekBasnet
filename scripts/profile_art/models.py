@@ -90,14 +90,16 @@ class Visit:
 
 @dataclass(frozen=True)
 class Ufo:
-    """Rises `rise` px from behind the ridge to park at (x, y), comes closer, then
-    whips off to vanish (dx, dy) away."""
+    """Arrives to park at (x, y), comes closer, then whips off to vanish (dx, dy) away.
+    It either rises `rise` px from behind the ridge or, when `arrive` is set, swoops
+    in from that offset in the far sky."""
     x: float
     y: float
     rise: float
     dx: float
     dy: float
     start: float      # seconds after load of its first visit
+    arrive: tuple[float, float] | None = None
 
 
 @dataclass(frozen=True)

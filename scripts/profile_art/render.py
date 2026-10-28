@@ -7,11 +7,12 @@ from string import Template
 from textwrap import dedent, indent
 
 from .config import (
-    AURORA_COLORS, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GLIDER_WING, GROUND_Y, HEIGHT, LABEL_GLOW,
-    LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB, RIDGE, RIGHT, RIPPLE_AT,
-    RIPPLE_LEN, ROLE, SANS, SATELLITE_HULL, SATELLITE_PANEL, SATELLITE_TRIM, SATELLITE_TUMBLE,
-    SEQUENCE_START, SNOW, SUMMITS, THEMES, TITLE, TRACE_AT, TRACE_LEN, UFO_APPROACH_SCALE, UFO_COLORS,
-    VIEW_X, VIEW_Y, VISIT_FIRST, VISITOR_INK, WIDTH,
+    AURORA_COLORS, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GLIDER_GROWTH, GLIDER_WING, GROUND_Y,
+    HEIGHT, LABEL_GLOW, LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB,
+    RIDGE, RIGHT, RIPPLE_AT, RIPPLE_LEN, ROLE, SANS, SATELLITE_HULL, SATELLITE_PANEL,
+    SATELLITE_TRIM, SATELLITE_TUMBLE, SEQUENCE_START, SNOW, SUMMITS, THEMES, TITLE, TRACE_AT,
+    TRACE_LEN, UFO_APPROACH_SCALE, UFO_COLORS, UFO_TING, VIEW_X, VIEW_Y, VISITOR_INK, VISIT_FIRST,
+    WIDTH,
 )
 from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Ufo, Visit
 
@@ -124,16 +125,30 @@ def satellite(s: Satellite) -> str:
   </g>"""
 
 
+def sparkle(kind: str, x: float, y: float, start: float) -> str:
+    """The cartoon "ting" where a UFO appears or vanishes."""
+    return f"""<g transform="translate({num(x)} {num(y)})">
+        <g class="ting {kind}" style="--d: {num(start)}s">
+          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+          <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
+        </g>
+      </g>"""
+
+
 def ufo(u: Ufo) -> str:
     """A saucer with a dome, an underglow and three blinking lights hung under the
     rim, where they show against the sky rather than the hull."""
     motion = f"--rise: {num(u.rise)}px; --dx: {num(u.dx)}px; --dy: {num(u.dy)}px; --d: {num(u.start)}s"
+    if u.arrive:
+        motion += f"; --ax: {num(u.arrive[0])}px; --ay: {num(u.arrive[1])}px"
+    arrival = "from-sky" if u.arrive else "from-ridge"
+    appear = "\n      " + sparkle("arrive", *u.arrive, u.start) if u.arrive else ""
     lights = "".join(f'<g class="light" style="animation-delay: -{num(i * .3)}s">'
                      f'<circle class="bloom" cx="{x}" cy="3" r="2.2" filter="url(#spark)"/>'
                      f'<circle cx="{x}" cy="3" r="1.1"/></g>'
                      for i, x in enumerate((-5.5, 0, 5.5)))
     return f"""<g transform="translate({num(u.x)} {num(u.y)})">
-      <g class="ufo" style="{motion}">
+      <g class="ufo {arrival}" style="{motion}">
         <g class="ufo-size">
         <g class="hover">
           <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
@@ -143,6 +158,7 @@ def ufo(u: Ufo) -> str:
         </g>
         </g>
       </g>
+      {sparkle("leave", u.dx, u.dy, u.start)}{appear}
     </g>"""
 
 
@@ -191,6 +207,8 @@ def visitor(v: Visit) -> str:
         shape = f'<g transform="rotate({num(math.degrees(math.atan2(r.dy, abs(r.dx))))})">\n          {shape}\n        </g>'
     if r.dx < 0:
         shape = f'<g transform="scale(-1 1)">\n          {shape}\n        </g>'
+    if v.kind == "glider":  # its own descent, so the path curves and it grows as it comes closer
+        shape = f'<g class="descent">\n          {shape}\n        </g>'
     motion = f"--dx: {num(r.dx)}px; --dy: {num(r.dy)}px; --d: {num(VISIT_FIRST + v.start)}s"
     return f"""<g transform="translate({num(r.x)} {num(r.y)})">
       <g class="visitor {v.kind}" style="{motion}">
@@ -290,6 +308,7 @@ DAY_STYLE = Template("""
     .swing { transform-box: fill-box; transform-origin: 50% 0; animation: sway 3.4s ease-in-out infinite alternate; }
     .bank  { transform-box: fill-box; transform-origin: center; animation: bank 5s ease-in-out infinite alternate; }
     .soar  { animation: soar 4.5s ease-in-out infinite alternate; }
+    .descent { transform-box: fill-box; transform-origin: center; animation: descent ${cycle}s linear var(--d) infinite; }
     .chute { fill: $canopy; }
     .wing  { fill: $wing; }
     .keel  { fill: none; stroke: $ink_day; stroke-width: .6; opacity: .6; }
@@ -344,17 +363,25 @@ NIGHT_STYLE = Template("""
 """)
 
 UFO_STYLE = Template("""
-    /* day and night: UFOs rise from behind the ridge, park, come closer, whip off */
-    .ufo       { opacity: 0; transform-box: fill-box; transform-origin: center;
-                 animation: ufo ${cycle}s linear var(--d) infinite; }
-    .ufo-size  { transform-box: fill-box; transform-origin: center;
-                 animation: ufo-size ${cycle}s linear var(--d) infinite; }
+    /* day and night: UFOs arrive (from behind the ridge or the far sky), park,
+       come closer, then whip off */
+    .ufo, .ufo-size, .ting   { transform-box: fill-box; transform-origin: center;
+                               animation: none ${cycle}s linear var(--d) infinite; }
+    .ufo, .ting              { opacity: 0; }
+    .ufo.from-ridge          { animation-name: ufo-ridge; }
+    .ufo.from-sky            { animation-name: ufo-sky; }
+    .from-ridge .ufo-size    { animation-name: ufo-size-ridge; }
+    .from-sky .ufo-size      { animation-name: ufo-size-sky; }
+    .ting.arrive             { animation-name: ting-in; }
+    .ting.leave              { animation-name: ting-out; }
     .hover     { animation: bob 1.8s ease-in-out infinite alternate; }
     .saucer    { fill: $hull; }
     .dome      { fill: $dome; opacity: .8; }
     .underglow { fill: $dome; opacity: .35; }
     .light     { fill: $light; animation: blink .9s steps(2) infinite; }
     .bloom     { opacity: .7; }
+    .ting-star { fill: $ting; }
+    .ting-glow { fill: $light; opacity: .8; }
 
     $visit
     @keyframes bob   { from { transform: translateY(-1.5px); } to { transform: translateY(1.5px); } }
@@ -373,6 +400,19 @@ def crossing(name: str, duration: float, cycle: float, peak: float = 1) -> str:
             f"{share(duration, cycle)}, 100% {{ opacity: 0; transform: translate(var(--dx), var(--dy)); }} }}")
 
 
+def glide(duration: float, cycle: float) -> str:
+    """The glider's flight as two keyframe sets, so its path curves gently: across
+    it eases off a little, down it starts slow and steepens a little, and it grows
+    as it comes towards us until the ridge hides it."""
+    fade = 1.0
+    across = (f"@keyframes fly-glider {{ 0% {{ opacity: 0; transform: none; animation-timing-function: cubic-bezier(.3, .4, .6, 1); }} "
+              f"{share(fade, cycle)}, {share(duration - .6, cycle)} {{ opacity: 1; }} "
+              f"{share(duration, cycle)}, 100% {{ opacity: 0; transform: translateX(var(--dx)); }} }}")
+    down = (f"@keyframes descent {{ 0% {{ transform: none; animation-timing-function: cubic-bezier(.4, 0, .7, .8); }} "
+            f"{share(duration, cycle)}, 100% {{ transform: translateY(var(--dy)) scale({num(GLIDER_GROWTH)}); }} }}")
+    return across + "\n    " + down
+
+
 def arc(name: str, duration: float, cycle: float) -> str:
     """Keyframes that lift something by var(--arc) and set it back down over
     `duration` seconds: quadratic easing either side of the top traces a parabola."""
@@ -383,23 +423,41 @@ def arc(name: str, duration: float, cycle: float) -> str:
 
 
 def ufo_visit(rise: float, park: float, approach: float, whip: float, cycle: float) -> str:
-    """Two sets of keyframes. `ufo` moves it: up from behind the ridge, parked, a
-    little forward, then whipped off with growing speed. `ufo-size` scales it: it
-    swells as it comes closer, then dwindles fast as it races away, so it is a
-    small dot well before it vanishes."""
-    up, near, away = "cubic-bezier(.2, .7, .3, 1)", "ease-in-out", "cubic-bezier(.45, 0, .75, .4)"
-    dwindle = "cubic-bezier(.35, .35, .55, 1)"
+    """Keyframes for a UFO's visit. Moving (`ufo-*`) and scaling (`ufo-size-*`) are
+    separate so each has its own easing. It arrives one of two ways: up from behind
+    the ridge, or swooping in from a far dot, growing and slowing as it nears. Then
+    both park, swell as they come a little closer, and whip off with growing speed
+    while dwindling to a dot. A small star "tings" where it appears and vanishes."""
+    up, swoop, grow = "cubic-bezier(.2, .7, .3, 1)", "cubic-bezier(.15, .6, .3, 1)", "cubic-bezier(.6, 0, .8, .5)"
+    near, away, dwindle = "ease-in-out", "cubic-bezier(.45, 0, .75, .4)", "cubic-bezier(.35, .35, .55, 1)"
     t1, t2, t3, t4 = rise, rise + park, rise + park + approach, rise + park + approach + whip
-    move = (f"@keyframes ufo {{ 0% {{ opacity: 1; transform: translateY(var(--rise)); animation-timing-function: {up}; }} "
-            f"{share(t1, cycle)} {{ opacity: 1; transform: none; }} "
-            f"{share(t2, cycle)} {{ opacity: 1; transform: none; animation-timing-function: {near}; }} "
-            f"{share(t3, cycle)} {{ opacity: 1; transform: translateY(4px); animation-timing-function: {away}; }} "
-            f"{share(t3 + whip * .92, cycle)} {{ opacity: 1; }} "
-            f"{share(t4, cycle)}, 100% {{ opacity: 0; transform: translate(var(--dx), var(--dy)); }} }}")
-    size = (f"@keyframes ufo-size {{ 0%, {share(t2, cycle)} {{ transform: none; animation-timing-function: {near}; }} "
-            f"{share(t3, cycle)} {{ transform: scale({num(UFO_APPROACH_SCALE)}); animation-timing-function: {dwindle}; }} "
-            f"{share(t4, cycle)}, 100% {{ transform: scale(.05); }} }}")
-    return move + "\n    " + size
+
+    leave = (f"{share(t2, cycle)} {{ opacity: 1; transform: none; animation-timing-function: {near}; }} "
+             f"{share(t3, cycle)} {{ opacity: 1; transform: translateY(4px); animation-timing-function: {away}; }} "
+             f"{share(t3 + whip * .92, cycle)} {{ opacity: 1; }} "
+             f"{share(t4, cycle)}, 100% {{ opacity: 0; transform: translate(var(--dx), var(--dy)); }} }}")
+    from_ridge = (f"@keyframes ufo-ridge {{ 0% {{ opacity: 1; transform: translateY(var(--rise)); animation-timing-function: {up}; }} "
+                  f"{share(t1, cycle)} {{ opacity: 1; transform: none; }} " + leave)
+    from_sky = (f"@keyframes ufo-sky {{ 0% {{ opacity: 0; transform: translate(var(--ax), var(--ay)); animation-timing-function: {swoop}; }} "
+                f"{share(.15, cycle)} {{ opacity: 1; }} "
+                f"{share(t1, cycle)} {{ opacity: 1; transform: none; }} " + leave)
+
+    shrink = (f"{share(t3, cycle)} {{ transform: scale({num(UFO_APPROACH_SCALE)}); animation-timing-function: {dwindle}; }} "
+              f"{share(t4, cycle)}, 100% {{ transform: scale(.05); }} }}")
+    size_ridge = f"@keyframes ufo-size-ridge {{ 0%, {share(t2, cycle)} {{ transform: none; animation-timing-function: {near}; }} " + shrink
+    size_sky = (f"@keyframes ufo-size-sky {{ 0% {{ transform: scale(.05); animation-timing-function: {grow}; }} "
+                f"{share(t1, cycle)}, {share(t2, cycle)} {{ transform: none; animation-timing-function: {near}; }} " + shrink)
+
+    return "\n    ".join((from_ridge, from_sky, size_ridge, size_sky,
+                            ting("ting-in", 0, cycle), ting("ting-out", t4, cycle)))
+
+
+def ting(name: str, at: float, cycle: float) -> str:
+    """A small star that pops at `at` seconds, turns and fades."""
+    before = f"0%, {share(at - .05, cycle)}" if at > .05 else "0%"
+    return (f"@keyframes {name} {{ {before} {{ opacity: 0; transform: scale(0); }} "
+            f"{share(at + UFO_TING * .25, cycle)} {{ opacity: 1; transform: scale(1) rotate(45deg); }} "
+            f"{share(at + UFO_TING, cycle)}, 100% {{ opacity: 0; transform: scale(.4) rotate(90deg); }} }}")
 
 
 def style(theme: str, sky: Sky) -> str:
@@ -413,7 +471,9 @@ def style(theme: str, sky: Sky) -> str:
         css += DAY_STYLE.substitute(
             cloud=CLOUD_FILL, wind=num(sky.wind), wind_half=num(sky.wind / 2),
             cycle=num(sky.visit_cycle), ink_day=VISITOR_INK, canopy=CANOPY, wing=GLIDER_WING,
-            **{f"fly_{kind}": crossing(f"fly-{kind}", sky.flight[kind], sky.visit_cycle) for kind in sky.flight},
+            **{f"fly_{kind}": crossing(f"fly-{kind}", sky.flight[kind], sky.visit_cycle)
+               for kind in sky.flight if kind != "glider"},
+            fly_glider=glide(sky.flight["glider"], sky.visit_cycle),
         )
     else:
         css += NIGHT_STYLE.substitute(
@@ -473,7 +533,7 @@ def aurora_window(i: int, rb: Ribbon) -> str:
 
 
 def ufo_layer(sky: Sky) -> str:
-    """Clipped to the sky, so each UFO comes up from behind the ridge."""
+    """Clipped to the sky, so a UFO rising from the ridge comes up from behind it."""
     ufos = "\n    ".join(ufo(u) for u in sky.ufos)
     return f"""<g class="ufos" clip-path="url(#above-ridge)">
     {ufos}

@@ -102,22 +102,25 @@ SATELLITE_HULL = "#D8DEE9"
 SATELLITE_PANEL = "#5E81AC"
 SATELLITE_TRIM = "#88C0D0"
 
-# Four UFOs a day, by day and by night: each rises from behind the ridge, parks,
-# comes a little closer, then whips off into the far sky until it is a dot and gone.
+# Four UFOs a day, by day and by night. Each arrives, parks over the ridge, comes a
+# little closer, then whips off into the far sky until it is a dot and gone. Some
+# rise from behind the ridge and some swoop in from the far sky (at least one each).
 UFOS = 4
-UFO_FIRST = (25, 45)                 # seconds after load the first one rises
+UFO_FIRST = (12, 18)                 # seconds after load the first one arrives
 UFO_GAP = (40, 180)                  # seconds of empty sky between flights
-UFO_RISE, UFO_PARK = (2.2, 3.2), (3, 5)          # seconds, rolled daily
+UFO_RISE, UFO_PARK = (2.2, 3.2), (3, 5)          # seconds to arrive and to stay parked, rolled daily
 UFO_APPROACH, UFO_WHIP = (.6, .9), (1.1, 1.6)
 UFO_APPROACH_SCALE = 1.6             # how much bigger it looks when it comes closer
 UFO_PARK_Y = (178, 214)              # below the labels, above the ridge
 UFO_ABOVE_RIDGE = 22                 # px it parks clear of the ridge line
 UFO_CLEAR_OF_LEADERS = 30            # px from the summit leader lines
-UFO_FAR_AREA = (70, 52, 830, 140)    # where in the sky it vanishes: left, top, right, bottom
-UFO_WHIP_MIN = 240                   # px at least between parking and vanishing
+UFO_FAR_AREA = (70, 52, 830, 140)    # where in the sky it appears or vanishes: left, top, right, bottom
+UFO_WHIP_MIN = 240                   # px at least between parking and the far point
+UFO_PATHS_APART = 150                # px at least between where a sky arrival appears and where it vanishes
+UFO_TING = .5                        # seconds the sparkle lasts where a UFO appears or vanishes
 UFO_COLORS = {                       # the hull is darker by day so it shows against white
-    "light": dict(hull="#4C566A", dome="#88C0D0", light="#EBCB8B"),
-    "dark": dict(hull="#D8DEE9", dome="#88C0D0", light="#EBCB8B"),
+    "light": dict(hull="#4C566A", dome="#88C0D0", light="#EBCB8B", ting="#D08770"),
+    "dark": dict(hull="#D8DEE9", dome="#88C0D0", light="#EBCB8B", ting="#ECEFF4"),
 }
 
 # ── Day visitors ─────────────────────────────────────────────────────────────
@@ -138,11 +141,16 @@ FLOCK_SIZE = (2, 4)
 ROUTE_KINDS = ("parachute", "glider", "plane")
 ROUTES = 4
 ROUTE_JITTER = 10                    # px a route sits above or below the day's height
-SINK = {"birds": (-10, 10), "glider": (24, 60), "plane": (-14, 14)}   # px lost (+) or gained (-) crossing
-PARACHUTE_LANDING_X = (110, 790)     # the day's landing spots are spread along the ridge
-PARACHUTE_SPACING = 120              # px at least between two landing spots
-PARACHUTE_MIN_DRIFT = 160            # px at least it drifts in, so it comes down gently
-PARACHUTE_LANDING_Y = 360            # it sinks to here; the ridge hides it well before
+SINK = {"birds": (-10, 10), "plane": (-14, 14)}   # px lost (+) or gained (-) crossing
+
+# The parachute and the hang glider come down behind the ridge at the day's landing
+# spots: the parachute anywhere along it, the glider somewhere in the middle.
+LANDINGS = {   # x range of the spots, px at least between spots, px below the ridge it aims for
+    "parachute": dict(area=(110, 790), spacing=120, depth=70),
+    "glider": dict(area=(300, 600), spacing=50, depth=24),   # shallow, so it glides rather than dives
+}
+LANDING_MIN_DRIFT = 160              # px at least it travels in, so it comes down gently
+GLIDER_GROWTH = 1.6                  # how much bigger the glider gets as it comes towards us
 
 VISITOR_INK = "#4C566A"
 CANOPY = "#D08770"                   # parachute
