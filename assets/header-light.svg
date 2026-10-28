@@ -1,22 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="808" height="240" viewBox="46 38 808 240" role="img" aria-label="Abhishek Basnet — developer, Nepal">
+<svg xmlns="http://www.w3.org/2000/svg" width="808" height="300" viewBox="46 36 808 300" role="img" aria-label="Abhishek Basnet — flutter, go, fastapi">
   <style>
-    .name { font: 300 46px 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, sans-serif; letter-spacing: -0.5px; fill: #2E3440; }
-    .mono { font: 400 13px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 1.5px; fill: #7B88A1; }
-    .ridge { fill: none; stroke: #5E81AC; stroke-width: 1.25; stroke-linejoin: miter; stroke-dasharray: 1; animation: draw 2.8s cubic-bezier(.6,.05,.3,1) both; }
+    .name { font: 300 30px 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, sans-serif; letter-spacing: -0.3px; fill: #2E3440; }
+    .mono { font: 400 11px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 1.8px; fill: #7B88A1; }
+    .peak { font: 400 12px ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: 2px; fill: #2E3440; }
+    .ridge { fill: none; stroke: #5E81AC; stroke-width: 1.25; stroke-linejoin: miter; stroke-dasharray: 1; animation: draw 2.6s cubic-bezier(.6,.05,.3,1) both; }
     .ground { stroke: #D8DEE9; stroke-width: 1; }
-    .sun { fill: #BF616A; animation: rise 2.8s ease-out both; }
+    .lead { stroke: #7B88A1; stroke-width: 1; stroke-dasharray: 2 3; }
+    .dot { fill: #5E81AC; }
+    .mark { opacity: 0; animation: show 0.8s ease-out both; }
+    .m1 { animation-delay: 1.6s; } .m2 { animation-delay: 2.0s; } .m3 { animation-delay: 2.4s; }
+    .sun { fill: #BF616A; animation: rise 3s ease-out both; }
     @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-    @media (prefers-reduced-motion: reduce) { .ridge, .sun { animation: none; } }
+    @keyframes show { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .ridge, .sun, .mark { animation: none; opacity: 1; } }
   </style>
 
-  <text class="mono" x="48" y="56">01 — README</text>
-  <text class="mono" x="852" y="56" text-anchor="end">28.39° N   84.12° E</text>
+  <text class="mono" x="48" y="56">28.39° N   84.12° E</text>
+  <circle class="sun" cx="792" cy="118" r="6"/>
 
-  <text class="name" x="46" y="122">Abhishek Basnet</text>
-  <text class="mono" x="48" y="152">developer · nepal</text>
+  <path class="ridge" pathLength="1" d="M48 262 L110 252 L150 256 L210 222 L236 230 L268 194 L300 214 L338 202 L380 226 L420 184 L452 150 L486 176 L516 168 L560 214 L604 202 L652 180 L690 212 L740 236 L790 228 L852 250"/>
 
-  <circle class="sun" cx="712" cy="132" r="6"/>
-  <path class="ridge" pathLength="1" d="M48 262 L118 250 L166 254 L228 224 L262 234 L318 188 L346 206 L374 172 L406 200 L452 148 L482 174 L514 162 L562 210 L606 198 L652 228 L702 216 L754 240 L802 234 L852 250"/>
+  <g class="mark m1"><line class="lead" x1="268" y1="186" x2="268" y2="112"/><circle class="dot" cx="268" cy="194" r="2.5"/><text class="peak" x="268" y="100" text-anchor="middle">flutter</text></g>
+  <g class="mark m2"><line class="lead" x1="452" y1="142" x2="452" y2="112"/><circle class="dot" cx="452" cy="150" r="2.5"/><text class="peak" x="452" y="100" text-anchor="middle">go</text></g>
+  <g class="mark m3"><line class="lead" x1="652" y1="172" x2="652" y2="112"/><circle class="dot" cx="652" cy="180" r="2.5"/><text class="peak" x="652" y="100" text-anchor="middle">fastapi</text></g>
+
   <line class="ground" x1="48" y1="272" x2="852" y2="272"/>
+  <text class="name" x="46" y="318">Abhishek Basnet</text>
+  <text class="mono" x="852" y="316" text-anchor="end">developer · nepal</text>
 </svg>
