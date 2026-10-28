@@ -184,6 +184,13 @@ class Output(unittest.TestCase):
         day = datetime.date(2026, 10, 28)
         self.assertEqual(roll_sky("2026-10-28", day), roll_sky("2026-10-28", day))
 
+    def test_palette_variables_are_colours_in_both_themes(self):
+        # guards against a template value overwriting a colour (the glow once became "1.4")
+        for theme, palette in cfg.THEMES.items():
+            svg = landscape(theme, SKIES[0])
+            for name, colour in palette.items():
+                self.assertIn(f"--{name}: {colour};", svg)
+
     def test_svgs_are_well_formed(self):
         for sky in SKIES[:30]:
             for theme in cfg.THEMES:

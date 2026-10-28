@@ -256,8 +256,8 @@ COMMON_STYLE = Template("""
     /* 2 · once, after the intro: labels glow in turn, light runs along the ridge,
        a ripple leaves the sun / moon; then the header rests */
     .pulse        { transform-box: fill-box; transform-origin: center;
-                    animation: label-scale ${glow}s ease-in-out calc(${start}s + var(--i) * ${stagger}s); }
-    .pulse .label { animation: label-tint ${glow}s ease-in-out; animation-delay: inherit; }
+                    animation: label-scale ${label_glow}s ease-in-out calc(${start}s + var(--i) * ${stagger}s); }
+    .pulse .label { animation: label-tint ${label_glow}s ease-in-out; animation-delay: inherit; }
     .pulse .halo  { fill: var(--accent); opacity: 0; animation-name: label-glow; }
 
     .trace      { fill: none; stroke-linecap: round; stroke-dasharray: .08 1.2; stroke-dashoffset: .08; opacity: 0;
@@ -464,7 +464,7 @@ def ting(name: str, at: float, cycle: float) -> str:
 def style(theme: str, sky: Sky) -> str:
     css = COMMON_STYLE.substitute(
         THEMES[theme], sans=SANS, mono=MONO,
-        start=num(SEQUENCE_START), glow=num(LABEL_GLOW), stagger=num(LABEL_STAGGER),
+        start=num(SEQUENCE_START), label_glow=num(LABEL_GLOW), stagger=num(LABEL_STAGGER),
         trace_at=num(SEQUENCE_START + TRACE_AT), trace_len=num(TRACE_LEN),
         ripple_at=num(SEQUENCE_START + RIPPLE_AT), ripple_len=num(RIPPLE_LEN),
     )
