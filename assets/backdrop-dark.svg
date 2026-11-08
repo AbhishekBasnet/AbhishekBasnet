@@ -86,14 +86,10 @@
       @keyframes satellite { 0% { opacity: 0; transform: none; } 1.16%, 17.89% { opacity: 1; } 19.05%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
       @keyframes orbit { 0% { transform: none; animation-timing-function: cubic-bezier(.25, .46, .45, .94); } 9.52% { transform: translateY(var(--arc)); animation-timing-function: cubic-bezier(.55, .085, .68, .53); } 19.05%, 100% { transform: none; } }
 
-      /* night: bats, sky lanterns and a balloon take turns */
-      .visitor          { opacity: 0; animation: none 181.4s linear var(--d) infinite; }
-      .visitor.bats     { animation-name: fly-bats; }
+      /* night: sky lanterns and a balloon take turns */
+      .visitor          { opacity: 0; animation: none 196.42s linear var(--d) infinite; }
       .visitor.lanterns { animation-name: fly-lanterns; }
       .visitor.balloon  { animation-name: fly-balloon; }
-      .bat              { fill: #7B88A1; transform-box: fill-box; transform-origin: center;
-                          animation: bat-flap .14s ease-in-out infinite alternate; }
-      .flit             { animation: flit .9s ease-in-out infinite alternate; }
       .lantern          { animation: lantern-sway 3.2s ease-in-out infinite alternate; }
       .lantern .paper   { fill: #D08770; }
       .lantern .flame   { fill: #EBCB8B; }
@@ -101,26 +97,23 @@
       .balloon .envelope { fill: #7B88A1; }
       .balloon .seams, .balloon .ropes { fill: none; stroke: #4C566A; stroke-width: .5; }
       .balloon .basket  { fill: #4C566A; }
-      .balloon .flare   { animation: balloon-fire 181.4s linear var(--d) infinite; }
+      .balloon .flare   { animation: balloon-fire 196.42s linear var(--d) infinite; }
       .balloon .burner  { fill: #EBCB8B; animation: flicker .22s ease-in-out infinite alternate; }
       .balloon .drift   { animation: balloon-bob 4s ease-in-out infinite alternate; }
-      .lift             { animation: balloon-lift 181.4s linear var(--d) infinite; }
+      .lift             { animation: balloon-lift 196.42s linear var(--d) infinite; }
 
       /* night: now and then a comet glides slowly across the upper sky */
-      .comet            { opacity: 0; animation: comet 191.36s linear 28.31s infinite; }
+      .comet            { opacity: 0; animation: comet 169.85s linear 39.88s infinite; }
       .comet-head       { fill: #ECEFF4; }
 
-      @keyframes fly-bats { 0% { opacity: 0; transform: none; } .55%, 2.26% { opacity: 1; } 2.81%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes fly-lanterns { 0% { opacity: 0; transform: none; } .55%, 10.13% { opacity: 1; } 10.68%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes fly-balloon { 0% { opacity: 0; transform: none; } .28%, 15.2% { opacity: 1; } 15.47%, 100% { opacity: 0; transform: translateX(var(--dx)); } }
-      @keyframes balloon-lift { 0% { transform: none; animation-timing-function: cubic-bezier(.3, .2, .5, 1); } 6.19% { transform: translateY(var(--top)); animation-timing-function: linear; } 9.28% { transform: translateY(var(--top)); animation-timing-function: cubic-bezier(.5, 0, .7, .8); } 15.47%, 100% { transform: translateY(var(--dy)); } }
-      @keyframes balloon-fire { 0%, 6.19% { opacity: 1; } 9.28% { opacity: .55; } 15.47%, 100% { opacity: .2; } }
-      @keyframes bat-flap     { to { transform: scaleY(-.4); } }
-      @keyframes flit         { 30% { transform: translateY(-2.5px); } 60% { transform: translateY(1.5px); } 100% { transform: translateY(-1px); } }
+      @keyframes fly-lanterns { 0% { opacity: 0; transform: none; } .51%, 7.74% { opacity: 1; } 8.24%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes fly-balloon { 0% { opacity: 0; transform: none; } .25%, 14.54% { opacity: 1; } 14.8%, 100% { opacity: 0; transform: translateX(var(--dx)); } }
+      @keyframes balloon-lift { 0% { transform: none; animation-timing-function: cubic-bezier(.3, .2, .5, 1); } 5.92% { transform: translateY(var(--top)); animation-timing-function: linear; } 8.88% { transform: translateY(var(--top)); animation-timing-function: cubic-bezier(.5, 0, .7, .8); } 14.8%, 100% { transform: translateY(var(--dy)); } }
+      @keyframes balloon-fire { 0%, 5.92% { opacity: 1; } 8.88% { opacity: .55; } 14.8%, 100% { opacity: .2; } }
       @keyframes lantern-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
       @keyframes flicker      { from { opacity: .6; } to { opacity: 1; } }
       @keyframes balloon-bob  { from { transform: translateY(-2px); } to { transform: translateY(2px); } }
-      @keyframes comet { 0% { opacity: 0; transform: none; } .78%, 4.9% { opacity: 1; } 5.94%, 100% { opacity: 0; transform: translateX(341.99px); } }
+      @keyframes comet { 0% { opacity: 0; transform: none; } .88%, 4.69% { opacity: 1; } 5.87%, 100% { opacity: 0; transform: translateX(334.56px); } }
 
       /* day and night: UFOs arrive (from behind the ridge or the far sky), park,
          come closer, then whip off */
@@ -335,95 +328,96 @@
         <circle class="head" r="1.02"/>
       </g>
     </g>
-    <g transform="translate(413.31 71.88) rotate(173.73)">
+    <g transform="translate(443.02 79.08) rotate(174.16)">
       <g class="comet">
-        <path d="M0 -1.4 L-76.04 -.25 L-76.04 .25 L0 1.4Z" fill="url(#comet-tail)"/>
-        <path d="M0 -.8 L-57.03 -4.2 L-57.03 -3 L0 .8Z" fill="url(#comet-ion)"/>
+        <path d="M0 -1.4 L-86.59 -.25 L-86.59 .25 L0 1.4Z" fill="url(#comet-tail)"/>
+        <path d="M0 -.8 L-64.94 -4.2 L-64.94 -3 L0 .8Z" fill="url(#comet-ion)"/>
         <circle r="4.5" fill="url(#comet-glow)"/>
         <circle class="comet-head" r="1.3"/>
       </g>
     </g>
   </g>
   <g class="visitors" clip-path="url(#above-ridge)">
-    <g transform="translate(197.19 325.84)">
-      <g class="visitor balloon" style="--dx: 253.32px; --dy: -51.83px; --d: 4.5s; --top: -136.64px">
+    <g transform="translate(468.45 259.83)">
+      <g class="visitor lanterns" style="--dx: 9.53px; --dy: -172.06px; --d: 4.5s">
+        <g transform="translate(.71 3.39) scale(1.47)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(2.65 14.39) scale(1.55)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-8.41 2.02) scale(1.4)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(2.47 4.38) scale(1.77)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
+      </g>
+    </g>
+    <g transform="translate(308.01 323.98)">
+      <g class="visitor balloon" style="--dx: -189.3px; --dy: 28.09px; --d: 22.26s; --top: -132.18px">
         <g class="lift">
-          <g class="drift">
+          <g transform="scale(-1 1)">
+          <g class="drift"><g transform="scale(1.07)">
             <path class="envelope" d="M0 -23 C6.5 -23 7.5 -15 4.6 -10.5 L2 -7 H-2 L-4.6 -10.5 C-7.5 -15 -6.5 -23 0 -23Z"/>
             <path class="seams" d="M0 -23 V-7 M-3.6 -21.6 Q-4.2 -14 -1.4 -7 M3.6 -21.6 Q4.2 -14 1.4 -7"/>
             <circle class="flare" cy="-13" r="10" fill="url(#balloon-flare)"/>
-            <path class="burner" d="M0 -9.8 Q1.1 -8.1 0 -6.8 Q-1.1 -8.1 0 -9.8Z"/>
+            <path class="burner" d="M0 -7.6 Q1.1 -5.9 0 -4.6 Q-1.1 -5.9 0 -7.6Z"/>
             <path class="ropes" d="M-2 -7 L-1.4 -3.4 M2 -7 L1.4 -3.4"/>
             <rect class="basket" x="-1.6" y="-3.4" width="3.2" height="2.4" rx=".3"/>
-          </g>
+          </g></g>
+        </g>
         </g>
       </g>
     </g>
-    <g transform="translate(876 102.73)">
-      <g class="visitor bats" style="--dx: -852px; --dy: -4.21px; --d: 33.94s">
-        <g transform="scale(-1 1)">
-          <g class="flit"><g transform="translate(0 0) scale(1.64)"><path class="bat" style="animation-delay: -0s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-15.15 7.77) scale(1.35)"><path class="bat" style="animation-delay: -.05s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-40.78 -11.73) scale(1.38)"><path class="bat" style="animation-delay: -.1s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g></g>
-        </g>
+    <g transform="translate(571.27 294.65)">
+      <g class="visitor lanterns" style="--dx: -30.25px; --dy: -216.74px; --d: 52.6s">
+        <g transform="translate(17.84 17.78) scale(1.4)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(3.12 14.87) scale(1.58)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-1.5 12.46) scale(1.69)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(6.84 6.61) scale(1.66)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-22.92 15.27) scale(1.62)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-6.52 9.1) scale(1.38)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(12.08 15.79) scale(1.56)"><g class="lantern" style="animation-delay: -5.4s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
       </g>
     </g>
-    <g transform="translate(188.23 333.02)">
-      <g class="visitor balloon" style="--dx: 221.54px; --dy: -30.73px; --d: 40.83s; --top: -145.61px">
+    <g transform="translate(708 324.4)">
+      <g class="visitor balloon" style="--dx: -199.51px; --dy: -52.54px; --d: 71.04s; --top: -128.82px">
         <g class="lift">
-          <g class="drift">
+          <g transform="scale(-1 1)">
+          <g class="drift"><g transform="scale(1.07)">
             <path class="envelope" d="M0 -23 C6.5 -23 7.5 -15 4.6 -10.5 L2 -7 H-2 L-4.6 -10.5 C-7.5 -15 -6.5 -23 0 -23Z"/>
             <path class="seams" d="M0 -23 V-7 M-3.6 -21.6 Q-4.2 -14 -1.4 -7 M3.6 -21.6 Q4.2 -14 1.4 -7"/>
             <circle class="flare" cy="-13" r="10" fill="url(#balloon-flare)"/>
-            <path class="burner" d="M0 -9.8 Q1.1 -8.1 0 -6.8 Q-1.1 -8.1 0 -9.8Z"/>
+            <path class="burner" d="M0 -7.6 Q1.1 -5.9 0 -4.6 Q-1.1 -5.9 0 -7.6Z"/>
             <path class="ropes" d="M-2 -7 L-1.4 -3.4 M2 -7 L1.4 -3.4"/>
             <rect class="basket" x="-1.6" y="-3.4" width="3.2" height="2.4" rx=".3"/>
-          </g>
+          </g></g>
+        </g>
         </g>
       </g>
     </g>
-    <g transform="translate(695.32 311.87)">
-      <g class="visitor lanterns" style="--dx: -41.64px; --dy: -212.32px; --d: 70.29s">
-        <g transform="translate(15.65 7.86) scale(1.6)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(9.22 11.61) scale(1.69)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-6.38 10.73) scale(1.37)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(16.71 9.32) scale(1.55)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(.27 .68) scale(1.74)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(18.12 7.21) scale(1.68)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
+    <g transform="translate(236.88 314.64)">
+      <g class="visitor lanterns" style="--dx: 41.65px; --dy: -241.23px; --d: 102.93s">
+        <g transform="translate(-10.89 1.81) scale(1.5)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(20.86 8.75) scale(1.37)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-6.49 2.57) scale(1.52)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(23.23 2.42) scale(1.69)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(2.36 14.85) scale(1.66)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-22.31 13.87) scale(1.85)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
       </g>
     </g>
-    <g transform="translate(24 102.95)">
-      <g class="visitor bats" style="--dx: 852px; --dy: 11.59px; --d: 92.11s">
-        <g class="flit"><g transform="translate(0 0) scale(1.48)"><path class="bat" style="animation-delay: -0s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-15.92 7.33) scale(1.51)"><path class="bat" style="animation-delay: -.05s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-29.66 -11.35) scale(1.61)"><path class="bat" style="animation-delay: -.1s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-47.49 24.38) scale(1.35)"><path class="bat" style="animation-delay: -.15s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g></g>
-      </g>
-    </g>
-    <g transform="translate(368.13 315.91)">
-      <g class="visitor balloon" style="--dx: 142.69px; --dy: -44.14px; --d: 99.24s; --top: -133.17px">
+    <g transform="translate(567.83 311.77)">
+      <g class="visitor balloon" style="--dx: 195.31px; --dy: 20.45px; --d: 120.22s; --top: -122.43px">
         <g class="lift">
-          <g class="drift">
+          <g class="drift"><g transform="scale(1.07)">
             <path class="envelope" d="M0 -23 C6.5 -23 7.5 -15 4.6 -10.5 L2 -7 H-2 L-4.6 -10.5 C-7.5 -15 -6.5 -23 0 -23Z"/>
             <path class="seams" d="M0 -23 V-7 M-3.6 -21.6 Q-4.2 -14 -1.4 -7 M3.6 -21.6 Q4.2 -14 1.4 -7"/>
             <circle class="flare" cy="-13" r="10" fill="url(#balloon-flare)"/>
-            <path class="burner" d="M0 -9.8 Q1.1 -8.1 0 -6.8 Q-1.1 -8.1 0 -9.8Z"/>
+            <path class="burner" d="M0 -7.6 Q1.1 -5.9 0 -4.6 Q-1.1 -5.9 0 -7.6Z"/>
             <path class="ropes" d="M-2 -7 L-1.4 -3.4 M2 -7 L1.4 -3.4"/>
             <rect class="basket" x="-1.6" y="-3.4" width="3.2" height="2.4" rx=".3"/>
-          </g>
+          </g></g>
         </g>
       </g>
     </g>
-    <g transform="translate(208.91 317.07)">
-      <g class="visitor lanterns" style="--dx: 4.91px; --dy: -229.74px; --d: 129.89s">
-        <g transform="translate(-22.95 4.44) scale(1.77)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-8.67 11.95) scale(1.6)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(18.55 4.43) scale(1.8)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-21.18 2.43) scale(1.6)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
+    <g transform="translate(208.95 317.04)">
+      <g class="visitor lanterns" style="--dx: 23.57px; --dy: -235.98px; --d: 151.16s">
+        <g transform="translate(18.72 7.44) scale(1.81)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-17.43 14.64) scale(1.48)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-20.77 9.16) scale(1.47)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(6.57 5.79) scale(1.6)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-15.6 5.28) scale(1.7)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
       </g>
     </g>
-    <g transform="translate(876 104.79)">
-      <g class="visitor bats" style="--dx: -852px; --dy: 9.12px; --d: 151.74s">
-        <g transform="scale(-1 1)">
-          <g class="flit"><g transform="translate(0 0) scale(1.5)"><path class="bat" style="animation-delay: -0s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-18.9 6.98) scale(1.28)"><path class="bat" style="animation-delay: -.05s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-34.6 -13.97) scale(1.38)"><path class="bat" style="animation-delay: -.1s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g></g>
+    <g transform="translate(746.89 333.86)">
+      <g class="visitor balloon" style="--dx: -226.51px; --dy: -59.22px; --d: 169.2s; --top: -140.34px">
+        <g class="lift">
+          <g transform="scale(-1 1)">
+          <g class="drift"><g transform="scale(1.07)">
+            <path class="envelope" d="M0 -23 C6.5 -23 7.5 -15 4.6 -10.5 L2 -7 H-2 L-4.6 -10.5 C-7.5 -15 -6.5 -23 0 -23Z"/>
+            <path class="seams" d="M0 -23 V-7 M-3.6 -21.6 Q-4.2 -14 -1.4 -7 M3.6 -21.6 Q4.2 -14 1.4 -7"/>
+            <circle class="flare" cy="-13" r="10" fill="url(#balloon-flare)"/>
+            <path class="burner" d="M0 -7.6 Q1.1 -5.9 0 -4.6 Q-1.1 -5.9 0 -7.6Z"/>
+            <path class="ropes" d="M-2 -7 L-1.4 -3.4 M2 -7 L1.4 -3.4"/>
+            <rect class="basket" x="-1.6" y="-3.4" width="3.2" height="2.4" rx=".3"/>
+          </g></g>
         </g>
-      </g>
-    </g>
-    <g transform="translate(313.45 306.87)">
-      <g class="visitor lanterns" style="--dx: -7.76px; --dy: -218.79px; --d: 158.37s">
-        <g transform="translate(19.79 12.98) scale(1.63)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(15.49 14.95) scale(1.67)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(16.53 7.72) scale(1.61)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(7.72 12.5) scale(1.57)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(1.49 5.76) scale(1.64)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-.44 9.83) scale(1.85)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-11.55 2.47) scale(1.64)"><g class="lantern" style="animation-delay: -5.4s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
-      </g>
-    </g>
-    <g transform="translate(24 122.44)">
-      <g class="visitor bats" style="--dx: 852px; --dy: 11.88px; --d: 179.56s">
-        <g class="flit"><g transform="translate(0 0) scale(1.59)"><path class="bat" style="animation-delay: -0s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-19.5 4.6) scale(1.29)"><path class="bat" style="animation-delay: -.05s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-27.12 -16.16) scale(1.51)"><path class="bat" style="animation-delay: -.1s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g><g transform="translate(-48.94 24.71) scale(1.39)"><path class="bat" style="animation-delay: -.15s" d="M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z"/></g></g>
+        </g>
       </g>
     </g>
   </g>

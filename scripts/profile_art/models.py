@@ -82,11 +82,11 @@ class Route:
 @dataclass(frozen=True)
 class Visit:
     """One crossing. By day: a bird flock, the parachute, the paraglider or the plane.
-    By night: the plane, bats, sky lanterns or a hot air balloon."""
+    By night: sky lanterns or a hot air balloon."""
     kind: str
     route: Route
     start: float      # seconds into the schedule
-    flock: tuple[tuple[float, float, float], ...] = ()   # birds, bats, lanterns: offset x, offset y, size
+    flock: tuple[tuple[float, float, float], ...] = ()   # birds, lanterns: offset x, offset y, size
     top: float = 0    # balloon only: y of the basket at the top of its climb
 
 

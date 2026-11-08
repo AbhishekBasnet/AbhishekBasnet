@@ -1,6 +1,6 @@
 """The night visitors and the comet: what they look like and how they move.
 
-    bats(visit), lanterns(visit), balloon()   the visitors, drawn facing right around (0, 0)
+    lanterns(visit), balloon()   the visitors, drawn around (0, 0)
     comet(comet)                                             the comet
     night_visitor_style(sky)                                 their CSS
     night_glows()                                            their soft glows, as gradients
@@ -14,26 +14,15 @@ from __future__ import annotations
 from string import Template
 
 from .config import (
-    AURORA_COLORS, BALLOON_HOVER, BAT_SIZE, LANTERN_GLOW, LANTERN_PAPER, LANTERN_SIZE, NIGHT_DARK,
+    AURORA_COLORS, BALLOON_HOVER, BALLOON_SIZE, LANTERN_GLOW, LANTERN_PAPER, LANTERN_SIZE, NIGHT_DARK,
     NIGHT_INK, SNOW,
 )
 from .keyframes import crossing, num, share
 from .models import Comet, Sky, Visit
 
-BAT = ("M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 "
-       "Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z")
 
 
 # ── The visitors ─────────────────────────────────────────────────────────────
-
-def bats(visit: Visit) -> str:
-    """A small colony flitting along, wings beating fast and out of step."""
-    colony = "".join(
-        f'<g transform="translate({num(offset_x * BAT_SIZE)} {num(offset_y * BAT_SIZE)}) scale({num(size * BAT_SIZE)})">'
-        f'<path class="bat" style="animation-delay: -{num(n * .05)}s" d="{BAT}"/></g>'
-        for n, (offset_x, offset_y, size) in enumerate(visit.flock))
-    return f'<g class="flit">{colony}</g>'
-
 
 def lanterns(visit: Visit) -> str:
     """Paper sky lanterns rising together, each glowing, flickering and swaying."""
@@ -49,18 +38,20 @@ def lanterns(visit: Visit) -> str:
 def balloon() -> str:
     """A hot air balloon bobbing gently, its burner alight the whole way: the flame
     flickers, and its glow lights the envelope from inside, brightest on the climb
-    and dimming on the way down. Drawn with the basket at (0, 0)."""
-    return """<g class="drift">
+    and dimming on the way down. The flame sits just under the envelope's mouth,
+    above the basket, where a real burner is. Drawn with the basket at (0, 0) and
+    scaled up by BALLOON_SIZE."""
+    return f"""<g class="drift"><g transform="scale({num(BALLOON_SIZE)})">
             <path class="envelope" d="M0 -23 C6.5 -23 7.5 -15 4.6 -10.5 L2 -7 H-2 L-4.6 -10.5 C-7.5 -15 -6.5 -23 0 -23Z"/>
             <path class="seams" d="M0 -23 V-7 M-3.6 -21.6 Q-4.2 -14 -1.4 -7 M3.6 -21.6 Q4.2 -14 1.4 -7"/>
             <circle class="flare" cy="-13" r="10" fill="url(#balloon-flare)"/>
-            <path class="burner" d="M0 -9.8 Q1.1 -8.1 0 -6.8 Q-1.1 -8.1 0 -9.8Z"/>
+            <path class="burner" d="M0 -7.6 Q1.1 -5.9 0 -4.6 Q-1.1 -5.9 0 -7.6Z"/>
             <path class="ropes" d="M-2 -7 L-1.4 -3.4 M2 -7 L1.4 -3.4"/>
             <rect class="basket" x="-1.6" y="-3.4" width="3.2" height="2.4" rx=".3"/>
-          </g>"""
+          </g></g>"""
 
 
-NIGHT_SHAPES = {"bats": bats, "lanterns": lanterns, "balloon": lambda visit: balloon()}
+NIGHT_SHAPES = {"lanterns": lanterns, "balloon": lambda visit: balloon()}
 
 
 # ── The comet ────────────────────────────────────────────────────────────────
@@ -82,14 +73,10 @@ def comet(c: Comet) -> str:
 # ── Styles ───────────────────────────────────────────────────────────────────
 
 NIGHT_VISITOR_STYLE = Template("""
-    /* night: bats, sky lanterns and a balloon take turns */
+    /* night: sky lanterns and a balloon take turns */
     .visitor          { opacity: 0; animation: none ${cycle}s linear var(--d) infinite; }
-    .visitor.bats     { animation-name: fly-bats; }
     .visitor.lanterns { animation-name: fly-lanterns; }
     .visitor.balloon  { animation-name: fly-balloon; }
-    .bat              { fill: $ink; transform-box: fill-box; transform-origin: center;
-                        animation: bat-flap .14s ease-in-out infinite alternate; }
-    .flit             { animation: flit .9s ease-in-out infinite alternate; }
     .lantern          { animation: lantern-sway 3.2s ease-in-out infinite alternate; }
     .lantern .paper   { fill: $paper; }
     .lantern .flame   { fill: $glow; }
@@ -107,8 +94,6 @@ NIGHT_VISITOR_STYLE = Template("""
     .comet-head       { fill: $snow; }
 
     $fly
-    @keyframes bat-flap     { to { transform: scaleY(-.4); } }
-    @keyframes flit         { 30% { transform: translateY(-2.5px); } 60% { transform: translateY(1.5px); } 100% { transform: translateY(-1px); } }
     @keyframes lantern-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
     @keyframes flicker      { from { opacity: .6; } to { opacity: 1; } }
     @keyframes balloon-bob  { from { transform: translateY(-2px); } to { transform: translateY(2px); } }

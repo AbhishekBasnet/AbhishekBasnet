@@ -385,10 +385,10 @@ def bird_route(rng: random.Random) -> Route:
                  direction * (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]), rng.uniform(*cfg.SINK["birds"]))
 
 
-def flock(rng: random.Random, size: tuple[int, int] = cfg.FLOCK_SIZE) -> tuple[tuple[float, float, float], ...]:
+def flock(rng: random.Random) -> tuple[tuple[float, float, float], ...]:
     """A loose V: the leader in front, the rest trailing and alternating sides."""
     return tuple((-i * rng.uniform(9, 14), (1 if i % 2 else -1) * i * rng.uniform(3, 6) if i else 0,
-                  rng.uniform(.8, 1.1)) for i in range(rng.randint(*size)))
+                  rng.uniform(.8, 1.1)) for i in range(rng.randint(*cfg.FLOCK_SIZE)))
 
 
 # ── Night visitors ───────────────────────────────────────────────────────────
@@ -410,20 +410,14 @@ def plan_night_visits(rng: random.Random) -> tuple[dict[str, float], list[Visit]
 
 
 def night_visit(rng: random.Random, kind: str, start: float) -> Visit:
-    """One night crossing: lanterns rise and the balloon hops from behind the ridge;
-    bats cross from one edge to the other."""
+    """One night visit: lanterns rise, or the balloon hops, from behind the ridge."""
     if kind == "lanterns":
         spread, below = cfg.LANTERN_SPREAD
         return Visit(kind, lantern_route(rng), start, flock=tuple(
             (rng.uniform(-spread, spread), rng.uniform(0, below), rng.uniform(.8, 1.1))
             for _ in range(rng.randint(*cfg.LANTERNS))))
-    if kind == "balloon":
-        route, top = balloon_route(rng)
-        return Visit(kind, route, start, top=top)
-    direction = rng.choice((1, -1))
-    route = Route(edge(direction), rng.uniform(*cfg.NIGHT_VISIT_Y[kind]),
-                  direction * (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]), rng.uniform(*cfg.NIGHT_SINK[kind]))
-    return Visit(kind, route, start, flock=flock(rng, cfg.BAT_COLONY) if kind == "bats" else ())
+    route, top = balloon_route(rng)
+    return Visit(kind, route, start, top=top)
 
 
 def hidden_below_ridge(x: float, half_width: float, above: float) -> float:

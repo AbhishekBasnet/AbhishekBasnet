@@ -196,7 +196,7 @@ class NightVisitorRules(unittest.TestCase):
             for a, b in zip(kinds, kinds[1:] + kinds[:1]):
                 self.assertNotEqual(a, b)
 
-    def test_lanterns_and_balloon_start_behind_the_ridge_and_the_rest_cross_from_an_edge(self):
+    def test_lanterns_and_balloon_start_behind_the_ridge(self):
         for sky in SKIES:
             for v in sky.night_visits:
                 r = v.route
@@ -207,15 +207,11 @@ class NightVisitorRules(unittest.TestCase):
                             self.assertGreater(y - 28, height_on(cfg.RIDGE, x + o) - 1e-9)
                     self.assertTrue(cfg.BALLOON_HOP[0] <= abs(r.dx) <= cfg.BALLOON_HOP[1])
                     self.assertTrue(cfg.BALLOON_TOP[0] <= v.top <= cfg.BALLOON_TOP[1])
-                elif v.kind == "lanterns":
+                else:
                     for ox, _, _ in v.flock:   # every lantern starts hidden, glow and all
                         self.assertGreater(r.y - 10, height_on(cfg.RIDGE, r.x + ox))
                     self.assertTrue(cfg.LANTERN_TOP[0] <= r.y + r.dy <= cfg.LANTERN_TOP[1])
                     self.assertTrue(cfg.LANTERNS[0] <= len(v.flock) <= cfg.LANTERNS[1])
-                else:
-                    self.assertIn(r.x, cfg.OFFSTAGE)
-                    low, high = cfg.NIGHT_VISIT_Y[v.kind]
-                    self.assertTrue(low <= r.y <= high)
 
     def test_comet_stays_in_the_sky_clear_of_the_moon_and_text_and_is_rare(self):
         for sky in SKIES:

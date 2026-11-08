@@ -214,14 +214,11 @@ CONTRAIL = "#C2CAD6"
 
 # ── Night visitors ───────────────────────────────────────────────────────────
 
-# By night bats, sky lanterns and a hot air balloon take turns the way the day visitors do: only one is ever in the sky, with
-# VISIT_GAP seconds of empty sky after it, and no kind follows itself.
-NIGHT_FLIGHT = {"bats": (5, 7), "lanterns": (16, 20), "balloon": (24, 30)}   # seconds
-NIGHT_VISIT_Y = {"bats": (80, 140)}
-NIGHT_SINK = {"bats": (-12, 12)}
-BAT_COLONY = (3, 5)
-BAT_SIZE = 1.5                       # bats are drawn this much larger than a bird, so they read as bats
-LANTERN_SIZE = 1.7                   # and lanterns this much larger than their outline
+# By night sky lanterns and a hot air balloon take turns the way the day visitors
+# do: only one is ever in the sky, with VISIT_GAP seconds of empty sky after it,
+# and neither follows itself.
+NIGHT_FLIGHT = {"lanterns": (16, 20), "balloon": (24, 30)}   # seconds
+LANTERN_SIZE = 1.7                   # lanterns are drawn this much larger than their outline, so they read
 LANTERNS = (4, 7)                    # lanterns let go together
 LANTERN_SPREAD = (24, 18)            # px the lanterns spread either side, and below the first
 LANTERN_AREA = (120, 780)            # x along the ridge they rise from behind
@@ -233,7 +230,8 @@ BALLOON_AREA = (90, 810)             # x it lifts off from and lands at
 BALLOON_HOP = (140, 260)             # px between lift-off and landing
 BALLOON_TOP = (182, 196)             # y of the basket at the top of its climb; the envelope stands 23 px above
 BALLOON_HOVER = .2                   # share of its flight it drifts at the top
-NIGHT_INK = "#7B88A1"                # bats and the balloon: moonlit grey, so they show on the night sky
+BALLOON_SIZE = 1.07                  # the balloon and basket are drawn this much larger than their outline
+NIGHT_INK = "#7B88A1"                # the balloon's envelope: moonlit grey, so it shows on the night sky
 NIGHT_DARK = "#4C566A"               # the balloon's seams, ropes and basket
 LANTERN_PAPER, LANTERN_GLOW = "#D08770", "#EBCB8B"
 
