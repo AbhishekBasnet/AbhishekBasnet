@@ -11,7 +11,7 @@ Writes six SVGs:
     python3 scripts/build_assets.py --date 2026-10-28 --out dist
 
 --date sets the moon phase and, unless --seed is given, seeds everything random:
-clouds, wind, day visitors, UFOs, stars, shooting stars, aurora and satellites. A daily
+clouds, wind, day and night visitors, UFOs, stars, shooting stars, the comet and satellites. A daily
 GitHub Action (.github/workflows/sky.yml) builds with the Nepal date and
 publishes to the `output` branch, which is what the profile shows. Tunable values
 live in profile_art/config.py.

@@ -16,7 +16,7 @@ from datetime import date, datetime, timezone
 from . import config as cfg
 from .geometry import (Box, contains, distance, distance_to_box, height_on, inside, overlaps,
                        segment_clear_of, segment_touches)
-from .models import Cloud, Comet, Gesture, Meteor, Moon, Ribbon, Route, Routine, Satellite, Sky, Star, Ufo, Visit
+from .models import Cloud, Comet, Gesture, Meteor, Moon, Route, Routine, Satellite, Sky, Star, Ufo, Visit
 
 
 def roll_sky(seed: str, day: date) -> Sky:
@@ -32,12 +32,11 @@ def roll_sky(seed: str, day: date) -> Sky:
     satellites, satellite_duration, satellite_cycle = plan_satellites(rng)
     ufos, ufo_times, ufo_cycle = plan_ufos(rng)
     routines = {"light": day_routine(rng, ufos, ufo_times, ufo_cycle), "dark": night_routine(rng)}
-    aurora = shape_aurora(rng)
     night_flight, night_visits, night_visit_cycle = plan_night_visits(rng)
     return Sky(clouds=clouds, cloudy_sun=cloudy_sun, wind=wind,
                visits=visits, flight=flight, visit_cycle=visit_cycle,
                stars=stars, meteors=meteors, moon=moon_on(day),
-               aurora=aurora, satellites=satellites,
+               satellites=satellites,
                satellite_pass=satellite_duration, satellite_cycle=satellite_cycle,
                ufos=ufos, ufo_times=ufo_times, ufo_cycle=ufo_cycle, routines=routines,
                night_visits=night_visits, night_flight=night_flight, night_visit_cycle=night_visit_cycle,
@@ -150,29 +149,6 @@ def moon_on(day: date) -> Moon:
     phase = age / cfg.SYNODIC_MONTH
     lit = (1 - math.cos(2 * math.pi * phase)) / 2
     return Moon(phase=phase, lit=max(lit, cfg.MOON_MIN_LIT))
-
-
-# ── Aurora ───────────────────────────────────────────────────────────────────
-
-def shape_aurora(rng: random.Random) -> list[Ribbon]:
-    """Two soft curtains low over the ridge. Their stretch of sky and folds are
-    rolled daily; the upper edge runs a wave past the stretch each side, so the
-    curtain fades out at its ends before the shape does."""
-    ribbons = []
-    for i, color in enumerate(cfg.AURORA_COLORS):
-        base = rng.uniform(*cfg.AURORA_BASE_Y) - i * 22     # the second hangs higher
-        width = rng.uniform(*cfg.AURORA_WIDTH)
-        left = rng.uniform(cfg.LEFT, cfg.RIGHT - width)
-        wave = rng.uniform(*cfg.AURORA_WAVE)
-        amp, ripple, shift = rng.uniform(8, 18), rng.uniform(2, 6), rng.uniform(0, 2 * math.pi)
-        step = wave / 6
-        xs = [left - wave + k * step for k in range(int((width + 2 * wave) / step) + 2)]
-        top = [(x, base - amp * math.sin(2 * math.pi * x / wave + shift)
-                     - ripple * math.sin(4 * math.pi * x / wave + 2 * shift)) for x in xs]
-        ribbons.append(Ribbon(top=top, span=(left, left + width), thickness=rng.uniform(34, 52),
-                              color=color, opacity=rng.uniform(*cfg.AURORA_OPACITY),
-                              wave=wave))
-    return ribbons
 
 
 # ── Satellite ────────────────────────────────────────────────────────────────

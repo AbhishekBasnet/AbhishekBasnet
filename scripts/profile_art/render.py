@@ -13,14 +13,14 @@ from xml.sax.saxutils import escape
 
 from .climber import climber, climber_style, footprints
 from .config import (
-    AURORA_COLORS, BACKDROP_HEIGHT, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GROUND_Y, HEADLAMP, HEIGHT,
+    BACKDROP_HEIGHT, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GROUND_Y, HEADLAMP, HEIGHT,
     LABEL_GLOW, LABEL_LINE_GAP, LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB,
     PARAGLIDER_GROWTH, RIDGE, RIGHT, ROLE, SANS, SATELLITE_HULL, SATELLITE_PANEL, SATELLITE_TRIM,
     SATELLITE_TUMBLE, SEQUENCE_START, SITE_CLOUD, SITE_THEMES, SNOW, SUMMITS, THEMES, TITLE,
     UFO_APPROACH_SCALE, UFO_COLORS, UFO_TING, VIEW_X, VIEW_Y, VISITOR_INK, VISIT_FIRST, WIDTH,
 )
 from .keyframes import crossing, num, share
-from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Ufo, Visit
+from .models import Cloud, Meteor, Moon, Satellite, Sky, Star, Ufo, Visit
 from .night import NIGHT_SHAPES, comet, night_glows, night_visitor_style
 
 Point = tuple[float, float]
@@ -46,20 +46,10 @@ def ridge_path() -> str:
 
 
 def above_ridge_path() -> str:
-    """Everything above the ridge line: the aurora glows and day visitors fly only here."""
+    """Everything above the ridge line: visitors and UFOs show only here, so they can rise
+    from and sink behind the ridge."""
     edge = " L".join(f"{x} {y}" for x, y in reversed(RIDGE))
     return f"M{VIEW_X} {VIEW_Y} H{VIEW_X + WIDTH} V{RIDGE[-1][1]} L{edge} H{VIEW_X} V{VIEW_Y}Z"
-
-
-def smooth(points: list[Point]) -> str:
-    """Cubic segments through the points (Catmull-Rom), after an initial move to points[0]."""
-    ext = [points[0], *points, points[-1]]
-    segments = []
-    for i in range(1, len(ext) - 2):
-        (x0, y0), (x1, y1), (x2, y2), (x3, y3) = ext[i - 1], ext[i], ext[i + 1], ext[i + 2]
-        segments.append(f"C{num(x1 + (x2 - x0) / 6)} {num(y1 + (y2 - y0) / 6)} "
-                        f"{num(x2 - (x3 - x1) / 6)} {num(y2 - (y3 - y1) / 6)} {num(x2)} {num(y2)}")
-    return " ".join(segments)
 
 
 # ── Sky elements ─────────────────────────────────────────────────────────────
@@ -100,28 +90,6 @@ def moon_shape(m: Moon) -> str:
     terminator = 1 if (m.lit > .5) == m.waxing else 0
     d = f"M{top} A{r} {r} 0 0 {limb} {bottom} A{num(abs(1 - 2 * m.lit) * r)} {r} 0 0 {terminator} {top}Z"
     return f'<path class="body" transform="rotate({MOON_TILT} {cx} {cy})" d="{d}"/>'
-
-
-def visible_edge(rb: Ribbon) -> list[Point]:
-    """The curtain's upper edge cut down to its stretch of sky, plus two points past
-    each end: the mask hides everything beyond the ends, and the two extra points
-    keep the curve through the stretch exactly as it was. A shorter shape leaves the
-    blur and the mask less to redraw each frame."""
-    left, right = rb.span
-    first = max(0, next(i for i, (x, _) in enumerate(rb.top) if x >= left) - 2)
-    last = min(len(rb.top), max(i for i, (x, _) in enumerate(rb.top) if x <= right) + 3)
-    return rb.top[first:last]
-
-
-def ribbon(i: int, rb: Ribbon) -> str:
-    """A curtain, faded in and out at the ends of its stretch of sky by the mask."""
-    top = visible_edge(rb)
-    lower = [(x, y + rb.thickness) for x, y in reversed(top)]
-    (x0, y0), (x1, y1) = top[0], lower[0]
-    d = f"M{num(x0)} {num(y0)} {smooth(top)} L{num(x1)} {num(y1)} {smooth(lower)}Z"
-    return f"""<g mask="url(#aurora-window-{i})" opacity="{num(rb.opacity)}">
-        <path class="aurora" fill="url(#aurora-{i})" d="{d}"/>
-      </g>"""
 
 
 def satellite(s: Satellite) -> str:
@@ -357,9 +325,7 @@ NIGHT_STYLE = Template("""
                     animation: none var(--t) ease-out var(--d) infinite; }
     .meteor .head { fill: $snow; }
 
-    /* night: the aurora holds still, since a blurred shape that moves is redrawn every
-       frame; a satellite arcs over now and then */
-    .aurora      { opacity: .8; }
+    /* night: a satellite arcs over now and then */
     .satellite   { opacity: 0; animation: satellite ${sat_cycle}s linear var(--d) infinite; }
     .orbit       { animation: orbit ${sat_cycle}s linear var(--d) infinite; }
     .craft       { transform-box: fill-box; transform-origin: center; animation: tumble 16s ease-in-out infinite alternate; }
@@ -516,63 +482,10 @@ def defs(theme: str, sky: Sky) -> str:
       <stop offset="0" stop-color="{SNOW}" stop-opacity="0"/>
       <stop offset="1" stop-color="{SNOW}" stop-opacity=".85"/>
     </linearGradient>
-{"".join(aurora_gradient(i, color) for i, color in enumerate(AURORA_COLORS))}
-    <linearGradient id="fade-ends">
-      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-      <stop offset=".3" stop-color="#fff"/>
-      <stop offset=".7" stop-color="#fff"/>
-      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
-    </linearGradient>{"".join(aurora_window(i, rb) for i, rb in enumerate(sky.aurora))}
-    {aurora_haze(sky.aurora)}
     <linearGradient id="beam">
       <stop offset="0" stop-color="{HEADLAMP}" stop-opacity=".6"/>
       <stop offset="1" stop-color="{HEADLAMP}" stop-opacity="0"/>
     </linearGradient>{night_glows()}"""
-
-
-def aurora_gradient(i: int, color: str) -> str:
-    """Brightest towards the lower edge and fading upwards, like a real curtain."""
-    return f"""
-    <linearGradient id="aurora-{i}" x2="0" y2="1">
-      <stop offset="0" stop-color="{color}" stop-opacity="0"/>
-      <stop offset=".7" stop-color="{color}"/>
-      <stop offset="1" stop-color="{color}" stop-opacity=".15"/>
-    </linearGradient>"""
-
-
-AURORA_BLUR = 6                      # the haze's softness (Gaussian standard deviation, px)
-
-
-def aurora_haze(ribbons: list[Ribbon]) -> str:
-    """The blur that softens the aurora, worked out only over the curtains' windows
-    plus three standard deviations each side, the farthest a Gaussian blur visibly
-    spreads. A tight area leaves the blur less to redraw each frame."""
-    spread = 3 * AURORA_BLUR
-    boxes = [aurora_box(rb) for rb in ribbons]
-    left = min(b[0] for b in boxes) - spread
-    top = min(b[1] for b in boxes) - spread
-    right = max(b[2] for b in boxes) + spread
-    bottom = max(b[3] for b in boxes) + spread
-    return (f'<filter id="haze" filterUnits="userSpaceOnUse" x="{num(left)}" y="{num(top)}" '
-            f'width="{num(right - left)}" height="{num(bottom - top)}"><feGaussianBlur stdDeviation="{AURORA_BLUR}"/></filter>')
-
-
-def aurora_box(rb: Ribbon) -> tuple[float, float, float, float]:
-    """The window a curtain shows through: its stretch of sky, as tall as the
-    curtain with room for the curve's swing."""
-    edge = [y for _, y in visible_edge(rb)]
-    return rb.span[0], min(edge) - 8, rb.span[1], max(edge) + rb.thickness + 8
-
-
-def aurora_window(i: int, rb: Ribbon) -> str:
-    """Limits a curtain to its stretch of sky, fading in and out at the ends. The
-    window is only as tall as the curtain (with room for the curve's swing), so the
-    mask has as little as possible to redraw each frame."""
-    left, top, right, bottom = aurora_box(rb)
-    return f"""
-    <mask id="aurora-window-{i}" maskUnits="userSpaceOnUse">
-      <rect x="{num(left)}" y="{num(top)}" width="{num(right - left)}" height="{num(bottom - top)}" fill="url(#fade-ends)"/>
-    </mask>"""
 
 
 def ufo_glows(theme: str) -> str:
@@ -612,7 +525,6 @@ def day_sky(sky: Sky) -> str:
 
 def night_sky(sky: Sky) -> str:
     (cx, cy), bright = ORB, sky.stars[0]
-    aurora = "\n      ".join(ribbon(i, rb) for i, rb in enumerate(sky.aurora))
     stars = "\n    ".join(star(s) for s in sky.stars)
     shooting = "\n    ".join(meteor(i, m) for i, m in enumerate(sky.meteors))
     satellites = "\n  ".join(satellite(s) for s in sky.satellites)
@@ -623,11 +535,6 @@ def night_sky(sky: Sky) -> str:
     {moon_shape(sky.moon)}
   </g>
   <g class="sky">
-    <g clip-path="url(#above-ridge)">
-      <g filter="url(#haze)">
-      {aurora}
-      </g>
-    </g>
     <circle class="haze" cx="{bright.x}" cy="{bright.y}" r="5" filter="url(#blur)"/>
     {stars}
     {shooting}

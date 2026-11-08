@@ -139,12 +139,6 @@ SYNODIC_MONTH = 29.530588853         # days from one new moon to the next
 NEW_MOON_EPOCH = datetime(2000, 1, 6, 18, 14, tzinfo=timezone.utc)
 MOON_VIEWING = time(14, 15)          # UTC; 20:00 in Nepal, when the phase is shown
 
-AURORA_COLORS = ("#A3BE8C", "#8FBCBB")   # Nord green and frost
-AURORA_BASE_Y = (196, 214)           # upper edge of the lower curtain; the ridge hides the rest
-AURORA_WIDTH = (380, 600)            # px of sky each curtain covers
-AURORA_OPACITY = (.10, .16)
-AURORA_WAVE = (160, 260)             # px between folds; the aurora holds still, since it is blurred
-
 # Four satellites a day take turns, one per pass. Each flies its own arc and the
 # whole craft (body and wings together) leans its own way.
 SATELLITES = 4
@@ -246,6 +240,7 @@ COMET_TRAVEL = (260, 360)            # px its head moves
 COMET_TAIL = (60, 90)                # px of tail
 COMET_AREA = (60, 48, 840, 132)      # the whole comet, tail to end, stays inside
 COMET_MOON_CLEAR = 44
+COMET_ION = "#8FBCBB"                # the faint ion tail, Nord frost
 
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
 

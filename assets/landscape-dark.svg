@@ -58,9 +58,7 @@
                       animation: none var(--t) ease-out var(--d) infinite; }
       .meteor .head { fill: #ECEFF4; }
 
-      /* night: the aurora holds still, since a blurred shape that moves is redrawn every
-         frame; a satellite arcs over now and then */
-      .aurora      { opacity: .8; }
+      /* night: a satellite arcs over now and then */
       .satellite   { opacity: 0; animation: satellite 86.23s linear var(--d) infinite; }
       .orbit       { animation: orbit 86.23s linear var(--d) infinite; }
       .craft       { transform-box: fill-box; transform-origin: center; animation: tumble 16s ease-in-out infinite alternate; }
@@ -87,7 +85,7 @@
       @keyframes orbit { 0% { transform: none; animation-timing-function: cubic-bezier(.25, .46, .45, .94); } 9.52% { transform: translateY(var(--arc)); animation-timing-function: cubic-bezier(.55, .085, .68, .53); } 19.05%, 100% { transform: none; } }
 
       /* night: sky lanterns and a balloon take turns */
-      .visitor          { opacity: 0; animation: none 196.42s linear var(--d) infinite; }
+      .visitor          { opacity: 0; animation: none 197.35s linear var(--d) infinite; }
       .visitor.lanterns { animation-name: fly-lanterns; }
       .visitor.balloon  { animation-name: fly-balloon; }
       .lantern          { animation: lantern-sway 3.2s ease-in-out infinite alternate; }
@@ -97,23 +95,23 @@
       .balloon .envelope { fill: #7B88A1; }
       .balloon .seams, .balloon .ropes { fill: none; stroke: #4C566A; stroke-width: .5; }
       .balloon .basket  { fill: #4C566A; }
-      .balloon .flare   { animation: balloon-fire 196.42s linear var(--d) infinite; }
+      .balloon .flare   { animation: balloon-fire 197.35s linear var(--d) infinite; }
       .balloon .burner  { fill: #EBCB8B; animation: flicker .22s ease-in-out infinite alternate; }
       .balloon .drift   { animation: balloon-bob 4s ease-in-out infinite alternate; }
-      .lift             { animation: balloon-lift 196.42s linear var(--d) infinite; }
+      .lift             { animation: balloon-lift 197.35s linear var(--d) infinite; }
 
       /* night: now and then a comet glides slowly across the upper sky */
-      .comet            { opacity: 0; animation: comet 169.85s linear 39.88s infinite; }
+      .comet            { opacity: 0; animation: comet 158.49s linear 33.21s infinite; }
       .comet-head       { fill: #ECEFF4; }
 
-      @keyframes fly-lanterns { 0% { opacity: 0; transform: none; } .51%, 7.74% { opacity: 1; } 8.24%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes fly-balloon { 0% { opacity: 0; transform: none; } .25%, 14.54% { opacity: 1; } 14.8%, 100% { opacity: 0; transform: translateX(var(--dx)); } }
-      @keyframes balloon-lift { 0% { transform: none; animation-timing-function: cubic-bezier(.3, .2, .5, 1); } 5.92% { transform: translateY(var(--top)); animation-timing-function: linear; } 8.88% { transform: translateY(var(--top)); animation-timing-function: cubic-bezier(.5, 0, .7, .8); } 14.8%, 100% { transform: translateY(var(--dy)); } }
-      @keyframes balloon-fire { 0%, 5.92% { opacity: 1; } 8.88% { opacity: .55; } 14.8%, 100% { opacity: .2; } }
+      @keyframes fly-lanterns { 0% { opacity: 0; transform: none; } .51%, 9.59% { opacity: 1; } 10.1%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes fly-balloon { 0% { opacity: 0; transform: none; } .25%, 12.4% { opacity: 1; } 12.65%, 100% { opacity: 0; transform: translateX(var(--dx)); } }
+      @keyframes balloon-lift { 0% { transform: none; animation-timing-function: cubic-bezier(.3, .2, .5, 1); } 5.06% { transform: translateY(var(--top)); animation-timing-function: linear; } 7.59% { transform: translateY(var(--top)); animation-timing-function: cubic-bezier(.5, 0, .7, .8); } 12.65%, 100% { transform: translateY(var(--dy)); } }
+      @keyframes balloon-fire { 0%, 5.06% { opacity: 1; } 7.59% { opacity: .55; } 12.65%, 100% { opacity: .2; } }
       @keyframes lantern-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
       @keyframes flicker      { from { opacity: .6; } to { opacity: 1; } }
       @keyframes balloon-bob  { from { transform: translateY(-2px); } to { transform: translateY(2px); } }
-      @keyframes comet { 0% { opacity: 0; transform: none; } .88%, 4.69% { opacity: 1; } 5.87%, 100% { opacity: 0; transform: translateX(334.56px); } }
+      @keyframes comet { 0% { opacity: 0; transform: none; } .95%, 5% { opacity: 1; } 6.26%, 100% { opacity: 0; transform: translateX(286.88px); } }
 
       /* day and night: UFOs arrive (from behind the ridge or the far sky), park,
          come closer, then whip off */
@@ -217,30 +215,6 @@
       <stop offset="0" stop-color="#ECEFF4" stop-opacity="0"/>
       <stop offset="1" stop-color="#ECEFF4" stop-opacity=".85"/>
     </linearGradient>
-
-    <linearGradient id="aurora-0" x2="0" y2="1">
-      <stop offset="0" stop-color="#A3BE8C" stop-opacity="0"/>
-      <stop offset=".7" stop-color="#A3BE8C"/>
-      <stop offset="1" stop-color="#A3BE8C" stop-opacity=".15"/>
-    </linearGradient>
-    <linearGradient id="aurora-1" x2="0" y2="1">
-      <stop offset="0" stop-color="#8FBCBB" stop-opacity="0"/>
-      <stop offset=".7" stop-color="#8FBCBB"/>
-      <stop offset="1" stop-color="#8FBCBB" stop-opacity=".15"/>
-    </linearGradient>
-    <linearGradient id="fade-ends">
-      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-      <stop offset=".3" stop-color="#fff"/>
-      <stop offset=".7" stop-color="#fff"/>
-      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
-    </linearGradient>
-    <mask id="aurora-window-0" maskUnits="userSpaceOnUse">
-      <rect x="305.97" y="189.47" width="415.67" height="84.76" fill="url(#fade-ends)"/>
-    </mask>
-    <mask id="aurora-window-1" maskUnits="userSpaceOnUse">
-      <rect x="299.99" y="164.38" width="476.69" height="94.63" fill="url(#fade-ends)"/>
-    </mask>
-    <filter id="haze" filterUnits="userSpaceOnUse" x="281.99" y="146.38" width="512.69" height="145.84"><feGaussianBlur stdDeviation="6"/></filter>
     <linearGradient id="beam">
       <stop offset="0" stop-color="#EBCB8B" stop-opacity=".6"/>
       <stop offset="1" stop-color="#EBCB8B" stop-opacity="0"/>
@@ -274,16 +248,6 @@
     <path class="body" transform="rotate(-25 792 92)" d="M792 82 A10 10 0 0 0 792 102 A8.8 10 0 0 1 792 82Z"/>
   </g>
   <g class="sky">
-    <g clip-path="url(#above-ridge)">
-      <g filter="url(#haze)">
-      <g mask="url(#aurora-window-0)" opacity=".13">
-        <path class="aurora" fill="url(#aurora-0)" d="M225.18 210.96 C231.91 208.71 252.11 197.97 265.57 197.47 C279.04 196.96 292.5 205.17 305.97 207.92 C319.43 210.68 332.9 211.62 346.36 213.98 C359.83 216.33 373.29 219.48 386.76 222.07 C400.22 224.66 413.69 231.36 427.15 229.51 C440.62 227.66 454.08 216.3 467.55 210.96 C481.01 205.62 494.47 197.97 507.94 197.47 C521.4 196.96 534.87 205.17 548.33 207.92 C561.8 210.68 575.26 211.62 588.73 213.98 C602.19 216.33 615.66 219.48 629.12 222.07 C642.59 224.66 656.05 231.36 669.52 229.51 C682.98 227.66 696.45 216.3 709.91 210.96 C723.38 205.62 736.84 197.97 750.31 197.47 C763.77 196.96 783.97 206.18 790.7 207.92 L790.7 244.64 C783.97 242.89 763.77 233.67 750.31 234.18 C736.84 234.68 723.38 242.33 709.91 247.67 C696.45 253.01 682.98 264.37 669.52 266.22 C656.05 268.08 642.59 261.37 629.12 258.78 C615.66 256.19 602.19 253.05 588.73 250.69 C575.26 248.33 561.8 247.39 548.33 244.64 C534.87 241.88 521.4 233.67 507.94 234.18 C494.47 234.68 481.01 242.33 467.55 247.67 C454.08 253.01 440.62 264.37 427.15 266.22 C413.69 268.08 400.22 261.37 386.76 258.78 C373.29 256.19 359.83 253.05 346.36 250.69 C332.9 248.33 319.43 247.39 305.97 244.64 C292.5 241.88 279.04 233.67 265.57 234.18 C252.11 234.68 231.91 245.42 225.18 247.67Z"/>
-      </g>
-      <g mask="url(#aurora-window-1)" opacity=".11">
-        <path class="aurora" fill="url(#aurora-1)" d="M232.15 172.38 C237.81 174.27 254.77 180.76 266.07 183.73 C277.38 186.7 288.69 187.23 299.99 190.21 C311.3 193.2 322.61 200.35 333.91 201.62 C345.22 202.89 356.53 202.26 367.84 197.83 C379.14 193.41 390.45 179.33 401.76 175.08 C413.06 170.84 424.37 170.94 435.68 172.38 C446.98 173.82 458.29 180.76 469.6 183.73 C480.9 186.7 492.21 187.23 503.52 190.21 C514.82 193.2 526.13 200.35 537.44 201.62 C548.74 202.89 560.05 202.26 571.36 197.83 C582.66 193.41 593.97 179.33 605.28 175.08 C616.59 170.84 627.89 170.94 639.2 172.38 C650.51 173.82 661.81 180.76 673.12 183.73 C684.43 186.7 695.73 187.23 707.04 190.21 C718.35 193.2 729.65 200.35 740.96 201.62 C752.27 202.89 763.57 202.26 774.88 197.83 C786.19 193.41 797.49 179.33 808.8 175.08 C820.11 170.84 837.07 172.83 842.72 172.38 L842.72 221.78 C837.07 222.23 820.11 220.24 808.8 224.48 C797.49 228.72 786.19 242.81 774.88 247.23 C763.57 251.65 752.27 252.28 740.96 251.01 C729.65 249.74 718.35 242.59 707.04 239.61 C695.73 236.63 684.43 236.09 673.12 233.12 C661.81 230.15 650.51 223.22 639.2 221.78 C627.89 220.34 616.59 220.24 605.28 224.48 C593.97 228.72 582.66 242.81 571.36 247.23 C560.05 251.65 548.74 252.28 537.44 251.01 C526.13 249.74 514.82 242.59 503.52 239.61 C492.21 236.63 480.9 236.09 469.6 233.12 C458.29 230.15 446.98 223.22 435.68 221.78 C424.37 220.34 413.06 220.24 401.76 224.48 C390.45 228.72 379.14 242.81 367.84 247.23 C356.53 251.65 345.22 252.28 333.91 251.01 C322.61 249.74 311.3 242.59 299.99 239.61 C288.69 236.63 277.38 236.09 266.07 233.12 C254.77 230.15 237.81 223.67 232.15 221.78Z"/>
-      </g>
-      </g>
-    </g>
     <circle class="haze" cx="113" cy="113" r="5" filter="url(#blur)"/>
     <circle class="star" cx="113" cy="113" r="1.8" style="--t: 4.68s; --d: 4.7s; opacity: 1"/>
     <circle class="star" cx="772" cy="123" r=".91" style="--t: 4.31s; --d: 5.03s; opacity: .51"/>
@@ -334,23 +298,18 @@
         <circle class="head" r="1.02"/>
       </g>
     </g>
-    <g transform="translate(443.02 79.08) rotate(174.16)">
+    <g transform="translate(454.87 87.63) rotate(174.22)">
       <g class="comet">
-        <path d="M0 -1.4 L-86.59 -.25 L-86.59 .25 L0 1.4Z" fill="url(#comet-tail)"/>
-        <path d="M0 -.8 L-64.94 -4.2 L-64.94 -3 L0 .8Z" fill="url(#comet-ion)"/>
+        <path d="M0 -1.4 L-71.78 -.25 L-71.78 .25 L0 1.4Z" fill="url(#comet-tail)"/>
+        <path d="M0 -.8 L-53.84 -4.2 L-53.84 -3 L0 .8Z" fill="url(#comet-ion)"/>
         <circle r="4.5" fill="url(#comet-glow)"/>
         <circle class="comet-head" r="1.3"/>
       </g>
     </g>
   </g>
   <g class="visitors" clip-path="url(#above-ridge)">
-    <g transform="translate(468.45 259.83)">
-      <g class="visitor lanterns" style="--dx: 9.53px; --dy: -172.06px; --d: 4.5s">
-        <g transform="translate(.71 3.39) scale(1.47)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(2.65 14.39) scale(1.55)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-8.41 2.02) scale(1.4)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(2.47 4.38) scale(1.77)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
-      </g>
-    </g>
-    <g transform="translate(308.01 323.98)">
-      <g class="visitor balloon" style="--dx: -189.3px; --dy: 28.09px; --d: 22.26s; --top: -132.18px">
+    <g transform="translate(602.41 303.71)">
+      <g class="visitor balloon" style="--dx: -192.74px; --dy: -1.35px; --d: 4.5s; --top: -115.61px">
         <g class="lift">
           <g transform="scale(-1 1)">
           <g class="drift"><g transform="scale(1.07)">
@@ -365,13 +324,13 @@
         </g>
       </g>
     </g>
-    <g transform="translate(571.27 294.65)">
-      <g class="visitor lanterns" style="--dx: -30.25px; --dy: -216.74px; --d: 52.6s">
-        <g transform="translate(17.84 17.78) scale(1.4)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(3.12 14.87) scale(1.58)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-1.5 12.46) scale(1.69)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(6.84 6.61) scale(1.66)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-22.92 15.27) scale(1.62)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-6.52 9.1) scale(1.38)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(12.08 15.79) scale(1.56)"><g class="lantern" style="animation-delay: -5.4s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
+    <g transform="translate(194.28 328.78)">
+      <g class="visitor lanterns" style="--dx: -28.24px; --dy: -233.99px; --d: 31.8s">
+        <g transform="translate(.62 6.39) scale(1.84)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-16.85 17) scale(1.67)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(17.33 16.21) scale(1.62)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-14.97 3.91) scale(1.64)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
       </g>
     </g>
-    <g transform="translate(708 324.4)">
-      <g class="visitor balloon" style="--dx: -199.51px; --dy: -52.54px; --d: 71.04s; --top: -128.82px">
+    <g transform="translate(383.4 315.48)">
+      <g class="visitor balloon" style="--dx: -223.86px; --dy: 38.47px; --d: 54.32s; --top: -132.33px">
         <g class="lift">
           <g transform="scale(-1 1)">
           <g class="drift"><g transform="scale(1.07)">
@@ -386,13 +345,13 @@
         </g>
       </g>
     </g>
-    <g transform="translate(236.88 314.64)">
-      <g class="visitor lanterns" style="--dx: 41.65px; --dy: -241.23px; --d: 102.93s">
-        <g transform="translate(-10.89 1.81) scale(1.5)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(20.86 8.75) scale(1.37)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-6.49 2.57) scale(1.52)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(23.23 2.42) scale(1.69)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(2.36 14.85) scale(1.66)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-22.31 13.87) scale(1.85)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
+    <g transform="translate(599.57 293.48)">
+      <g class="visitor lanterns" style="--dx: 41.85px; --dy: -217.53px; --d: 81.39s">
+        <g transform="translate(-6.91 14.82) scale(1.72)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-17.45 12.23) scale(1.71)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-5.45 3.56) scale(1.75)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-3.99 5.39) scale(1.83)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(15.46 5.73) scale(1.47)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(2.89 16.15) scale(1.84)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
       </g>
     </g>
-    <g transform="translate(567.83 311.77)">
-      <g class="visitor balloon" style="--dx: 195.31px; --dy: 20.45px; --d: 120.22s; --top: -122.43px">
+    <g transform="translate(354.26 305.94)">
+      <g class="visitor balloon" style="--dx: 211.54px; --dy: 5.8px; --d: 103.06s; --top: -110.93px">
         <g class="lift">
           <g class="drift"><g transform="scale(1.07)">
             <path class="envelope" d="M0 -23 C6.5 -23 7.5 -15 4.6 -10.5 L2 -7 H-2 L-4.6 -10.5 C-7.5 -15 -6.5 -23 0 -23Z"/>
@@ -405,13 +364,13 @@
         </g>
       </g>
     </g>
-    <g transform="translate(208.95 317.04)">
-      <g class="visitor lanterns" style="--dx: 23.57px; --dy: -235.98px; --d: 151.16s">
-        <g transform="translate(18.72 7.44) scale(1.81)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-17.43 14.64) scale(1.48)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-20.77 9.16) scale(1.47)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(6.57 5.79) scale(1.6)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-15.6 5.28) scale(1.7)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
+    <g transform="translate(586.18 294.95)">
+      <g class="visitor lanterns" style="--dx: 36.55px; --dy: -209.93px; --d: 129.52s">
+        <g transform="translate(18.12 7.21) scale(1.68)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(10.82 1.68) scale(1.56)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(23.18 15.45) scale(1.61)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(5.49 5.82) scale(1.68)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(8.94 3.19) scale(1.49)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
       </g>
     </g>
-    <g transform="translate(746.89 333.86)">
-      <g class="visitor balloon" style="--dx: -226.51px; --dy: -59.22px; --d: 169.2s; --top: -140.34px">
+    <g transform="translate(286.71 323.7)">
+      <g class="visitor balloon" style="--dx: -152.08px; --dy: 29.96px; --d: 152.28s; --top: -134.51px">
         <g class="lift">
           <g transform="scale(-1 1)">
           <g class="drift"><g transform="scale(1.07)">
@@ -424,6 +383,11 @@
           </g></g>
         </g>
         </g>
+      </g>
+    </g>
+    <g transform="translate(133.15 336.92)">
+      <g class="visitor lanterns" style="--dx: -35.73px; --dy: -259.78px; --d: 179.98s">
+        <g transform="translate(14.15 7.48) scale(1.75)"><g class="lantern" style="animation-delay: -0s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-16.92 3.9) scale(1.75)"><g class="lantern" style="animation-delay: -.9s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(14.04 .39) scale(1.49)"><g class="lantern" style="animation-delay: -1.8s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(14.59 5.75) scale(1.7)"><g class="lantern" style="animation-delay: -2.7s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(-1.87 15.95) scale(1.49)"><g class="lantern" style="animation-delay: -3.6s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g><g transform="translate(17 1.06) scale(1.43)"><g class="lantern" style="animation-delay: -4.5s"><circle class="halo" r="5" fill="url(#lantern-glow)"/><path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/><circle class="flame" cy="1.4" r=".45"/></g></g>
       </g>
     </g>
   </g>

@@ -47,18 +47,6 @@ class Moon:
 
 
 @dataclass(frozen=True)
-class Ribbon:
-    """One curtain of the aurora: a band with folds every `wave` px along its upper
-    edge, shown only over its stretch of sky."""
-    top: list[tuple[float, float]]   # points along its upper edge, a wave beyond the span each side
-    span: tuple[float, float]        # left and right of the stretch of sky it lights; fades at both ends
-    thickness: float
-    color: str
-    opacity: float
-    wave: float       # px from one fold to the next
-
-
-@dataclass(frozen=True)
 class Satellite:
     """One pass: edge to edge on a gentle arc, as real satellites appear to."""
     x: float          # start, just off one edge
@@ -147,7 +135,6 @@ class Sky:
     stars: list[Star]        # night: brightest first
     meteors: list[Meteor]
     moon: Moon
-    aurora: list[Ribbon]
     satellites: list[Satellite]   # night: take turns, one per pass
     satellite_pass: float         # night: seconds each pass takes
     satellite_cycle: float        # night: seconds before the first comes round again

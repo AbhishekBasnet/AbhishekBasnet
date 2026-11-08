@@ -14,7 +14,7 @@ from __future__ import annotations
 from string import Template
 
 from .config import (
-    AURORA_COLORS, BALLOON_HOVER, BALLOON_SIZE, LANTERN_GLOW, LANTERN_PAPER, LANTERN_SIZE, NIGHT_DARK,
+    BALLOON_HOVER, COMET_ION, BALLOON_SIZE, LANTERN_GLOW, LANTERN_PAPER, LANTERN_SIZE, NIGHT_DARK,
     NIGHT_INK, SNOW,
 )
 from .keyframes import crossing, num, share
@@ -152,5 +152,5 @@ def night_glows() -> str:
     <linearGradient id="{gradient_id}">
       <stop offset="0" stop-color="{color}" stop-opacity="0"/>
       <stop offset="1" stop-color="{color}" stop-opacity="{peak}"/>
-    </linearGradient>""" for gradient_id, color, peak in (("comet-tail", SNOW, ".75"), ("comet-ion", AURORA_COLORS[1], ".4")))
+    </linearGradient>""" for gradient_id, color, peak in (("comet-tail", SNOW, ".75"), ("comet-ion", COMET_ION, ".4")))
     return glows + tails
