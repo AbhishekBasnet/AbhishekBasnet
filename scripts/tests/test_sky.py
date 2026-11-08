@@ -171,7 +171,7 @@ class NightRules(unittest.TestCase):
                 self.assertTrue(contains(cfg.UFO_FAR_AREA, far))
                 self.assertGreaterEqual(distance((u.x, u.y), far), cfg.UFO_WHIP_MIN)
 
-    def test_aurora_stays_inside_the_sky_and_has_room_to_flow(self):
+    def test_aurora_stays_inside_the_sky_and_fades_out_before_its_ends(self):
         for sky in SKIES:
             self.assertEqual(len(sky.aurora), len(cfg.AURORA_COLORS))
             for rb in sky.aurora:

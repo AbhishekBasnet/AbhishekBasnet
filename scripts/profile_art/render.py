@@ -9,13 +9,14 @@ from textwrap import dedent, indent
 from xml.sax.saxutils import escape
 
 from .config import (
-    AURORA_COLORS, BACKDROP_HEIGHT, CANOPY, CLIMBER_AT, CLIMBER_STRIDE, CLIMBER_STRIDES, CLIMBER_X,
+    AURORA_COLORS, BACKDROP_HEIGHT, CANOPY, CLIMBER_AT, CLIMBER_LOOK_HOLD, CLIMBER_LOOK_TURN,
+    CLIMBER_LOOKS, CLIMBER_STRIDE, CLIMBER_STRIDES, CLIMBER_X,
     CLOUD_FILL, CONTRAIL, COORDS, FOOTPRINT_OFFSETS, FOOTPRINT_REVEAL, FOOTPRINT_SPACING,
     FOOTPRINT_SUMMIT_CLEAR, FOOTPRINT_TOE_OUT, GROUND_Y, HEADLAMP, HEIGHT, MUFFLER,
     LABEL_GLOW, LABEL_LINE_GAP, LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB,
-    PARAGLIDER_GROWTH, RIDGE, RIGHT, RIPPLE_AT, RIPPLE_LEN, ROLE, SANS, SATELLITE_HULL,
+    PARAGLIDER_GROWTH, RIDGE, RIGHT, ROLE, SANS, SATELLITE_HULL,
     SATELLITE_PANEL, SATELLITE_TRIM, SATELLITE_TUMBLE, SEQUENCE_START, SITE_CLOUD, SITE_THEMES,
-    SNOW, SUMMITS, THEMES, TITLE, TRACE_AT, TRACE_LEN, UFO_APPROACH_SCALE, UFO_COLORS, UFO_TING,
+    SNOW, SUMMITS, THEMES, TITLE, UFO_APPROACH_SCALE, UFO_COLORS, UFO_TING,
     VIEW_X, VIEW_Y, VISITOR_INK, VISIT_FIRST, WIDTH,
 )
 from .geometry import distance_to_polyline, height_on
@@ -114,14 +115,12 @@ def moon_shape(m: Moon) -> str:
 
 
 def ribbon(i: int, rb: Ribbon) -> str:
-    """The mask holds the lit stretch of sky still while the folds flow through it."""
+    """A curtain, faded in and out at the ends of its stretch of sky by the mask."""
     lower = [(x, y + rb.thickness) for x, y in reversed(rb.top)]
     (x0, y0), (x1, y1) = rb.top[0], lower[0]
     d = f"M{num(x0)} {num(y0)} {smooth(rb.top)} L{num(x1)} {num(y1)} {smooth(lower)}Z"
-    wave = rb.wave if rb.flow > 0 else -rb.wave
-    flow = f"--wave: {num(wave)}px; --t: {num(abs(rb.flow))}s; --d: -{num(i * 3.5)}s"
     return f"""<g mask="url(#aurora-window-{i})" opacity="{num(rb.opacity)}">
-        <g class="aurora" style="{flow}"><path fill="url(#aurora-{i})" d="{d}"/></g>
+        <path class="aurora" fill="url(#aurora-{i})" d="{d}"/>
       </g>"""
 
 
@@ -149,7 +148,7 @@ def sparkle(kind: str, x: float, y: float, start: float) -> str:
     """The cartoon "ting" where a UFO appears or vanishes."""
     return f"""<g transform="translate({num(x)} {num(y)})">
         <g class="ting {kind}" style="--d: {num(start)}s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>"""
@@ -157,21 +156,22 @@ def sparkle(kind: str, x: float, y: float, start: float) -> str:
 
 def ufo(u: Ufo) -> str:
     """A saucer with a dome, an underglow and three blinking lights hung under the
-    rim, where they show against the sky rather than the hull."""
+    rim, where they show against the sky rather than the hull. The glows are soft
+    radial gradients rather than blurs, since a blur that moves is redrawn every frame."""
     motion = f"--rise: {num(u.rise)}px; --dx: {num(u.dx)}px; --dy: {num(u.dy)}px; --d: {num(u.start)}s"
     if u.arrive:
         motion += f"; --ax: {num(u.arrive[0])}px; --ay: {num(u.arrive[1])}px"
     arrival = "from-sky" if u.arrive else "from-ridge"
     appear = "\n      " + sparkle("arrive", *u.arrive, u.start) if u.arrive else ""
     lights = "".join(f'<g class="light" style="animation-delay: -{num(i * .3)}s">'
-                     f'<circle class="bloom" cx="{x}" cy="3" r="2.2" filter="url(#spark)"/>'
+                     f'<circle class="bloom" cx="{x}" cy="3" r="3.6" fill="url(#ufo-bloom)"/>'
                      f'<circle cx="{x}" cy="3" r="1.1"/></g>'
                      for i, x in enumerate((-5.5, 0, 5.5)))
     return f"""<g transform="translate({num(u.x)} {num(u.y)})">
       <g class="ufo {arrival}" style="{motion}">
         <g class="ufo-size">
         <g class="hover">
-          <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
+          <ellipse class="underglow" cy="3.5" rx="11" ry="5" fill="url(#ufo-underglow)"/>
           <path class="dome" d="M-4.2 -1.6 A4.2 3.8 0 0 1 4.2 -1.6 Z"/>
           <ellipse class="saucer" rx="10" ry="2.6"/>
           {lights}
@@ -242,11 +242,13 @@ def climber(theme: str) -> str:
     CSS rotation swings them about it. At night a headlamp beam lights the slope."""
     (x0, x1), lift = CLIMBER_X, .6          # stand on the ridge stroke, not in it
     start, rest = (x0, height_on(RIDGE, x0) - lift), (x1, height_on(RIDGE, x1) - lift)
+    night = theme == "dark"
     beam = ("""
-        <path class="beam" d="M4.3 -15 L24 -28.8 L27.5 -21.2 Z" fill="url(#beam)" filter="url(#spark)"/>"""
-            if theme == "dark" else "")
+          <path class="beam" d="M4.3 -15 L24 -28.8 L27.5 -21.2 Z" fill="url(#beam)" filter="url(#spark)"/>"""
+            if night else "")
+    look = ' class="look"' if night else ""         # at night the head looks around, the beam with it
     return f"""<g transform="translate({num(rest[0])} {num(rest[1])})">
-    <g class="climber" style="--dx: {num(start[0] - rest[0])}px; --dy: {num(start[1] - rest[1])}px">{beam}
+    <g class="climber" style="--dx: {num(start[0] - rest[0])}px; --dy: {num(start[1] - rest[1])}px">
       <g transform="translate(0 -7)"><g class="leg back">
         <path class="limb" d="M0 0 L-.9 4.1 L-1.8 8.3 L-.6 8.1"/>
       </g></g>
@@ -258,10 +260,12 @@ def climber(theme: str) -> str:
       <g transform="translate(0 -7)"><g class="leg">
         <path class="limb" d="M0 0 L4 1.2 L2.6 5.2 L3.8 4.9"/>
       </g></g>
-      <circle class="head" cx="2.6" cy="-15.1" r="1.75"/>
-      <path class="muffler" d="M.85 -15.4 A1.8 1.8 0 0 1 4.35 -15.4 Z"/>
-      <circle class="muffler" cx="2.4" cy="-17.3" r=".6"/>
-      <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>
+      <g transform="translate(2 -13.4)"><g{look}><g transform="translate(-2 13.4)">{beam}
+          <circle class="head" cx="2.6" cy="-15.1" r="1.75"/>
+          <path class="muffler" d="M.85 -15.4 A1.8 1.8 0 0 1 4.35 -15.4 Z"/>
+          <circle class="muffler" cx="2.4" cy="-17.3" r=".6"/>
+          <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>
+      </g></g></g>
       <g transform="translate(.8 -13.2)"><g class="tail-a">
         <path class="muffler" d="M.4 -.6 L-4.6 -.8 L-4.6 .6 L.4 .6 Z"/>
         <g transform="translate(-4.6 -.1)"><g class="tail-b">
@@ -338,7 +342,7 @@ def summit(i: int, x: int, y: int, label: str) -> str:
 COMMON_STYLE = Template("""
     /* palette */
     svg { --ink: $ink; --muted: $muted; --accent: $accent; --rule: $rule;
-          --orb: $orb; --glow: $glow; --ripple: $ripple;
+          --orb: $orb; --glow: $glow;
           --sans: $sans;
           --mono: $mono; }
 
@@ -362,26 +366,14 @@ COMMON_STYLE = Template("""
     .orb    { animation: rise 3s ease-out backwards; }
     .sky    { animation: appear 1.6s ease-out 3.2s backwards; }
 
-    /* 2 · once, after the intro: labels glow in turn, light runs along the ridge,
-       a ripple leaves the sun / moon; then the header rests */
+    /* 2 · once, after the intro: labels glow in turn; then the header rests */
     .pulse        { transform-box: fill-box; transform-origin: center;
                     animation: label-scale ${label_glow}s ease-in-out calc(${start}s + var(--i) * ${stagger}s); }
     .pulse .label { animation: label-tint ${label_glow}s ease-in-out; animation-delay: inherit; }
     .pulse .halo  { fill: var(--accent); opacity: 0; animation-name: label-glow; }
 
-    .trace      { fill: none; stroke-linecap: round; stroke-dasharray: .08 1.2; stroke-dashoffset: .08; opacity: 0;
-                  animation: trace ${trace_len}s ease-in-out ${trace_at}s; }
-    .trace.core { stroke: var(--ink); stroke-width: 2; }
-    .trace.halo { stroke: var(--accent); stroke-width: 5; }
-
-    .ripple        { transform-box: fill-box; transform-origin: center;
-                     animation: ripple-grow ${ripple_len}s cubic-bezier(.2, .6, .3, 1) ${ripple_at}s; }
-    .ripple circle { fill: none; stroke: var(--ripple); stroke-width: 1.6; vector-effect: non-scaling-stroke; opacity: 0;
-                     animation: ripple-fade ${ripple_len}s linear ${ripple_at}s; }
-
-    /* ambient */
-    .glow { opacity: .1; transform-box: fill-box; transform-origin: center;
-            animation: breathe 9s ease-in-out 3s infinite alternate; }
+    /* the sun / moon glow holds still: a blurred shape that animates is redrawn every frame */
+    .glow { opacity: .15; }
 
     @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
     @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -390,12 +382,6 @@ COMMON_STYLE = Template("""
     @keyframes label-scale { 45% { transform: scale(1.14); } }
     @keyframes label-tint  { 45% { fill: var(--accent); } }
     @keyframes label-glow  { 45% { opacity: .85; } }
-    @keyframes trace       { 0% { stroke-dashoffset: .08; opacity: 0; } 7.5%, 92.5% { opacity: 1; }
-                             100% { stroke-dashoffset: -1; opacity: 0; } }
-    @keyframes ripple-grow { to { transform: scale(4.6); } }
-    @keyframes ripple-fade { 0% { opacity: 0; stroke-width: 1.6; } 4.5% { opacity: .85; stroke-width: 1.6; }
-                             100% { opacity: 0; stroke-width: .3; } }
-    @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
     @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
 """)
 
@@ -444,9 +430,9 @@ NIGHT_STYLE = Template("""
                     animation: none var(--t) ease-out var(--d) infinite; }
     .meteor .head { fill: $snow; }
 
-    /* night: aurora folds flow sideways and shimmer; a satellite arcs over now and then */
-    .aurora      { animation: flow var(--t) linear infinite; }
-    .aurora path { animation: shimmer 7s ease-in-out var(--d) infinite alternate; }
+    /* night: the aurora holds still, since a blurred shape that moves is redrawn every
+       frame; a satellite arcs over now and then */
+    .aurora      { opacity: .8; }
     .satellite   { opacity: 0; animation: satellite ${sat_cycle}s linear var(--d) infinite; }
     .orbit       { animation: orbit ${sat_cycle}s linear var(--d) infinite; }
     .craft       { transform-box: fill-box; transform-origin: center; animation: tumble 16s ease-in-out infinite alternate; }
@@ -457,8 +443,6 @@ NIGHT_STYLE = Template("""
 
     @keyframes twinkle     { 50% { opacity: .12; } }
     $meteors
-    @keyframes flow        { to { transform: translateX(var(--wave)); } }
-    @keyframes shimmer     { from { opacity: .55; } to { opacity: 1; } }
     @keyframes tumble      { from { transform: rotate(-${tumble}deg); } to { transform: rotate(${tumble}deg); } }
     $satellite
     $orbit
@@ -479,11 +463,11 @@ UFO_STYLE = Template("""
     .hover     { animation: bob 1.8s ease-in-out infinite alternate; }
     .saucer    { fill: $hull; }
     .dome      { fill: $dome; opacity: .8; }
-    .underglow { fill: $dome; opacity: .35; }
+    .underglow { opacity: .35; }
     .light     { fill: $light; animation: blink .9s steps(2) infinite; }
     .bloom     { opacity: .7; }
     .ting-star { fill: $ting; }
-    .ting-glow { fill: $light; opacity: .8; }
+    .ting-glow { opacity: .8; }
 
     $visit
     @keyframes bob   { from { transform: translateY(-1.5px); } to { transform: translateY(1.5px); } }
@@ -509,6 +493,7 @@ CLIMBER_STYLE = Template("""
     .climber .tail-b  { animation: flutter-b .6s ease-in-out -.2s infinite alternate; }
     .climber .tail-c  { animation: flutter-c .6s ease-in-out -.4s infinite alternate; }
     .climber .beam    { animation: beam 2.4s ease-in-out infinite alternate; }
+    .climber .look    { animation: look ${look_cycle}s ease-in-out ${stopped}s infinite; }
     .print            { fill: var(--muted); opacity: .75; animation: print .4s ease-out var(--d) backwards; }
 
     @keyframes climb     { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } 5% { opacity: 1; } to { transform: none; } }
@@ -518,6 +503,7 @@ CLIMBER_STYLE = Template("""
     @keyframes flutter-c { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
     @keyframes beam      { from { opacity: .7; } to { opacity: 1; } }
     @keyframes print     { from { opacity: 0; } }
+    $look
 """)
 
 REDUCED_MOTION ="\n    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }\n"
@@ -600,12 +586,26 @@ def ting(name: str, at: float, cycle: float) -> str:
             f"{share(at + UFO_TING, cycle)}, 100% {{ opacity: 0; transform: scale(.4) rotate(90deg); }} }}")
 
 
+def look_around() -> str:
+    """Keyframes for the climber's head at night: it holds each of CLIMBER_LOOKS for
+    CLIMBER_LOOK_HOLD seconds, turning quickly between them, and loops. Every frame
+    names the same functions, so they ease one into the next: a look up or down tilts
+    the head, a look back flips it through scaleX, which reads as turning round."""
+    cycle, turn = CLIMBER_LOOK_HOLD * len(CLIMBER_LOOKS), CLIMBER_LOOK_TURN
+    frames = []
+    for i, (tilt, facing) in enumerate(CLIMBER_LOOKS):
+        held_from, held_to = i * CLIMBER_LOOK_HOLD, (i + 1) * CLIMBER_LOOK_HOLD - turn
+        frames.append(f"{share(held_from, cycle)}, {share(held_to, cycle)} "
+                      f"{{ transform: rotate({num(tilt)}deg) scaleX({facing}); }}")
+    tilt, facing = CLIMBER_LOOKS[0]
+    frames.append(f"100% {{ transform: rotate({num(tilt)}deg) scaleX({facing}); }}")
+    return f"@keyframes look {{ {' '.join(frames)} }}"
+
+
 def style(theme: str, sky: Sky, look: Look) -> str:
     css = COMMON_STYLE.substitute(
         look.palette, sans=SANS, mono=MONO,
         start=num(SEQUENCE_START), label_glow=num(LABEL_GLOW), stagger=num(LABEL_STAGGER),
-        trace_at=num(SEQUENCE_START + TRACE_AT), trace_len=num(TRACE_LEN),
-        ripple_at=num(SEQUENCE_START + RIPPLE_AT), ripple_len=num(RIPPLE_LEN),
     )
     if theme == "light":
         css += DAY_STYLE.substitute(
@@ -625,9 +625,12 @@ def style(theme: str, sky: Sky, look: Look) -> str:
         )
     css += UFO_STYLE.substitute(UFO_COLORS[theme], cycle=num(sky.ufo_cycle),
                                 visit=ufo_visit(*sky.ufo_times, sky.ufo_cycle))
+    walk = CLIMBER_STRIDE * CLIMBER_STRIDES
     css += CLIMBER_STYLE.substitute(
-        climb=num(CLIMBER_STRIDE * CLIMBER_STRIDES), at=num(CLIMBER_AT), stride=num(CLIMBER_STRIDE),
-        strides=CLIMBER_STRIDES, muffler=MUFFLER, lamp=HEADLAMP)
+        climb=num(walk), at=num(CLIMBER_AT), stride=num(CLIMBER_STRIDE),
+        strides=CLIMBER_STRIDES, muffler=MUFFLER, lamp=HEADLAMP,
+        look_cycle=num(CLIMBER_LOOK_HOLD * len(CLIMBER_LOOKS)), stopped=num(CLIMBER_AT + walk),
+        look=look_around())
     css += REDUCED_MOTION
     return "\n" + indent(dedent(css).strip(), " " * 6) + "\n    "
 
@@ -680,6 +683,17 @@ def aurora_window(i: int, rb: Ribbon) -> str:
     </mask>"""
 
 
+def ufo_glows(theme: str) -> str:
+    """Soft round glows for the UFO lights, sparkles and underglow: a colour fading
+    to nothing at the rim, so they look blurred without a blur filter."""
+    c = UFO_COLORS[theme]
+    return "".join(f"""
+    <radialGradient id="ufo-{name}">
+      <stop offset="0" stop-color="{c[key]}" stop-opacity="{peak}"/>
+      <stop offset="1" stop-color="{c[key]}" stop-opacity="0"/>
+    </radialGradient>""" for name, key, peak in (("bloom", "light", ".9"), ("underglow", "dome", ".8")))
+
+
 def ufo_layer(sky: Sky) -> str:
     """Clipped to the sky, so a UFO rising from the ridge comes up from behind it."""
     ufos = "\n    ".join(ufo(u) for u in sky.ufos)
@@ -691,8 +705,7 @@ def ufo_layer(sky: Sky) -> str:
 def day_sky(sky: Sky) -> str:
     (cx, cy), clouds = ORB, "\n    ".join(cloud(c) for c in sky.clouds)
     visitors = "\n    ".join(visitor(v) for v in sky.visits)
-    return f"""  <g class="ripple"><circle cx="{cx}" cy="{cy}" r="11"/></g>
-  <g class="orb">
+    return f"""  <g class="orb">
     <circle class="glow" cx="{cx}" cy="{cy}" r="24" filter="url(#blur)"/>
     <circle class="body" cx="{cx}" cy="{cy}" r="11"/>
   </g>
@@ -712,8 +725,7 @@ def night_sky(sky: Sky) -> str:
     shooting = "\n    ".join(meteor(i, m) for i, m in enumerate(sky.meteors))
     satellites = "\n  ".join(satellite(s) for s in sky.satellites)
 
-    return f"""  <g class="ripple"><circle cx="{cx}" cy="{cy}" r="{MOON_R}"/></g>
-  <g class="orb">
+    return f"""  <g class="orb">
     <circle class="glow" cx="{cx}" cy="{cy}" r="22" filter="url(#blur)"/>
     {moon_shape(sky.moon)}
   </g>
@@ -763,16 +775,14 @@ def scene(theme: str, sky: Sky, look: Look) -> str:
     <filter id="blur" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter>
     <filter id="spark" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.1"/></filter>
     <path id="ridge-line" pathLength="1" d="{ridge_path()}"/>
-    <clipPath id="above-ridge"><path d="{above_ridge_path()}"/></clipPath>{defs(theme, sky)}
+    <clipPath id="above-ridge"><path d="{above_ridge_path()}"/></clipPath>{ufo_glows(theme)}{defs(theme, sky)}
   </defs>
 
   <!-- sky -->{coords}
 {sky_layer}
 
-  <!-- range: the ridge, then two copies for the light that runs along it -->
+  <!-- range -->
   <use class="ridge" href="#ridge-line"/>
-  <use class="trace halo" href="#ridge-line" filter="url(#blur)"/>
-  <use class="trace core" href="#ridge-line"/>
 
   <!-- climber: footprints over the peaks behind, halfway up the devsecops peak -->
   <g class="footprints">

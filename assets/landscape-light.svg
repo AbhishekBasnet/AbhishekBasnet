@@ -5,7 +5,7 @@
     <style>
       /* palette */
       svg { --ink: #2E3440; --muted: #6B7891; --accent: #5E81AC; --rule: #D8DEE9;
-            --orb: #BF616A; --glow: #D08770; --ripple: #BF616A;
+            --orb: #BF616A; --glow: #D08770;
             --sans: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, sans-serif;
             --mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
 
@@ -29,26 +29,14 @@
       .orb    { animation: rise 3s ease-out backwards; }
       .sky    { animation: appear 1.6s ease-out 3.2s backwards; }
 
-      /* 2 · once, after the intro: labels glow in turn, light runs along the ridge,
-         a ripple leaves the sun / moon; then the header rests */
+      /* 2 · once, after the intro: labels glow in turn; then the header rests */
       .pulse        { transform-box: fill-box; transform-origin: center;
                       animation: label-scale 1.4s ease-in-out calc(4s + var(--i) * .7s); }
       .pulse .label { animation: label-tint 1.4s ease-in-out; animation-delay: inherit; }
       .pulse .halo  { fill: var(--accent); opacity: 0; animation-name: label-glow; }
 
-      .trace      { fill: none; stroke-linecap: round; stroke-dasharray: .08 1.2; stroke-dashoffset: .08; opacity: 0;
-                    animation: trace 2.4s ease-in-out 7s; }
-      .trace.core { stroke: var(--ink); stroke-width: 2; }
-      .trace.halo { stroke: var(--accent); stroke-width: 5; }
-
-      .ripple        { transform-box: fill-box; transform-origin: center;
-                       animation: ripple-grow 2.64s cubic-bezier(.2, .6, .3, 1) 9.2s; }
-      .ripple circle { fill: none; stroke: var(--ripple); stroke-width: 1.6; vector-effect: non-scaling-stroke; opacity: 0;
-                       animation: ripple-fade 2.64s linear 9.2s; }
-
-      /* ambient */
-      .glow { opacity: .1; transform-box: fill-box; transform-origin: center;
-              animation: breathe 9s ease-in-out 3s infinite alternate; }
+      /* the sun / moon glow holds still: a blurred shape that animates is redrawn every frame */
+      .glow { opacity: .15; }
 
       @keyframes draw        { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
       @keyframes fade-up     { from { opacity: 0; transform: translateY(6px); } }
@@ -57,19 +45,13 @@
       @keyframes label-scale { 45% { transform: scale(1.14); } }
       @keyframes label-tint  { 45% { fill: var(--accent); } }
       @keyframes label-glow  { 45% { opacity: .85; } }
-      @keyframes trace       { 0% { stroke-dashoffset: .08; opacity: 0; } 7.5%, 92.5% { opacity: 1; }
-                               100% { stroke-dashoffset: -1; opacity: 0; } }
-      @keyframes ripple-grow { to { transform: scale(4.6); } }
-      @keyframes ripple-fade { 0% { opacity: 0; stroke-width: 1.6; } 4.5% { opacity: .85; stroke-width: 1.6; }
-                               100% { opacity: 0; stroke-width: .3; } }
-      @keyframes breathe     { to { opacity: .2; transform: scale(1.2); } }
       @keyframes drift       { from { transform: translateX(calc(-1 * var(--reach))); } to { transform: translateX(var(--reach)); } }
 
       /* day: clouds sway in one wind */
       .cloud { fill: #E5E9F0; animation: drift 17.18s ease-in-out -8.59s infinite alternate; }
 
       /* day: birds, the parachute, the paraglider and the plane take turns crossing */
-      .visitor           { opacity: 0; animation: none 263.11s linear var(--d) infinite; }
+      .visitor           { opacity: 0; animation: none 227.58s linear var(--d) infinite; }
       .visitor.birds     { animation-name: fly-birds; }
       .visitor.parachute { animation-name: fly-parachute; }
       .visitor.paraglider { animation-name: fly-paraglider; }
@@ -79,7 +61,7 @@
       .swing { transform-box: fill-box; transform-origin: 50% 0; animation: sway 3.4s ease-in-out infinite alternate; }
       .bank  { transform-box: fill-box; transform-origin: center; animation: bank 5s ease-in-out infinite alternate; }
       .soar  { animation: soar 4.5s ease-in-out infinite alternate; }
-      .descent { transform-box: fill-box; transform-origin: center; animation: descent 263.11s linear var(--d) infinite; }
+      .descent { transform-box: fill-box; transform-origin: center; animation: descent 227.58s linear var(--d) infinite; }
       .chute { fill: #D08770; }
       .arch  { fill: none; stroke: #D08770; stroke-width: 2.6; stroke-linecap: round; }
       .lines, .diver { fill: none; stroke: #4C566A; stroke-width: .45; stroke-linecap: round; }
@@ -87,11 +69,11 @@
       .pilot, .plane { fill: #4C566A; }
       .contrail { fill: url(#contrail); }
 
-      @keyframes fly-birds { 0% { opacity: 0; transform: none; } .38%, 2.56% { opacity: 1; } 2.94%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes fly-parachute { 0% { opacity: 0; transform: none; } .38%, 3.72% { opacity: 1; } 4.1%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes fly-paraglider { 0% { opacity: 0; transform: none; animation-timing-function: cubic-bezier(.3, .4, .6, 1); } .38%, 5.05% { opacity: 1; } 5.28%, 100% { opacity: 0; transform: translateX(var(--dx)); } }
-      @keyframes descent { 0% { transform: none; animation-timing-function: cubic-bezier(.4, 0, .7, .8); } 5.28%, 100% { transform: translateY(var(--dy)) scale(1.6); } }
-      @keyframes fly-plane { 0% { opacity: 0; transform: none; } .38%, 3.49% { opacity: 1; } 3.87%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes fly-birds { 0% { opacity: 0; transform: none; } .44%, 2.96% { opacity: 1; } 3.4%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes fly-parachute { 0% { opacity: 0; transform: none; } .44%, 4.3% { opacity: 1; } 4.73%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes fly-paraglider { 0% { opacity: 0; transform: none; animation-timing-function: cubic-bezier(.3, .4, .6, 1); } .44%, 5.84% { opacity: 1; } 6.11%, 100% { opacity: 0; transform: translateX(var(--dx)); } }
+      @keyframes descent { 0% { transform: none; animation-timing-function: cubic-bezier(.4, 0, .7, .8); } 6.11%, 100% { transform: translateY(var(--dy)) scale(1.6); } }
+      @keyframes fly-plane { 0% { opacity: 0; transform: none; } .44%, 4.04% { opacity: 1; } 4.48%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
       @keyframes flap { to { transform: scaleY(-.45); } }
       @keyframes sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
       @keyframes bank { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
@@ -100,7 +82,7 @@
       /* day and night: UFOs arrive (from behind the ridge or the far sky), park,
          come closer, then whip off */
       .ufo, .ufo-size, .ting   { transform-box: fill-box; transform-origin: center;
-                                 animation: none 159.08s linear var(--d) infinite; }
+                                 animation: none 63.89s linear var(--d) infinite; }
       .ufo, .ting              { opacity: 0; }
       .ufo.from-ridge          { animation-name: ufo-ridge; }
       .ufo.from-sky            { animation-name: ufo-sky; }
@@ -111,18 +93,18 @@
       .hover     { animation: bob 1.8s ease-in-out infinite alternate; }
       .saucer    { fill: #4C566A; }
       .dome      { fill: #88C0D0; opacity: .8; }
-      .underglow { fill: #88C0D0; opacity: .35; }
+      .underglow { opacity: .35; }
       .light     { fill: #EBCB8B; animation: blink .9s steps(2) infinite; }
       .bloom     { opacity: .7; }
       .ting-star { fill: #D08770; }
-      .ting-glow { fill: #EBCB8B; opacity: .8; }
+      .ting-glow { opacity: .8; }
 
-      @keyframes ufo-ridge { 0% { opacity: 1; transform: translateY(var(--rise)); animation-timing-function: cubic-bezier(.2, .7, .3, 1); } 1.29% { opacity: 1; transform: none; } 2.92% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 3.35% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 4.25% { opacity: 1; } 4.32%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes ufo-sky { 0% { opacity: 0; transform: translate(var(--ax), var(--ay)); animation-timing-function: cubic-bezier(.15, .6, .3, 1); } .09% { opacity: 1; } 1.29% { opacity: 1; transform: none; } 2.92% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 3.35% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 4.25% { opacity: 1; } 4.32%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
-      @keyframes ufo-size-ridge { 0%, 2.92% { transform: none; animation-timing-function: ease-in-out; } 3.35% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 4.32%, 100% { transform: scale(.05); } }
-      @keyframes ufo-size-sky { 0% { transform: scale(.05); animation-timing-function: cubic-bezier(.6, 0, .8, .5); } 1.29%, 2.92% { transform: none; animation-timing-function: ease-in-out; } 3.35% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 4.32%, 100% { transform: scale(.05); } }
-      @keyframes ting-in { 0% { opacity: 0; transform: scale(0); } .08% { opacity: 1; transform: scale(1) rotate(45deg); } .31%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
-      @keyframes ting-out { 0%, 4.29% { opacity: 0; transform: scale(0); } 4.4% { opacity: 1; transform: scale(1) rotate(45deg); } 4.64%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
+      @keyframes ufo-ridge { 0% { opacity: 1; transform: translateY(var(--rise)); animation-timing-function: cubic-bezier(.2, .7, .3, 1); } 3.22% { opacity: 1; transform: none; } 7.28% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 8.35% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 10.57% { opacity: 1; } 10.77%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes ufo-sky { 0% { opacity: 0; transform: translate(var(--ax), var(--ay)); animation-timing-function: cubic-bezier(.15, .6, .3, 1); } .23% { opacity: 1; } 3.22% { opacity: 1; transform: none; } 7.28% { opacity: 1; transform: none; animation-timing-function: ease-in-out; } 8.35% { opacity: 1; transform: translateY(4px); animation-timing-function: cubic-bezier(.45, 0, .75, .4); } 10.57% { opacity: 1; } 10.77%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+      @keyframes ufo-size-ridge { 0%, 7.28% { transform: none; animation-timing-function: ease-in-out; } 8.35% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 10.77%, 100% { transform: scale(.05); } }
+      @keyframes ufo-size-sky { 0% { transform: scale(.05); animation-timing-function: cubic-bezier(.6, 0, .8, .5); } 3.22%, 7.28% { transform: none; animation-timing-function: ease-in-out; } 8.35% { transform: scale(1.6); animation-timing-function: cubic-bezier(.35, .35, .55, 1); } 10.77%, 100% { transform: scale(.05); } }
+      @keyframes ting-in { 0% { opacity: 0; transform: scale(0); } .2% { opacity: 1; transform: scale(1) rotate(45deg); } .78%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
+      @keyframes ting-out { 0%, 10.69% { opacity: 0; transform: scale(0); } 10.96% { opacity: 1; transform: scale(1) rotate(45deg); } 11.55%, 100% { opacity: 0; transform: scale(.4) rotate(90deg); } }
       @keyframes bob   { from { transform: translateY(-1.5px); } to { transform: translateY(1.5px); } }
       @keyframes blink { 50% { opacity: .2; } }
 
@@ -144,6 +126,7 @@
       .climber .tail-b  { animation: flutter-b .6s ease-in-out -.2s infinite alternate; }
       .climber .tail-c  { animation: flutter-c .6s ease-in-out -.4s infinite alternate; }
       .climber .beam    { animation: beam 2.4s ease-in-out infinite alternate; }
+      .climber .look    { animation: look 8s ease-in-out 5.4s infinite; }
       .print            { fill: var(--muted); opacity: .75; animation: print .4s ease-out var(--d) backwards; }
 
       @keyframes climb     { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } 5% { opacity: 1; } to { transform: none; } }
@@ -153,6 +136,7 @@
       @keyframes flutter-c { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
       @keyframes beam      { from { opacity: .7; } to { opacity: 1; } }
       @keyframes print     { from { opacity: 0; } }
+      @keyframes look { 0%, 20.62% { transform: rotate(0deg) scaleX(1); } 25%, 45.62% { transform: rotate(-26deg) scaleX(1); } 50%, 70.62% { transform: rotate(10deg) scaleX(1); } 75%, 95.62% { transform: rotate(0deg) scaleX(-1); } 100% { transform: rotate(0deg) scaleX(1); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
     </style>
@@ -160,6 +144,14 @@
     <filter id="spark" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.1"/></filter>
     <path id="ridge-line" pathLength="1" d="M48 332 L110 322 L150 326 L200 286 L236 304 L270 290 L296 296 L336 252 L378 288 L476 220 L504 244 L526 238 L560 284 L604 272 L652 250 L690 282 L740 306 L790 298 L852 320"/>
     <clipPath id="above-ridge"><path d="M46 36 H854 V320 L852 320 L790 298 L740 306 L690 282 L652 250 L604 272 L560 284 L526 238 L504 244 L476 220 L378 288 L336 252 L296 296 L270 290 L236 304 L200 286 L150 326 L110 322 L48 332 H46 V36Z"/></clipPath>
+    <radialGradient id="ufo-bloom">
+      <stop offset="0" stop-color="#EBCB8B" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#EBCB8B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ufo-underglow">
+      <stop offset="0" stop-color="#88C0D0" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#88C0D0" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="contrail">
       <stop offset="0" stop-color="#C2CAD6" stop-opacity="0"/>
       <stop offset="1" stop-color="#C2CAD6" stop-opacity=".9"/>
@@ -168,7 +160,6 @@
 
   <!-- sky -->
   <text class="meta" x="48" y="56">28.39° N   84.12° E</text>
-  <g class="ripple"><circle cx="792" cy="92" r="11"/></g>
   <g class="orb">
     <circle class="glow" cx="792" cy="92" r="24" filter="url(#blur)"/>
     <circle class="body" cx="792" cy="92" r="11"/>
@@ -221,7 +212,7 @@
       </g>
     </g>
     <g transform="translate(876 84.58)">
-      <g class="visitor parachute" style="--dx: -238.93px; --dy: 242.26px; --d: 14.47s">
+      <g class="visitor parachute" style="--dx: -238.93px; --dy: 242.26px; --d: 13.35s">
         <g transform="scale(-1 1)">
           <g class="swing">
             <path class="chute" d="M-8 -14 Q-8 -22 0 -22 Q8 -22 8 -14 Q4 -16 0 -14 Q-4 -16 -8 -14 Z"/>
@@ -233,7 +224,7 @@
       </g>
     </g>
     <g transform="translate(24 93.16)">
-      <g class="visitor paraglider" style="--dx: 445.97px; --dy: 155.03px; --d: 28.51s">
+      <g class="visitor paraglider" style="--dx: 445.97px; --dy: 155.03px; --d: 25.76s">
         <g class="descent">
           <g class="swing">
             <path class="arch" d="M-9 -17 Q0 -23 9 -17"/>
@@ -244,13 +235,13 @@
       </g>
     </g>
     <g transform="translate(24 113.67)">
-      <g class="visitor birds" style="--dx: 852px; --dy: .82px; --d: 46.83s">
+      <g class="visitor birds" style="--dx: 852px; --dy: .82px; --d: 41.87s">
         <path class="bird" style="animation-delay: -0s" d="M-4.8 0 Q-2.4 -2.88 0 0 Q2.4 -2.88 4.8 0"/>
           <path class="bird" style="animation-delay: -.17s" d="M-14.99 5.04 Q-12.82 2.43 -10.64 5.04 Q-8.47 2.43 -6.3 5.04"/>
       </g>
     </g>
     <g transform="translate(24 106.46)">
-      <g class="visitor paraglider" style="--dx: 388.88px; --dy: 181.34px; --d: 58.06s">
+      <g class="visitor paraglider" style="--dx: 388.88px; --dy: 181.34px; --d: 51.36s">
         <g class="descent">
           <g class="swing">
             <path class="arch" d="M-9 -17 Q0 -23 9 -17"/>
@@ -261,7 +252,7 @@
       </g>
     </g>
     <g transform="translate(876 64.93)">
-      <g class="visitor plane" style="--dx: -852px; --dy: 6.13px; --d: 77.31s">
+      <g class="visitor plane" style="--dx: -852px; --dy: 6.13px; --d: 67.93s">
         <g transform="scale(-1 1)">
           <g transform="rotate(.41)">
           <rect class="contrail" x="-150" y=".1" width="143" height="1" rx=".5"/>
@@ -271,14 +262,14 @@
       </g>
     </g>
     <g transform="translate(24 124.56)">
-      <g class="visitor birds" style="--dx: 852px; --dy: -6.02px; --d: 90.07s">
+      <g class="visitor birds" style="--dx: 852px; --dy: -6.02px; --d: 79.41s">
         <path class="bird" style="animation-delay: -0s" d="M-5.23 0 Q-2.61 -3.14 0 0 Q2.61 -3.14 5.23 0"/>
           <path class="bird" style="animation-delay: -.17s" d="M-16.94 5.04 Q-14.45 2.05 -11.96 5.04 Q-9.48 2.05 -6.99 5.04"/>
           <path class="bird" style="animation-delay: -.34s" d="M-32.31 -11.99 Q-29.8 -14.99 -27.3 -11.99 Q-24.8 -14.99 -22.29 -11.99"/>
       </g>
     </g>
     <g transform="translate(876 68.58)">
-      <g class="visitor plane" style="--dx: -852px; --dy: 9.5px; --d: 103.44s">
+      <g class="visitor plane" style="--dx: -852px; --dy: 9.5px; --d: 89.96s">
         <g transform="scale(-1 1)">
           <g transform="rotate(.64)">
           <rect class="contrail" x="-150" y=".1" width="143" height="1" rx=".5"/>
@@ -288,7 +279,7 @@
       </g>
     </g>
     <g transform="translate(876 97.38)">
-      <g class="visitor paraglider" style="--dx: -565.27px; --dy: 206.42px; --d: 116.92s">
+      <g class="visitor paraglider" style="--dx: -565.27px; --dy: 206.42px; --d: 101.79s">
         <g class="descent">
           <g transform="scale(-1 1)">
           <g class="swing">
@@ -301,7 +292,7 @@
       </g>
     </g>
     <g transform="translate(24 81.63)">
-      <g class="visitor plane" style="--dx: 852px; --dy: 7.61px; --d: 132.83s">
+      <g class="visitor plane" style="--dx: 852px; --dy: 7.61px; --d: 116.7s">
         <g transform="rotate(.51)">
           <rect class="contrail" x="-150" y=".1" width="143" height="1" rx=".5"/>
           <path class="plane" d="M-6 0 H5 Q7 0 7 .6 Q7 1.2 5 1.2 H-5 Z M-6 0 L-7.5 -2.6 H-5.4 L-3.6 0 Z M-1 .8 L-3 2.6 H-1.6 L1.6 .8 Z"/>
@@ -309,7 +300,7 @@
       </g>
     </g>
     <g transform="translate(24 95.93)">
-      <g class="visitor paraglider" style="--dx: 522.06px; --dy: 193.21px; --d: 148.82s">
+      <g class="visitor paraglider" style="--dx: 522.06px; --dy: 193.21px; --d: 129.79s">
         <g class="descent">
           <g class="swing">
             <path class="arch" d="M-9 -17 Q0 -23 9 -17"/>
@@ -320,7 +311,7 @@
       </g>
     </g>
     <g transform="translate(876 81.13)">
-      <g class="visitor parachute" style="--dx: -359.22px; --dy: 229.39px; --d: 164.72s">
+      <g class="visitor parachute" style="--dx: -359.22px; --dy: 229.39px; --d: 144.69s">
         <g transform="scale(-1 1)">
           <g class="swing">
             <path class="chute" d="M-8 -14 Q-8 -22 0 -22 Q8 -22 8 -14 Q4 -16 0 -14 Q-4 -16 -8 -14 Z"/>
@@ -332,14 +323,14 @@
       </g>
     </g>
     <g transform="translate(24 87.88)">
-      <g class="visitor birds" style="--dx: 852px; --dy: -2.77px; --d: 181.25s">
+      <g class="visitor birds" style="--dx: 852px; --dy: -2.77px; --d: 158.34s">
         <path class="bird" style="animation-delay: -0s" d="M-4.36 0 Q-2.18 -2.62 0 0 Q2.18 -2.62 4.36 0"/>
           <path class="bird" style="animation-delay: -.17s" d="M-15.18 3.85 Q-13.14 1.42 -11.11 3.85 Q-9.08 1.42 -7.05 3.85"/>
           <path class="bird" style="animation-delay: -.34s" d="M-25.17 -6.35 Q-23.17 -8.75 -21.17 -6.35 Q-19.17 -8.75 -17.17 -6.35"/>
       </g>
     </g>
     <g transform="translate(876 80.77)">
-      <g class="visitor plane" style="--dx: -852px; --dy: 12.08px; --d: 194.62s">
+      <g class="visitor plane" style="--dx: -852px; --dy: 12.08px; --d: 168.9s">
         <g transform="scale(-1 1)">
           <g transform="rotate(.81)">
           <rect class="contrail" x="-150" y=".1" width="143" height="1" rx=".5"/>
@@ -349,7 +340,7 @@
       </g>
     </g>
     <g transform="translate(876 101.73)">
-      <g class="visitor birds" style="--dx: -852px; --dy: -2.68px; --d: 209.02s">
+      <g class="visitor birds" style="--dx: -852px; --dy: -2.68px; --d: 181.19s">
         <g transform="scale(-1 1)">
           <path class="bird" style="animation-delay: -0s" d="M-4.76 0 Q-2.38 -2.86 0 0 Q2.38 -2.86 4.76 0"/>
           <path class="bird" style="animation-delay: -.17s" d="M-15.93 3.85 Q-13.89 1.4 -11.84 3.85 Q-9.79 1.4 -7.75 3.85"/>
@@ -357,7 +348,7 @@
       </g>
     </g>
     <g transform="translate(876 86.13)">
-      <g class="visitor parachute" style="--dx: -730.53px; --dy: 309.42px; --d: 220.61s">
+      <g class="visitor parachute" style="--dx: -730.53px; --dy: 309.42px; --d: 190.86s">
         <g transform="scale(-1 1)">
           <g class="swing">
             <path class="chute" d="M-8 -14 Q-8 -22 0 -22 Q8 -22 8 -14 Q4 -16 0 -14 Q-4 -16 -8 -14 Z"/>
@@ -369,7 +360,7 @@
       </g>
     </g>
     <g transform="translate(24 93.16)">
-      <g class="visitor paraglider" style="--dx: 445.97px; --dy: 155.03px; --d: 233.86s">
+      <g class="visitor paraglider" style="--dx: 445.97px; --dy: 155.03px; --d: 202.87s">
         <g class="descent">
           <g class="swing">
             <path class="arch" d="M-9 -17 Q0 -23 9 -17"/>
@@ -380,7 +371,7 @@
       </g>
     </g>
     <g transform="translate(24 73.9)">
-      <g class="visitor parachute" style="--dx: 344.47px; --dy: 275.93px; --d: 253.35s">
+      <g class="visitor parachute" style="--dx: 344.47px; --dy: 275.93px; --d: 219.57s">
         <g class="swing">
             <path class="chute" d="M-8 -14 Q-8 -22 0 -22 Q8 -22 8 -14 Q4 -16 0 -14 Q-4 -16 -8 -14 Z"/>
             <path class="lines" d="M-8 -14 L0 0 M8 -14 L0 0 M0 -14 V0"/>
@@ -392,101 +383,99 @@
   </g>
   <g class="ufos" clip-path="url(#above-ridge)">
     <g transform="translate(810.5 179.23)">
-      <g class="ufo from-sky" style="--rise: 142.05px; --dx: -579.22px; --dy: -121.13px; --d: 9.28s; --ax: -239.49px; --ay: -59.85px">
+      <g class="ufo from-sky" style="--rise: 142.05px; --dx: -579.22px; --dy: -121.13px; --d: 6.52s; --ax: -239.49px; --ay: -59.85px">
         <g class="ufo-size">
         <g class="hover">
-          <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
+          <ellipse class="underglow" cy="3.5" rx="11" ry="5" fill="url(#ufo-underglow)"/>
           <path class="dome" d="M-4.2 -1.6 A4.2 3.8 0 0 1 4.2 -1.6 Z"/>
           <ellipse class="saucer" rx="10" ry="2.6"/>
-          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="2.2" filter="url(#spark)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="5.5" cy="3" r="1.1"/></g>
+          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="5.5" cy="3" r="1.1"/></g>
         </g>
         </g>
       </g>
       <g transform="translate(-579.22 -121.13)">
-        <g class="ting leave" style="--d: 9.28s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+        <g class="ting leave" style="--d: 6.52s">
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
       <g transform="translate(-239.49 -59.85)">
-        <g class="ting arrive" style="--d: 9.28s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+        <g class="ting arrive" style="--d: 6.52s">
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
     <g transform="translate(785.73 205.03)">
-      <g class="ufo from-ridge" style="--rise: 109.65px; --dx: -281.19px; --dy: -141.56px; --d: 55.96s">
+      <g class="ufo from-ridge" style="--rise: 109.65px; --dx: -281.19px; --dy: -141.56px; --d: 24.15s">
         <g class="ufo-size">
         <g class="hover">
-          <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
+          <ellipse class="underglow" cy="3.5" rx="11" ry="5" fill="url(#ufo-underglow)"/>
           <path class="dome" d="M-4.2 -1.6 A4.2 3.8 0 0 1 4.2 -1.6 Z"/>
           <ellipse class="saucer" rx="10" ry="2.6"/>
-          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="2.2" filter="url(#spark)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="5.5" cy="3" r="1.1"/></g>
+          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="5.5" cy="3" r="1.1"/></g>
         </g>
         </g>
       </g>
       <g transform="translate(-281.19 -141.56)">
-        <g class="ting leave" style="--d: 55.96s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+        <g class="ting leave" style="--d: 24.15s">
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
     <g transform="translate(798.31 213.41)">
-      <g class="ufo from-sky" style="--rise: 103.54px; --dx: -568.52px; --dy: -133.38px; --d: 101.17s; --ax: -205.81px; --ay: -157.15px">
+      <g class="ufo from-sky" style="--rise: 103.54px; --dx: -568.52px; --dy: -133.38px; --d: 41.43s; --ax: -205.81px; --ay: -157.15px">
         <g class="ufo-size">
         <g class="hover">
-          <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
+          <ellipse class="underglow" cy="3.5" rx="11" ry="5" fill="url(#ufo-underglow)"/>
           <path class="dome" d="M-4.2 -1.6 A4.2 3.8 0 0 1 4.2 -1.6 Z"/>
           <ellipse class="saucer" rx="10" ry="2.6"/>
-          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="2.2" filter="url(#spark)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="5.5" cy="3" r="1.1"/></g>
+          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="5.5" cy="3" r="1.1"/></g>
         </g>
         </g>
       </g>
       <g transform="translate(-568.52 -133.38)">
-        <g class="ting leave" style="--d: 101.17s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+        <g class="ting leave" style="--d: 41.43s">
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
       <g transform="translate(-205.81 -157.15)">
-        <g class="ting arrive" style="--d: 101.17s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+        <g class="ting arrive" style="--d: 41.43s">
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
     <g transform="translate(746.26 201.59)">
-      <g class="ufo from-sky" style="--rise: 119.4px; --dx: -531.08px; --dy: -74.2px; --d: 137.38s; --ax: -340.65px; --ay: -99.59px">
+      <g class="ufo from-sky" style="--rise: 119.4px; --dx: -531.08px; --dy: -74.2px; --d: 56.55s; --ax: -340.65px; --ay: -99.59px">
         <g class="ufo-size">
         <g class="hover">
-          <ellipse class="underglow" cy="3.5" rx="7" ry="2.5" filter="url(#blur)"/>
+          <ellipse class="underglow" cy="3.5" rx="11" ry="5" fill="url(#ufo-underglow)"/>
           <path class="dome" d="M-4.2 -1.6 A4.2 3.8 0 0 1 4.2 -1.6 Z"/>
           <ellipse class="saucer" rx="10" ry="2.6"/>
-          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="2.2" filter="url(#spark)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="2.2" filter="url(#spark)"/><circle cx="5.5" cy="3" r="1.1"/></g>
+          <g class="light" style="animation-delay: -0s"><circle class="bloom" cx="-5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="-5.5" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.3s"><circle class="bloom" cx="0" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="0" cy="3" r="1.1"/></g><g class="light" style="animation-delay: -.6s"><circle class="bloom" cx="5.5" cy="3" r="3.6" fill="url(#ufo-bloom)"/><circle cx="5.5" cy="3" r="1.1"/></g>
         </g>
         </g>
       </g>
       <g transform="translate(-531.08 -74.2)">
-        <g class="ting leave" style="--d: 137.38s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+        <g class="ting leave" style="--d: 56.55s">
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
       <g transform="translate(-340.65 -99.59)">
-        <g class="ting arrive" style="--d: 137.38s">
-          <circle class="ting-glow" r="4" filter="url(#spark)"/>
+        <g class="ting arrive" style="--d: 56.55s">
+          <circle class="ting-glow" r="5.5" fill="url(#ufo-bloom)"/>
           <path class="ting-star" d="M0 -6 Q.7 -.7 6 0 Q.7 .7 0 6 Q-.7 .7 -6 0 Q-.7 -.7 0 -6Z"/>
         </g>
       </g>
     </g>
   </g>
 
-  <!-- range: the ridge, then two copies for the light that runs along it -->
+  <!-- range -->
   <use class="ridge" href="#ridge-line"/>
-  <use class="trace halo" href="#ridge-line" filter="url(#blur)"/>
-  <use class="trace core" href="#ridge-line"/>
 
   <!-- climber: footprints over the peaks behind, halfway up the devsecops peak -->
   <g class="footprints">
@@ -570,10 +559,12 @@
       <g transform="translate(0 -7)"><g class="leg">
         <path class="limb" d="M0 0 L4 1.2 L2.6 5.2 L3.8 4.9"/>
       </g></g>
-      <circle class="head" cx="2.6" cy="-15.1" r="1.75"/>
-      <path class="muffler" d="M.85 -15.4 A1.8 1.8 0 0 1 4.35 -15.4 Z"/>
-      <circle class="muffler" cx="2.4" cy="-17.3" r=".6"/>
-      <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>
+      <g transform="translate(2 -13.4)"><g><g transform="translate(-2 13.4)">
+          <circle class="head" cx="2.6" cy="-15.1" r="1.75"/>
+          <path class="muffler" d="M.85 -15.4 A1.8 1.8 0 0 1 4.35 -15.4 Z"/>
+          <circle class="muffler" cx="2.4" cy="-17.3" r=".6"/>
+          <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>
+      </g></g></g>
       <g transform="translate(.8 -13.2)"><g class="tail-a">
         <path class="muffler" d="M.4 -.6 L-4.6 -.8 L-4.6 .6 L.4 .6 Z"/>
         <g transform="translate(-4.6 -.1)"><g class="tail-b">

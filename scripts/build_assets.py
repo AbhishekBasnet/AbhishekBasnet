@@ -20,11 +20,11 @@ Animation timeline (seconds after the image loads):
 
     0.0 – 3.2   intro, once      ridge draws, summits fade up, sun/moon rises
     3.2 – 4.8   sky, once        clouds or stars fade in
-    4.0 – 11.8  sequence, once   labels glow → light runs along the ridge → ripple
-    always      ambient          glow breathes, clouds sway, stars twinkle, aurora flows
-    4.5 →       day visitors     birds, parachute, paraglider, plane take turns, 2–6s apart
-    7 – 10 →    both             UFOs arrive, park and whip off, 20–45s apart
-    4.5 →       night visitors   shooting stars; satellites from 5–8s, 10–25s apart
+    4.0 – 7.5   sequence, once   labels glow in turn
+    always      ambient          clouds sway, stars twinkle, muffler waves
+    4.5 →       day visitors     birds, parachute, paraglider, plane take turns, 1–3s apart
+    5 – 7 →     both             UFOs arrive, park and whip off, 6–12s apart
+    4.5 →       night visitors   shooting stars; satellites from 3–5s, 3–8s apart
 """
 
 from __future__ import annotations

@@ -150,8 +150,9 @@ def moon_on(day: date) -> Moon:
 # ── Aurora ───────────────────────────────────────────────────────────────────
 
 def shape_aurora(rng: random.Random) -> list[Ribbon]:
-    """Two soft curtains low over the ridge. Their stretch of sky, folds and flow
-    are rolled daily; the upper edge repeats every wave so the folds can flow."""
+    """Two soft curtains low over the ridge. Their stretch of sky and folds are
+    rolled daily; the upper edge runs a wave past the stretch each side, so the
+    curtain fades out at its ends before the shape does."""
     ribbons = []
     for i, color in enumerate(cfg.AURORA_COLORS):
         base = rng.uniform(*cfg.AURORA_BASE_Y) - i * 22     # the second hangs higher
@@ -163,10 +164,9 @@ def shape_aurora(rng: random.Random) -> list[Ribbon]:
         xs = [left - wave + k * step for k in range(int((width + 2 * wave) / step) + 2)]
         top = [(x, base - amp * math.sin(2 * math.pi * x / wave + shift)
                      - ripple * math.sin(4 * math.pi * x / wave + 2 * shift)) for x in xs]
-        flow = rng.uniform(*cfg.AURORA_FLOW) * rng.choice((1, -1))
         ribbons.append(Ribbon(top=top, span=(left, left + width), thickness=rng.uniform(34, 52),
                               color=color, opacity=rng.uniform(*cfg.AURORA_OPACITY),
-                              wave=wave, flow=flow))
+                              wave=wave))
     return ribbons
 
 

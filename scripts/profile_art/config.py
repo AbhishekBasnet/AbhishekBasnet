@@ -16,18 +16,18 @@ MONO = "ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace"
 
 THEMES = {
     "light": dict(ink="#2E3440", muted="#6B7891", accent="#5E81AC", rule="#D8DEE9",
-                  orb="#BF616A", glow="#D08770", ripple="#BF616A"),
+                  orb="#BF616A", glow="#D08770"),
     "dark": dict(ink="#ECEFF4", muted="#8F9BB3", accent="#88C0D0", rule="#3B4252",
-                 orb="#E5E9F0", glow="#E5E9F0", ripple="#D8DEE9"),
+                 orb="#E5E9F0", glow="#E5E9F0"),
 }
 # The portfolio site (AbhishekBasnet.github.io) shows the same sky as a soft
 # backdrop in its own palette, copied from its css/tokens.css. Its light page is
 # grey-green, so clouds there are white to stand out.
 SITE_THEMES = {
     "light": dict(ink="#2b3138", muted="#6b7680", accent="#4f7a94", rule="#d6dbd8",
-                  orb="#BF616A", glow="#D08770", ripple="#BF616A"),
+                  orb="#BF616A", glow="#D08770"),
     "dark": dict(ink="#dfe4e2", muted="#94a0a8", accent="#8fb5cc", rule="#36404a",
-                 orb="#E5E9F0", glow="#E5E9F0", ripple="#D8DEE9"),
+                 orb="#E5E9F0", glow="#E5E9F0"),
 }
 SITE_CLOUD = "#FFFFFF"
 BACKDROP_HEIGHT = 314                # just the sky and the ridge, without the caption below
@@ -78,6 +78,11 @@ CLIMBER_STRIDE = .65                 # seconds per stride
 CLIMBER_STRIDES = 4                  # strides to the stop, so the walk lasts 2.6s
 MUFFLER = "#D08770"                  # Nord orange, like the parachute and the sun's glow
 HEADLAMP = "#EBCB8B"
+# At night, once stopped, the climber looks around and the headlamp beam follows:
+# ahead, up, down, then back over the shoulder, each held for CLIMBER_LOOK_HOLD seconds.
+CLIMBER_LOOKS = [(0, 1), (-26, 1), (10, 1), (0, -1)]   # head tilt in degrees (- is up), 1 faces ahead, -1 back
+CLIMBER_LOOK_HOLD = 2                # seconds per direction, turn included
+CLIMBER_LOOK_TURN = .35              # seconds the head takes to turn to the next direction
 UFO_CLEAR_OF_CLIMBER = 30            # px either side of the climber's walk that UFOs don't park in
 
 # Footprints along the ridge crest from the left edge to the climber's heels: the
@@ -109,9 +114,9 @@ STAR_SPACING = 48                    # px every star keeps from every other, so 
 MOON_CLEAR = 30                      # px from the moon's centre
 
 METEOR_COUNT = 6
-METEOR_PERIOD = (30, 70)             # seconds between one meteor's appearances
+METEOR_PERIOD = (14, 30)             # seconds between one meteor's appearances
 METEOR_FLIGHT = (.6, 1.1)            # seconds a streak lasts, however often it comes
-METEOR_FIRST, METEOR_SPREAD = 4.5, (8, 36)   # the first falls at 4.5s, the rest start within this window
+METEOR_FIRST, METEOR_SPREAD = 4.5, (5, 16)   # the first falls at 4.5s, the rest start within this window
 METEOR_AREA = (52, 62, 848, 150)     # the whole streak, tail to end, stays inside
 METEOR_MOON_CLEAR = 34
 
@@ -126,15 +131,14 @@ AURORA_COLORS = ("#A3BE8C", "#8FBCBB")   # Nord green and frost
 AURORA_BASE_Y = (196, 214)           # upper edge of the lower curtain; the ridge hides the rest
 AURORA_WIDTH = (380, 600)            # px of sky each curtain covers
 AURORA_OPACITY = (.10, .16)
-AURORA_WAVE = (160, 260)             # px between folds; the folds flow sideways along the curtain
-AURORA_FLOW = (22, 34)               # seconds for the folds to move one wave along
+AURORA_WAVE = (160, 260)             # px between folds; the aurora holds still, since it is blurred
 
 # Four satellites a day take turns, one per pass. Each flies its own arc and the
 # whole craft (body and wings together) leans its own way.
 SATELLITES = 4
 SATELLITE_PASS = (14, 20)            # seconds to cross the sky, rolled daily
-SATELLITE_GAP = (10, 25)             # seconds of clear sky between passes
-SATELLITE_FIRST = (5, 8)             # seconds after load the first one appears
+SATELLITE_GAP = (3, 8)               # seconds of clear sky between passes
+SATELLITE_FIRST = (3, 5)             # seconds after load the first one appears
 SATELLITE_Y = (74, 140)              # ends of the pass: below the coordinates, above the labels
 SATELLITE_ARC = (18, 40)             # px the middle of the pass rises
 SATELLITE_TOP = 58                   # the arc never rises above this
@@ -149,8 +153,8 @@ SATELLITE_TRIM = "#88C0D0"
 # little closer, then whips off into the far sky until it is a dot and gone. Some
 # rise from behind the ridge and some swoop in from the far sky (at least one each).
 UFOS = 4
-UFO_FIRST = (7, 10)                  # seconds after load the first one arrives
-UFO_GAP = (20, 45)                   # seconds of empty sky between flights
+UFO_FIRST = (5, 7)                   # seconds after load the first one arrives
+UFO_GAP = (6, 12)                    # seconds of empty sky between flights
 UFO_RISE, UFO_PARK = (1.8, 2.4), (2.5, 3.5)      # seconds to arrive and to stay parked, rolled daily
 UFO_APPROACH, UFO_WHIP = (.6, .9), (1.1, 1.6)
 UFO_APPROACH_SCALE = 1.6             # how much bigger it looks when it comes closer
@@ -170,7 +174,7 @@ UFO_COLORS = {                       # the hull is darker by day so it shows aga
 
 # Birds, the parachute, the paraglider and the plane share one schedule: only one
 # is ever in the sky, and after it leaves the sky stays empty for VISIT_GAP seconds.
-VISIT_GAP = (2, 6)
+VISIT_GAP = (1, 3)
 VISIT_FIRST = 4.5                    # seconds after load the first visitor appears
 VISIT_SCHEDULE = 180                 # at least this many seconds before the schedule repeats
 OFFSTAGE = (24, 876)                 # x just outside the left and right edges
@@ -201,9 +205,6 @@ CONTRAIL = "#C2CAD6"
 
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
 
-# After the intro, one sequence plays once: labels glow in turn, light runs along
-# the ridge, a ripple leaves the sun or moon. Then the header rests.
+# After the intro the labels glow once, one after another. Then the header rests.
 SEQUENCE_START = 4.0
 LABEL_GLOW, LABEL_STAGGER = 1.4, 0.7   # each label, one after another
-TRACE_AT, TRACE_LEN = 3.0, 2.4         # light along the ridge, after SEQUENCE_START
-RIPPLE_AT, RIPPLE_LEN = 5.2, 2.64      # ring leaving the sun or moon, after SEQUENCE_START

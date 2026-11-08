@@ -48,15 +48,14 @@ class Moon:
 
 @dataclass(frozen=True)
 class Ribbon:
-    """One curtain of the aurora. Its upper edge repeats every `wave` px, so the
-    folds can flow sideways forever while the lit stretch of sky stays put."""
+    """One curtain of the aurora: a band with folds every `wave` px along its upper
+    edge, shown only over its stretch of sky."""
     top: list[tuple[float, float]]   # points along its upper edge, a wave beyond the span each side
     span: tuple[float, float]        # left and right of the stretch of sky it lights; fades at both ends
     thickness: float
     color: str
     opacity: float
     wave: float       # px from one fold to the next
-    flow: float       # seconds for the folds to move one wave along; negative flows left
 
 
 @dataclass(frozen=True)
