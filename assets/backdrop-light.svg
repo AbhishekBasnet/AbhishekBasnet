@@ -129,14 +129,18 @@
 
       /* once stopped, one gesture at a time: every moving part runs the same loop */
       .climber .turn, .climber .gesture,
-      .climber .prop, .climber .flash { animation: none 63.89s ease-in-out 6.52s infinite; }
+      .climber .prop, .climber .flash,
+      .climber .bubble { animation: none 63.89s ease-in-out 6.52s infinite; }
       .climber .turn       { animation-name: climber-head; }
       .climber .gesture    { animation-name: climber-arm; }
       .climber .binoculars { animation-name: climber-binoculars; fill: #4C566A; }
       .climber .camera     { animation-name: climber-camera; }
       .climber .bottle     { animation-name: climber-bottle; fill: #8FBCBB; }
       .climber .flash      { animation-name: climber-flash; }
-      .climber .prop, .climber .flash { opacity: 0; }
+      .climber .bubble     { animation-name: climber-bubble; }
+      .climber .prop, .climber .flash, .climber .bubble { opacity: 0; }
+      .climber .pill       { fill: var(--ink); }
+      .climber .words      { font: 500 8.5px var(--mono); letter-spacing: .3px; fill: #FFFFFF; text-anchor: middle; }
       .climber .camera .body { fill: var(--muted); }
       .climber .camera .lens { fill: var(--accent); }
       .climber .flash .spark { fill: #EBCB8B; }
@@ -157,6 +161,7 @@
       @keyframes climber-camera { 0% { opacity: 0; } .97% { opacity: 0; } 11.55% { opacity: 0; } 16.22% { opacity: 0; } 19.66% { opacity: 0; } 28.56% { opacity: 0; } 39.14% { opacity: 0; } 42.54% { opacity: 0; } 42.91% { opacity: 0; } 43.16% { opacity: 1; } 45.67% { opacity: 1; } 46.04% { opacity: 0; } 46.29% { opacity: 0; } 55.6% { opacity: 0; } 66.19% { opacity: 0; } 70.41% { opacity: 0; } 74.79% { opacity: 0; } 79.27% { opacity: 0; } 89.85% { opacity: 0; } 93.21% { opacity: 0; } 97.6% { opacity: 0; } 100% { opacity: 0; } }
       @keyframes climber-bottle { 0% { opacity: 0; } .97% { opacity: 0; } 11.55% { opacity: 0; } 16.22% { opacity: 0; } 19.66% { opacity: 0; } 28.56% { opacity: 0; } 39.14% { opacity: 0; } 42.54% { opacity: 0; } 46.29% { opacity: 0; } 55.6% { opacity: 0; } 66.19% { opacity: 0; } 70.41% { opacity: 0; } 74.79% { opacity: 0; } 79.27% { opacity: 0; } 89.85% { opacity: 0; } 93.21% { opacity: 0; } 93.59% { opacity: 0; } 93.84% { opacity: 1; } 94.54% { opacity: 1; } 96.26% { opacity: 1; } 96.97% { opacity: 1; } 97.34% { opacity: 0; } 97.6% { opacity: 0; } 100% { opacity: 0; } }
       @keyframes climber-flash { 0% { opacity: 0; transform: scale(.3); } .97% { opacity: 0; transform: scale(.3); } 11.55% { opacity: 0; transform: scale(.3); } 16.22% { opacity: 0; transform: scale(.3); } 19.66% { opacity: 0; transform: scale(.3); } 28.56% { opacity: 0; transform: scale(.3); } 39.14% { opacity: 0; transform: scale(.3); } 42.54% { opacity: 0; transform: scale(.3); } 44.34% { opacity: 0; transform: scale(.3); } 44.51% { opacity: 1; transform: scale(1.2); } 44.96% { opacity: 0; transform: scale(.6); } 46.29% { opacity: 0; transform: scale(.3); } 55.6% { opacity: 0; transform: scale(.3); } 66.19% { opacity: 0; transform: scale(.3); } 70.41% { opacity: 0; transform: scale(.3); } 74.79% { opacity: 0; transform: scale(.3); } 79.27% { opacity: 0; transform: scale(.3); } 89.85% { opacity: 0; transform: scale(.3); } 93.21% { opacity: 0; transform: scale(.3); } 97.6% { opacity: 0; transform: scale(.3); } 100% { opacity: 0; transform: scale(.3); } }
+      @keyframes climber-bubble { 0% { opacity: 0; transform: scale(.4); } .97% { opacity: 0; transform: scale(.4); } 11.55% { opacity: 0; transform: scale(.4); } 16.22% { opacity: 0; transform: scale(.4); } 16.53% { opacity: 0; transform: scale(.4); } 16.77% { opacity: 1; transform: scale(1.08); } 16.92% { opacity: 1; transform: scale(1); } 19.35% { opacity: 1; transform: scale(1); } 19.66% { opacity: 0; transform: scale(.4); } 28.56% { opacity: 0; transform: scale(.4); } 39.14% { opacity: 0; transform: scale(.4); } 42.54% { opacity: 0; transform: scale(.4); } 46.29% { opacity: 0; transform: scale(.4); } 55.6% { opacity: 0; transform: scale(.4); } 66.19% { opacity: 0; transform: scale(.4); } 70.41% { opacity: 0; transform: scale(.4); } 74.79% { opacity: 0; transform: scale(.4); } 79.27% { opacity: 0; transform: scale(.4); } 89.85% { opacity: 0; transform: scale(.4); } 93.21% { opacity: 0; transform: scale(.4); } 97.6% { opacity: 0; transform: scale(.4); } 100% { opacity: 0; transform: scale(.4); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
     </style>
@@ -606,6 +611,11 @@
       <g transform="translate(1.6 -12.2)"><g class="arm">
         <path class="limb" d="M0 0 L2 2.8"/>
         <path class="limb pole" d="M1.7 1.8 L5 8"/>
+      </g></g>
+      <g transform="translate(3 -19)"><g class="bubble">
+        <rect class="pill" x="-38" y="-18.5" width="56" height="14.5" rx="7.25"/>
+        <path class="pill" d="M-2 -4.5 L1.5 0 L3 -4.5Z"/>
+        <text class="words" x="-10" y="-8.4">Hi there!</text>
       </g></g>
     </g>
   </g>

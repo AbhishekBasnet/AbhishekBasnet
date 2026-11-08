@@ -91,6 +91,9 @@ CLIMBER_BINOCULARS_LEAD = .3         # share of a UFO's arrival gone before the 
 CLIMBER_LOOKS = [(-26, 1), (10, 1), (0, -1)]   # look around: up, down, back; tilt in degrees (- is up), -1 faces back
 CLIMBER_LOOK_TURN = .35              # seconds the head takes to turn to the next direction
 BINOCULARS = "#4C566A"
+GREETING = "Hi there!"               # the speech bubble that pops up while the climber waves
+GREETING_SHOWN = 2                   # seconds it stays up
+GREETING_TEXT = {"light": "#FFFFFF", "dark": "#2E3440"}   # on an ink bubble: white by day, dark at night
 BOTTLE = "#8FBCBB"                   # Nord frost
 UFO_CLEAR_OF_CLIMBER = 30            # px either side of the climber's walk that UFOs don't park in
 

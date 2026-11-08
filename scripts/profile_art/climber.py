@@ -15,8 +15,10 @@ from __future__ import annotations
 import math
 from string import Template
 
+from xml.sax.saxutils import escape
+
 from .config import (
-    BINOCULARS, BOTTLE, CLIMBER_AT, CLIMBER_BINOCULARS_LEAD, CLIMBER_LOOK_TURN, CLIMBER_LOOKS,
+    BINOCULARS, BOTTLE, GREETING, GREETING_SHOWN, GREETING_TEXT, CLIMBER_AT, CLIMBER_BINOCULARS_LEAD, CLIMBER_LOOK_TURN, CLIMBER_LOOKS,
     CLIMBER_RAISE, CLIMBER_STRIDE, CLIMBER_STRIDES, CLIMBER_X, FOOTPRINT_OFFSETS, FOOTPRINT_REVEAL,
     FOOTPRINT_SPACING, FOOTPRINT_SUMMIT_CLEAR, FOOTPRINT_TOE_OUT, HEADLAMP, MUFFLER, ORB, RIDGE, SUMMITS,
 )
@@ -99,8 +101,20 @@ def climber(theme: str) -> str:
         <path class="limb" d="M0 0 L2 2.8"/>
         <path class="limb pole" d="M1.7 1.8 L5 8"/>
       </g></g>
+      {greeting()}
     </g>
   </g>"""
+
+
+def greeting() -> str:
+    """The speech bubble that pops up while the climber waves: an ink pill above and
+    to the left of the head, its tail pointing down at them. It pops from the tail's
+    tip at (0, 0), and sits clear of the ridge line and the devsecops label."""
+    return f"""<g transform="translate(3 -19)"><g class="bubble">
+        <rect class="pill" x="-38" y="-18.5" width="56" height="14.5" rx="7.25"/>
+        <path class="pill" d="M-2 -4.5 L1.5 0 L3 -4.5Z"/>
+        <text class="words" x="-10" y="-8.4">{escape(GREETING)}</text>
+      </g></g>"""
 
 
 # ── The footprint trail ──────────────────────────────────────────────────────
@@ -161,7 +175,8 @@ ARM_HANGING = 106                    # degrees: at rest the arm lies along the t
 HAND_AT_BROW = (3.8, -16.8)          # where the hand goes, in the head's frame
 HAND_AT_EYES = (4.6, -14.9)          # holding the camera or binoculars
 HAND_ON_BOTTLE = (5.4, -15.4)
-REST_POSE = {"head": (0, 1), "arm": 0, "binoculars": 0, "camera": 0, "bottle": 0, "flash": (0, .3)}
+REST_POSE = {"head": (0, 1), "arm": 0, "binoculars": 0, "camera": 0, "bottle": 0, "flash": (0, .3),
+             "bubble": (0, .4)}
 
 Pose = dict[str, object]
 Timeline = list[tuple[float, Pose]]   # (seconds into the gesture, pose)
@@ -206,13 +221,18 @@ def shade_poses(duration: float, sky: Sky) -> Timeline:
 
 
 def wave_poses(duration: float, sky: Sky) -> Timeline:
-    """The arm up high, waving side to side four times."""
+    """The arm up high, waving side to side four times, with a "Hi there!" bubble
+    that pops up as the wave starts and shrinks away GREETING_SHOWN seconds later."""
     head, high, low = (-6, 1), -60 - ARM_HANGING, -98 - ARM_HANGING
     raised = {"head": head, "arm": (high + low) / 2}
     waving = duration - 2 * CLIMBER_RAISE
     swings = [(CLIMBER_RAISE + waving * (n + 1) / 5, {"head": head, "arm": low if n % 2 == 0 else high})
               for n in range(4)]
-    return [(CLIMBER_RAISE, raised), *swings, (duration - CLIMBER_RAISE, raised)]
+    pops, gone = duration - GREETING_SHOWN, duration      # it leaves as the arm comes down
+    bubble = [(pops, {"bubble": (0, .4)}), (pops + .15, {"bubble": (1, 1.08)}), (pops + .25, {"bubble": (1, 1)}),
+              (gone - .2, {"bubble": (1, 1)})]
+    return sorted([(CLIMBER_RAISE, raised), *swings, (duration - CLIMBER_RAISE, raised), *bubble],
+                  key=lambda pose: pose[0])
 
 
 def photo_poses(duration: float, sky: Sky) -> Timeline:
@@ -299,7 +319,7 @@ def declaration(part: str, value) -> str:
         return f"transform: rotate({num(tilt)}deg) scaleX({facing});"
     if part == "arm":
         return f"transform: rotate({num(value)}deg);"
-    if part == "flash":
+    if part in ("flash", "bubble"):
         opacity, scale = value
         return f"opacity: {num(opacity)}; transform: scale({num(scale)});"
     return f"opacity: {num(value)};"             # a prop showing or not
@@ -329,14 +349,18 @@ CLIMBER_STYLE = Template("""
 
     /* once stopped, one gesture at a time: every moving part runs the same loop */
     .climber .turn, .climber .gesture,
-    .climber .prop, .climber .flash { animation: none ${routine_cycle}s ease-in-out ${routine_at}s infinite; }
+    .climber .prop, .climber .flash,
+    .climber .bubble { animation: none ${routine_cycle}s ease-in-out ${routine_at}s infinite; }
     .climber .turn       { animation-name: climber-head; }
     .climber .gesture    { animation-name: climber-arm; }
     .climber .binoculars { animation-name: climber-binoculars; fill: $binoculars; }
     .climber .camera     { animation-name: climber-camera; }
     .climber .bottle     { animation-name: climber-bottle; fill: $bottle; }
     .climber .flash      { animation-name: climber-flash; }
-    .climber .prop, .climber .flash { opacity: 0; }
+    .climber .bubble     { animation-name: climber-bubble; }
+    .climber .prop, .climber .flash, .climber .bubble { opacity: 0; }
+    .climber .pill       { fill: var(--ink); }
+    .climber .words      { font: 500 8.5px var(--mono); letter-spacing: .3px; fill: $greeting_text; text-anchor: middle; }
     .climber .camera .body { fill: var(--muted); }
     .climber .camera .lens { fill: var(--accent); }
     .climber .flash .spark { fill: $lamp; }
@@ -357,7 +381,7 @@ CLIMBER_STYLE = Template("""
 
 def climber_style(theme: str, sky: Sky) -> str:
     routine = sky.routines[theme]
-    return CLIMBER_STYLE.substitute(
+    return CLIMBER_STYLE.substitute(greeting_text=GREETING_TEXT[theme],
         climb=num(WALK), at=num(CLIMBER_AT), stride=num(CLIMBER_STRIDE),
         strides=CLIMBER_STRIDES, muffler=MUFFLER, lamp=HEADLAMP, binoculars=BINOCULARS, bottle=BOTTLE,
         routine_cycle=num(routine.cycle), routine_at=num(routine.at), gestures=gesture_keyframes(sky, theme))

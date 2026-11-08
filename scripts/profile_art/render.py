@@ -102,11 +102,23 @@ def moon_shape(m: Moon) -> str:
     return f'<path class="body" transform="rotate({MOON_TILT} {cx} {cy})" d="{d}"/>'
 
 
+def visible_edge(rb: Ribbon) -> list[Point]:
+    """The curtain's upper edge cut down to its stretch of sky, plus two points past
+    each end: the mask hides everything beyond the ends, and the two extra points
+    keep the curve through the stretch exactly as it was. A shorter shape leaves the
+    blur and the mask less to redraw each frame."""
+    left, right = rb.span
+    first = max(0, next(i for i, (x, _) in enumerate(rb.top) if x >= left) - 2)
+    last = min(len(rb.top), max(i for i, (x, _) in enumerate(rb.top) if x <= right) + 3)
+    return rb.top[first:last]
+
+
 def ribbon(i: int, rb: Ribbon) -> str:
     """A curtain, faded in and out at the ends of its stretch of sky by the mask."""
-    lower = [(x, y + rb.thickness) for x, y in reversed(rb.top)]
-    (x0, y0), (x1, y1) = rb.top[0], lower[0]
-    d = f"M{num(x0)} {num(y0)} {smooth(rb.top)} L{num(x1)} {num(y1)} {smooth(lower)}Z"
+    top = visible_edge(rb)
+    lower = [(x, y + rb.thickness) for x, y in reversed(top)]
+    (x0, y0), (x1, y1) = top[0], lower[0]
+    d = f"M{num(x0)} {num(y0)} {smooth(top)} L{num(x1)} {num(y1)} {smooth(lower)}Z"
     return f"""<g mask="url(#aurora-window-{i})" opacity="{num(rb.opacity)}">
         <path class="aurora" fill="url(#aurora-{i})" d="{d}"/>
       </g>"""
@@ -511,7 +523,7 @@ def defs(theme: str, sky: Sky) -> str:
       <stop offset=".7" stop-color="#fff"/>
       <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>{"".join(aurora_window(i, rb) for i, rb in enumerate(sky.aurora))}
-    <filter id="haze" x="-10%" y="-60%" width="120%" height="220%"><feGaussianBlur stdDeviation="6"/></filter>
+    {aurora_haze(sky.aurora)}
     <linearGradient id="beam">
       <stop offset="0" stop-color="{HEADLAMP}" stop-opacity=".6"/>
       <stop offset="1" stop-color="{HEADLAMP}" stop-opacity="0"/>
@@ -528,12 +540,38 @@ def aurora_gradient(i: int, color: str) -> str:
     </linearGradient>"""
 
 
+AURORA_BLUR = 6                      # the haze's softness (Gaussian standard deviation, px)
+
+
+def aurora_haze(ribbons: list[Ribbon]) -> str:
+    """The blur that softens the aurora, worked out only over the curtains' windows
+    plus three standard deviations each side, the farthest a Gaussian blur visibly
+    spreads. A tight area leaves the blur less to redraw each frame."""
+    spread = 3 * AURORA_BLUR
+    boxes = [aurora_box(rb) for rb in ribbons]
+    left = min(b[0] for b in boxes) - spread
+    top = min(b[1] for b in boxes) - spread
+    right = max(b[2] for b in boxes) + spread
+    bottom = max(b[3] for b in boxes) + spread
+    return (f'<filter id="haze" filterUnits="userSpaceOnUse" x="{num(left)}" y="{num(top)}" '
+            f'width="{num(right - left)}" height="{num(bottom - top)}"><feGaussianBlur stdDeviation="{AURORA_BLUR}"/></filter>')
+
+
+def aurora_box(rb: Ribbon) -> tuple[float, float, float, float]:
+    """The window a curtain shows through: its stretch of sky, as tall as the
+    curtain with room for the curve's swing."""
+    edge = [y for _, y in visible_edge(rb)]
+    return rb.span[0], min(edge) - 8, rb.span[1], max(edge) + rb.thickness + 8
+
+
 def aurora_window(i: int, rb: Ribbon) -> str:
-    """Limits a curtain to its stretch of sky, fading in and out at the ends."""
-    left, right = rb.span
+    """Limits a curtain to its stretch of sky, fading in and out at the ends. The
+    window is only as tall as the curtain (with room for the curve's swing), so the
+    mask has as little as possible to redraw each frame."""
+    left, top, right, bottom = aurora_box(rb)
     return f"""
     <mask id="aurora-window-{i}" maskUnits="userSpaceOnUse">
-      <rect x="{num(left)}" y="{VIEW_Y}" width="{num(right - left)}" height="{HEIGHT}" fill="url(#fade-ends)"/>
+      <rect x="{num(left)}" y="{num(top)}" width="{num(right - left)}" height="{num(bottom - top)}" fill="url(#fade-ends)"/>
     </mask>"""
 
 
