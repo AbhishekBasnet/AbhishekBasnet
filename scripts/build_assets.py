@@ -25,6 +25,9 @@ Animation timeline (seconds after the image loads):
     4.5 →       day visitors     birds, parachute, paraglider, plane take turns, 1–3s apart
     5 – 7 →     both             UFOs arrive, park and whip off, 6–12s apart
     4.5 →       night visitors   shooting stars; satellites from 3–5s, 3–8s apart
+    2.8 – 5.4   climber, once    walks four strides up the devsecops peak, stops halfway
+    5.4 →       climber          one gesture at a time: binoculars on each UFO by day, and
+                                 shade / wave / photo / drink (day) or look / wave / photo / drink (night)
 """
 
 from __future__ import annotations

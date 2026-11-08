@@ -16,7 +16,7 @@ from datetime import date, datetime, timezone
 from . import config as cfg
 from .geometry import (Box, contains, distance, distance_to_box, height_on, inside, overlaps,
                        segment_clear_of, segment_touches)
-from .models import Cloud, Meteor, Moon, Ribbon, Route, Satellite, Sky, Star, Ufo, Visit
+from .models import Cloud, Gesture, Meteor, Moon, Ribbon, Route, Routine, Satellite, Sky, Star, Ufo, Visit
 
 
 def roll_sky(seed: str, day: date) -> Sky:
@@ -31,12 +31,13 @@ def roll_sky(seed: str, day: date) -> Sky:
     flight, visits, visit_cycle = plan_visits(rng)
     satellites, satellite_duration, satellite_cycle = plan_satellites(rng)
     ufos, ufo_times, ufo_cycle = plan_ufos(rng)
+    routines = {"light": day_routine(rng, ufos, ufo_times, ufo_cycle), "dark": night_routine(rng)}
     return Sky(clouds=clouds, cloudy_sun=cloudy_sun, wind=wind,
                visits=visits, flight=flight, visit_cycle=visit_cycle,
                stars=stars, meteors=meteors, moon=moon_on(day),
                aurora=shape_aurora(rng), satellites=satellites,
                satellite_pass=satellite_duration, satellite_cycle=satellite_cycle,
-               ufos=ufos, ufo_times=ufo_times, ufo_cycle=ufo_cycle)
+               ufos=ufos, ufo_times=ufo_times, ufo_cycle=ufo_cycle, routines=routines)
 
 
 # ── Clouds ───────────────────────────────────────────────────────────────────
@@ -254,6 +255,51 @@ def ufo(rng: random.Random, start: float, from_sky: bool, attempts: int = 10_000
         return Ufo(x=x, y=y, rise=height_on(cfg.RIDGE, x) - y + 16, dx=exit_[0] - x, dy=exit_[1] - y,
                    start=start, arrive=(entry[0] - x, entry[1] - y) if from_sky else None)
     raise RuntimeError("no UFO parking spot fits the rules in config")
+
+
+# ── Climber's gestures ───────────────────────────────────────────────────────
+
+def day_routine(rng: random.Random, ufos: list[Ufo], ufo_times: tuple[float, float, float, float],
+                ufo_cycle: float) -> Routine:
+    """Binoculars on every UFO, in step with the UFO loop, and the other day gestures
+    in the gaps between: each only where it fits whole, with a rest either side."""
+    rise, visit = ufo_times[0], sum(ufo_times)
+    lead = cfg.CLIMBER_BINOCULARS_LEAD * rise
+    first = ufos[0].start
+    windows = [Gesture("binoculars", u.start - first + lead, visit - lead + .1 + cfg.CLIMBER_RAISE, ufo=i)
+               for i, u in enumerate(ufos)]
+    gaps = [(w.start + w.duration, nxt.start) for w, nxt in zip(windows, windows[1:])]
+    gaps.append((windows[-1].start + windows[-1].duration, ufo_cycle))
+    return Routine(fill_gaps(rng, cfg.CLIMBER_DAY, gaps, windows), ufo_cycle, first)
+
+
+def night_routine(rng: random.Random) -> Routine:
+    """The night gestures taking turns in a shuffled loop, from just after the climber stops."""
+    order = list(cfg.CLIMBER_NIGHT)
+    rng.shuffle(order)
+    gestures, t = [], 0.0
+    for kind in order:
+        gestures.append(Gesture(kind, t, cfg.CLIMBER_GESTURES[kind]))
+        t += cfg.CLIMBER_GESTURES[kind] + rng.uniform(*cfg.CLIMBER_REST)
+    stopped = cfg.CLIMBER_AT + cfg.CLIMBER_STRIDE * cfg.CLIMBER_STRIDES
+    return Routine(gestures, t, stopped + cfg.CLIMBER_REST[0])
+
+
+def fill_gaps(rng: random.Random, kinds: tuple[str, ...], gaps: list[tuple[float, float]],
+              fixed: list[Gesture]) -> list[Gesture]:
+    """Takes `kinds` in a shuffled turn and places each in the gaps, wherever it fits
+    whole between rests; returns them merged with the `fixed` gestures, in order."""
+    order = list(kinds)
+    rng.shuffle(order)
+    placed, k = [], 0
+    for start, end in gaps:
+        t = start + rng.uniform(*cfg.CLIMBER_REST)
+        while t + cfg.CLIMBER_GESTURES[order[k % len(order)]] + cfg.CLIMBER_REST[0] <= end:
+            kind = order[k % len(order)]
+            placed.append(Gesture(kind, t, cfg.CLIMBER_GESTURES[kind]))
+            t += cfg.CLIMBER_GESTURES[kind] + rng.uniform(*cfg.CLIMBER_REST)
+            k += 1
+    return sorted(fixed + placed, key=lambda g: g.start)
 
 
 # ── Day visitors ─────────────────────────────────────────────────────────────

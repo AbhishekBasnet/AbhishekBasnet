@@ -78,11 +78,20 @@ CLIMBER_STRIDE = .65                 # seconds per stride
 CLIMBER_STRIDES = 4                  # strides to the stop, so the walk lasts 2.6s
 MUFFLER = "#D08770"                  # Nord orange, like the parachute and the sun's glow
 HEADLAMP = "#EBCB8B"
-# At night, once stopped, the climber looks around and the headlamp beam follows:
-# ahead, up, down, then back over the shoulder, each held for CLIMBER_LOOK_HOLD seconds.
-CLIMBER_LOOKS = [(0, 1), (-26, 1), (10, 1), (0, -1)]   # head tilt in degrees (- is up), 1 faces ahead, -1 back
-CLIMBER_LOOK_HOLD = 2                # seconds per direction, turn included
+# Once stopped, the climber passes the time with one gesture at a time, a short rest
+# between. By day, whenever a UFO comes, they follow it through binoculars, and the
+# other day gestures fill the gaps between UFOs. At night there are no binoculars;
+# the gestures take turns in a loop. The order is shuffled daily.
+CLIMBER_GESTURES = dict(shade=2.8, wave=2.2, photo=2.4, drink=2.8, look=5.0)   # seconds each
+CLIMBER_DAY = ("shade", "wave", "photo", "drink")     # shade the eyes towards the sun, wave, take a photo, drink
+CLIMBER_NIGHT = ("look", "wave", "photo", "drink")    # look around (the beam follows), wave, photo, drink
+CLIMBER_REST = (1.5, 3.0)            # seconds between gestures
+CLIMBER_RAISE = .4                   # seconds to bring the arm up or down
+CLIMBER_BINOCULARS_LEAD = .3         # share of a UFO's arrival gone before the binoculars come up
+CLIMBER_LOOKS = [(-26, 1), (10, 1), (0, -1)]   # look around: up, down, back; tilt in degrees (- is up), -1 faces back
 CLIMBER_LOOK_TURN = .35              # seconds the head takes to turn to the next direction
+BINOCULARS = "#4C566A"
+BOTTLE = "#8FBCBB"                   # Nord frost
 UFO_CLEAR_OF_CLIMBER = 30            # px either side of the climber's walk that UFOs don't park in
 
 # Footprints along the ridge crest from the left edge to the climber's heels: the

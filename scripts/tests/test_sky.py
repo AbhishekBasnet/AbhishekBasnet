@@ -181,6 +181,37 @@ class NightRules(unittest.TestCase):
                 self.assertGreaterEqual(rb.top[-1][0], rb.span[1] + rb.wave - 1e-6)
 
 
+class ClimberRules(unittest.TestCase):
+    STOPPED = cfg.CLIMBER_AT + cfg.CLIMBER_STRIDE * cfg.CLIMBER_STRIDES
+
+    def test_one_gesture_at_a_time_with_a_rest_between_inside_the_loop(self):
+        for sky in SKIES:
+            for routine in sky.routines.values():
+                gestures = routine.gestures
+                self.assertGreaterEqual(routine.at + gestures[0].start, self.STOPPED)   # only once stopped
+                for a, b in zip(gestures, gestures[1:]):
+                    self.assertGreaterEqual(b.start - (a.start + a.duration), cfg.CLIMBER_REST[0] - 1e-9)
+                self.assertLessEqual(gestures[-1].start + gestures[-1].duration, routine.cycle)
+
+    def test_day_follows_every_ufo_through_binoculars_in_step_with_the_ufo_loop(self):
+        for sky in SKIES:
+            day = sky.routines["light"]
+            self.assertAlmostEqual(day.cycle, sky.ufo_cycle)
+            self.assertAlmostEqual(day.at, sky.ufos[0].start)
+            binoculars = [g for g in day.gestures if g.kind == "binoculars"]
+            self.assertEqual([g.ufo for g in binoculars], list(range(cfg.UFOS)))
+            for g in binoculars:                         # up while the UFO is in the sky, down once it has gone
+                u = sky.ufos[g.ufo]
+                self.assertLess(day.at + g.start, u.start + sky.ufo_times[0])
+                self.assertGreater(day.at + g.start + g.duration, u.start + sum(sky.ufo_times))
+            self.assertTrue({g.kind for g in day.gestures} - {"binoculars"} <= set(cfg.CLIMBER_DAY))
+
+    def test_night_has_every_night_gesture_and_no_binoculars(self):
+        for sky in SKIES:
+            kinds = [g.kind for g in sky.routines["dark"].gestures]
+            self.assertEqual(sorted(kinds), sorted(cfg.CLIMBER_NIGHT))
+
+
 class Output(unittest.TestCase):
     def test_same_seed_gives_same_sky(self):
         day = datetime.date(2026, 10, 28)

@@ -126,8 +126,23 @@
       .climber .tail-b  { animation: flutter-b .6s ease-in-out -.2s infinite alternate; }
       .climber .tail-c  { animation: flutter-c .6s ease-in-out -.4s infinite alternate; }
       .climber .beam    { animation: beam 2.4s ease-in-out infinite alternate; }
-      .climber .look    { animation: look 8s ease-in-out 5.4s infinite; }
-      .print            { fill: var(--muted); opacity: .75; animation: print .4s ease-out var(--d) backwards; }
+
+      /* once stopped, one gesture at a time: every moving part runs the same loop */
+      .climber .turn, .climber .gesture,
+      .climber .prop, .climber .flash { animation: none 63.89s ease-in-out 6.52s infinite; }
+      .climber .turn       { animation-name: climber-head; }
+      .climber .gesture    { animation-name: climber-arm; }
+      .climber .binoculars { animation-name: climber-binoculars; fill: #4C566A; }
+      .climber .camera     { animation-name: climber-camera; }
+      .climber .bottle     { animation-name: climber-bottle; fill: #8FBCBB; }
+      .climber .flash      { animation-name: climber-flash; }
+      .climber .prop, .climber .flash { opacity: 0; }
+      .climber .camera .body { fill: var(--muted); }
+      .climber .camera .lens { fill: var(--accent); }
+      .climber .flash .spark { fill: #EBCB8B; }
+      .climber .flash .core  { fill: #FFFFFF; }
+
+      .print           { fill: var(--muted); opacity: .75; animation: print .4s ease-out var(--d) backwards; }
 
       @keyframes climb     { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } 5% { opacity: 1; } to { transform: none; } }
       @keyframes stride    { 25% { transform: rotate(18deg); } 75% { transform: rotate(-18deg); } }
@@ -136,7 +151,12 @@
       @keyframes flutter-c { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
       @keyframes beam      { from { opacity: .7; } to { opacity: 1; } }
       @keyframes print     { from { opacity: 0; } }
-      @keyframes look { 0%, 20.62% { transform: rotate(0deg) scaleX(1); } 25%, 45.62% { transform: rotate(-26deg) scaleX(1); } 50%, 70.62% { transform: rotate(10deg) scaleX(1); } 75%, 95.62% { transform: rotate(0deg) scaleX(-1); } 100% { transform: rotate(0deg) scaleX(1); } }
+      @keyframes climber-head { 0% { transform: rotate(0deg) scaleX(1); } .97% { transform: rotate(0deg) scaleX(1); } 1.59% { transform: rotate(-8.81deg) scaleX(1); } 8.35% { transform: rotate(-8.81deg) scaleX(1); } 9.8% { transform: rotate(-24.79deg) scaleX(1); } 10.77% { transform: rotate(-70deg) scaleX(1); } 10.92% { transform: rotate(-70deg) scaleX(1); } 11.55% { transform: rotate(0deg) scaleX(1); } 16.22% { transform: rotate(0deg) scaleX(1); } 16.85% { transform: rotate(-6deg) scaleX(1); } 17.28% { transform: rotate(-6deg) scaleX(1); } 17.72% { transform: rotate(-6deg) scaleX(1); } 18.16% { transform: rotate(-6deg) scaleX(1); } 18.6% { transform: rotate(-6deg) scaleX(1); } 19.04% { transform: rotate(-6deg) scaleX(1); } 19.66% { transform: rotate(0deg) scaleX(1); } 28.56% { transform: rotate(0deg) scaleX(1); } 29.19% { transform: rotate(-5.32deg) scaleX(1); } 35.95% { transform: rotate(-5.32deg) scaleX(1); } 37.4% { transform: rotate(-15.59deg) scaleX(1); } 38.36% { transform: rotate(-67.05deg) scaleX(1); } 38.52% { transform: rotate(-67.05deg) scaleX(1); } 39.14% { transform: rotate(0deg) scaleX(1); } 42.54% { transform: rotate(0deg) scaleX(1); } 43.16% { transform: rotate(-8deg) scaleX(1); } 45.67% { transform: rotate(-8deg) scaleX(1); } 46.29% { transform: rotate(0deg) scaleX(1); } 55.6% { transform: rotate(0deg) scaleX(1); } 56.23% { transform: rotate(-3.84deg) scaleX(1); } 62.99% { transform: rotate(-3.84deg) scaleX(1); } 64.44% { transform: rotate(-18.17deg) scaleX(1); } 65.4% { transform: rotate(-70deg) scaleX(1); } 65.56% { transform: rotate(-70deg) scaleX(1); } 66.19% { transform: rotate(0deg) scaleX(1); } 70.41% { transform: rotate(0deg) scaleX(1); } 71.03% { transform: rotate(-22.01deg) scaleX(1); } 72.6% { transform: rotate(-14.01deg) scaleX(1); } 74.16% { transform: rotate(-22.01deg) scaleX(1); } 74.79% { transform: rotate(0deg) scaleX(1); } 79.27% { transform: rotate(0deg) scaleX(1); } 79.89% { transform: rotate(-6.6deg) scaleX(1); } 86.65% { transform: rotate(-6.6deg) scaleX(1); } 88.1% { transform: rotate(-20.6deg) scaleX(1); } 89.07% { transform: rotate(-70deg) scaleX(1); } 89.22% { transform: rotate(-70deg) scaleX(1); } 89.85% { transform: rotate(0deg) scaleX(1); } 93.21% { transform: rotate(0deg) scaleX(1); } 93.84% { transform: rotate(-6deg) scaleX(1); } 94.54% { transform: rotate(-36deg) scaleX(1); } 96.26% { transform: rotate(-36deg) scaleX(1); } 96.97% { transform: rotate(-6deg) scaleX(1); } 97.6% { transform: rotate(0deg) scaleX(1); } 100% { transform: rotate(0deg) scaleX(1); } }
+      @keyframes climber-arm { 0% { transform: rotate(0deg); } .97% { transform: rotate(0deg); } 1.59% { transform: rotate(-154.35deg); } 8.35% { transform: rotate(-154.35deg); } 9.8% { transform: rotate(-165.73deg); } 10.77% { transform: rotate(-197.66deg); } 10.92% { transform: rotate(-197.66deg); } 11.55% { transform: rotate(0deg); } 16.22% { transform: rotate(0deg); } 16.85% { transform: rotate(-185deg); } 17.28% { transform: rotate(-204deg); } 17.72% { transform: rotate(-166deg); } 18.16% { transform: rotate(-204deg); } 18.6% { transform: rotate(-166deg); } 19.04% { transform: rotate(-185deg); } 19.66% { transform: rotate(0deg); } 28.56% { transform: rotate(0deg); } 29.19% { transform: rotate(-151.84deg); } 35.95% { transform: rotate(-151.84deg); } 37.4% { transform: rotate(-159.2deg); } 38.36% { transform: rotate(-195.56deg); } 38.52% { transform: rotate(-195.56deg); } 39.14% { transform: rotate(0deg); } 42.54% { transform: rotate(0deg); } 43.16% { transform: rotate(-153.77deg); } 45.67% { transform: rotate(-153.77deg); } 46.29% { transform: rotate(0deg); } 55.6% { transform: rotate(0deg); } 56.23% { transform: rotate(-150.77deg); } 62.99% { transform: rotate(-150.77deg); } 64.44% { transform: rotate(-161.04deg); } 65.4% { transform: rotate(-197.66deg); } 65.56% { transform: rotate(-197.66deg); } 66.19% { transform: rotate(0deg); } 70.41% { transform: rotate(0deg); } 71.03% { transform: rotate(-187.02deg); } 72.6% { transform: rotate(-180.99deg); } 74.16% { transform: rotate(-187.02deg); } 74.79% { transform: rotate(0deg); } 79.27% { transform: rotate(0deg); } 79.89% { transform: rotate(-152.76deg); } 86.65% { transform: rotate(-152.76deg); } 88.1% { transform: rotate(-162.76deg); } 89.07% { transform: rotate(-197.66deg); } 89.22% { transform: rotate(-197.66deg); } 89.85% { transform: rotate(0deg); } 93.21% { transform: rotate(0deg); } 93.84% { transform: rotate(-150.78deg); } 94.54% { transform: rotate(-173.7deg); } 96.26% { transform: rotate(-173.7deg); } 96.97% { transform: rotate(-150.78deg); } 97.6% { transform: rotate(0deg); } 100% { transform: rotate(0deg); } }
+      @keyframes climber-binoculars { 0% { opacity: 0; } .97% { opacity: 0; } 1.34% { opacity: 0; } 1.59% { opacity: 1; } 8.35% { opacity: 1; } 9.8% { opacity: 1; } 10.77% { opacity: 1; } 10.92% { opacity: 1; } 11.3% { opacity: 0; } 11.55% { opacity: 0; } 16.22% { opacity: 0; } 19.66% { opacity: 0; } 28.56% { opacity: 0; } 28.94% { opacity: 0; } 29.19% { opacity: 1; } 35.95% { opacity: 1; } 37.4% { opacity: 1; } 38.36% { opacity: 1; } 38.52% { opacity: 1; } 38.89% { opacity: 0; } 39.14% { opacity: 0; } 42.54% { opacity: 0; } 46.29% { opacity: 0; } 55.6% { opacity: 0; } 55.98% { opacity: 0; } 56.23% { opacity: 1; } 62.99% { opacity: 1; } 64.44% { opacity: 1; } 65.4% { opacity: 1; } 65.56% { opacity: 1; } 65.94% { opacity: 0; } 66.19% { opacity: 0; } 70.41% { opacity: 0; } 74.79% { opacity: 0; } 79.27% { opacity: 0; } 79.64% { opacity: 0; } 79.89% { opacity: 1; } 86.65% { opacity: 1; } 88.1% { opacity: 1; } 89.07% { opacity: 1; } 89.22% { opacity: 1; } 89.6% { opacity: 0; } 89.85% { opacity: 0; } 93.21% { opacity: 0; } 97.6% { opacity: 0; } 100% { opacity: 0; } }
+      @keyframes climber-camera { 0% { opacity: 0; } .97% { opacity: 0; } 11.55% { opacity: 0; } 16.22% { opacity: 0; } 19.66% { opacity: 0; } 28.56% { opacity: 0; } 39.14% { opacity: 0; } 42.54% { opacity: 0; } 42.91% { opacity: 0; } 43.16% { opacity: 1; } 45.67% { opacity: 1; } 46.04% { opacity: 0; } 46.29% { opacity: 0; } 55.6% { opacity: 0; } 66.19% { opacity: 0; } 70.41% { opacity: 0; } 74.79% { opacity: 0; } 79.27% { opacity: 0; } 89.85% { opacity: 0; } 93.21% { opacity: 0; } 97.6% { opacity: 0; } 100% { opacity: 0; } }
+      @keyframes climber-bottle { 0% { opacity: 0; } .97% { opacity: 0; } 11.55% { opacity: 0; } 16.22% { opacity: 0; } 19.66% { opacity: 0; } 28.56% { opacity: 0; } 39.14% { opacity: 0; } 42.54% { opacity: 0; } 46.29% { opacity: 0; } 55.6% { opacity: 0; } 66.19% { opacity: 0; } 70.41% { opacity: 0; } 74.79% { opacity: 0; } 79.27% { opacity: 0; } 89.85% { opacity: 0; } 93.21% { opacity: 0; } 93.59% { opacity: 0; } 93.84% { opacity: 1; } 94.54% { opacity: 1; } 96.26% { opacity: 1; } 96.97% { opacity: 1; } 97.34% { opacity: 0; } 97.6% { opacity: 0; } 100% { opacity: 0; } }
+      @keyframes climber-flash { 0% { opacity: 0; transform: scale(.3); } .97% { opacity: 0; transform: scale(.3); } 11.55% { opacity: 0; transform: scale(.3); } 16.22% { opacity: 0; transform: scale(.3); } 19.66% { opacity: 0; transform: scale(.3); } 28.56% { opacity: 0; transform: scale(.3); } 39.14% { opacity: 0; transform: scale(.3); } 42.54% { opacity: 0; transform: scale(.3); } 44.34% { opacity: 0; transform: scale(.3); } 44.51% { opacity: 1; transform: scale(1.2); } 44.96% { opacity: 0; transform: scale(.6); } 46.29% { opacity: 0; transform: scale(.3); } 55.6% { opacity: 0; transform: scale(.3); } 66.19% { opacity: 0; transform: scale(.3); } 70.41% { opacity: 0; transform: scale(.3); } 74.79% { opacity: 0; transform: scale(.3); } 79.27% { opacity: 0; transform: scale(.3); } 89.85% { opacity: 0; transform: scale(.3); } 93.21% { opacity: 0; transform: scale(.3); } 97.6% { opacity: 0; transform: scale(.3); } 100% { opacity: 0; transform: scale(.3); } }
 
       @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
     </style>
@@ -558,11 +578,17 @@
       <g transform="translate(0 -7)"><g class="leg">
         <path class="limb" d="M0 0 L4 1.2 L2.6 5.2 L3.8 4.9"/>
       </g></g>
-      <g transform="translate(2 -13.4)"><g><g transform="translate(-2 13.4)">
+      <g transform="translate(2 -13.4)"><g class="turn"><g transform="translate(-2 13.4)">
           <circle class="head" cx="2.6" cy="-15.1" r="1.75"/>
           <path class="muffler" d="M.85 -15.4 A1.8 1.8 0 0 1 4.35 -15.4 Z"/>
           <circle class="muffler" cx="2.4" cy="-17.3" r=".6"/>
           <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>
+          <g class="prop binoculars"><rect x="3.7" y="-16.4" width="2.8" height="1.1" rx=".35"/><rect x="3.9" y="-15.2" width="2.6" height="1" rx=".35"/></g>
+          <g class="prop camera"><rect class="body" x="3.7" y="-16.5" width="2.6" height="1.8" rx=".35"/><circle class="lens" cx="6.4" cy="-15.6" r=".6"/></g>
+          <g transform="translate(7.6 -15.6)"><g class="flash">
+            <path class="spark" d="M0 -3 Q.4 -.4 3 0 Q.4 .4 0 3 Q-.4 .4 -3 0 Q-.4 -.4 0 -3Z"/><circle class="core" r=".8"/>
+          </g></g>
+          <rect class="prop bottle" x="0" y="-.65" width="3.4" height="1.3" rx=".5" transform="translate(4 -14.4) rotate(-28)"/>
       </g></g></g>
       <g transform="translate(.8 -13.2)"><g class="tail-a">
         <path class="muffler" d="M.4 -.6 L-4.6 -.8 L-4.6 .6 L.4 .6 Z"/>
@@ -574,6 +600,9 @@
         </g></g>
       </g></g>
       <rect class="muffler" x=".6" y="-13.7" width="2.8" height="1.3" rx=".6" transform="rotate(16 2 -13)"/>
+      <g transform="translate(1.6 -12.2)"><g class="gesture">
+        <path class="limb" d="M0 0 L-1.15 4.04"/>
+      </g></g>
       <g transform="translate(1.6 -12.2)"><g class="arm">
         <path class="limb" d="M0 0 L2 2.8"/>
         <path class="limb pole" d="M1.7 1.8 L5 8"/>

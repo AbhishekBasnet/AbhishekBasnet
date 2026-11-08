@@ -103,6 +103,24 @@ class Ufo:
 
 
 @dataclass(frozen=True)
+class Gesture:
+    """One thing the climber does: shade, wave, photo, drink, look or binoculars."""
+    kind: str
+    start: float      # seconds into the routine
+    duration: float
+    ufo: int | None = None   # binoculars only: which UFO they follow
+
+
+@dataclass(frozen=True)
+class Routine:
+    """The climber's gestures for one theme, one at a time, looping every `cycle`
+    seconds from `at` seconds after load."""
+    gestures: list[Gesture]
+    cycle: float
+    at: float
+
+
+@dataclass(frozen=True)
 class Sky:
     """Everything that changes from day to day."""
     clouds: list[Cloud]
@@ -121,3 +139,4 @@ class Sky:
     ufos: list[Ufo]               # day and night: take turns
     ufo_times: tuple[float, float, float, float]   # seconds to rise, park, approach and whip off
     ufo_cycle: float              # night: seconds before the first comes round again
+    routines: dict[str, Routine]  # the climber's gestures, by theme

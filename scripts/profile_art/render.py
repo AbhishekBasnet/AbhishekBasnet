@@ -9,8 +9,8 @@ from textwrap import dedent, indent
 from xml.sax.saxutils import escape
 
 from .config import (
-    AURORA_COLORS, BACKDROP_HEIGHT, CANOPY, CLIMBER_AT, CLIMBER_LOOK_HOLD, CLIMBER_LOOK_TURN,
-    CLIMBER_LOOKS, CLIMBER_STRIDE, CLIMBER_STRIDES, CLIMBER_X,
+    AURORA_COLORS, BACKDROP_HEIGHT, BINOCULARS, BOTTLE, CANOPY, CLIMBER_AT, CLIMBER_BINOCULARS_LEAD,
+    CLIMBER_LOOK_TURN, CLIMBER_LOOKS, CLIMBER_RAISE, CLIMBER_STRIDE, CLIMBER_STRIDES, CLIMBER_X,
     CLOUD_FILL, CONTRAIL, COORDS, FOOTPRINT_OFFSETS, FOOTPRINT_REVEAL, FOOTPRINT_SPACING,
     FOOTPRINT_SUMMIT_CLEAR, FOOTPRINT_TOE_OUT, GROUND_Y, HEADLAMP, HEIGHT, MUFFLER,
     LABEL_GLOW, LABEL_LINE_GAP, LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB,
@@ -20,7 +20,7 @@ from .config import (
     VIEW_X, VIEW_Y, VISITOR_INK, VISIT_FIRST, WIDTH,
 )
 from .geometry import distance_to_polyline, height_on
-from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Ufo, Visit
+from .models import Cloud, Gesture, Meteor, Moon, Ribbon, Satellite, Sky, Star, Ufo, Visit
 
 Point = tuple[float, float]
 
@@ -239,14 +239,17 @@ def climber(theme: str) -> str:
     right around their feet at (0, 0) on a slope of about 35°. The outer group stands
     them where they stop; `.climber` walks them in from where they set off. Each leg,
     the arm and the three pieces of the muffler sit in a group at their own hinge, so a plain
-    CSS rotation swings them about it. At night a headlamp beam lights the slope."""
-    (x0, x1), lift = CLIMBER_X, .6          # stand on the ridge stroke, not in it
-    start, rest = (x0, height_on(RIDGE, x0) - lift), (x1, height_on(RIDGE, x1) - lift)
+    CSS rotation swings them about it. The head carries the props (binoculars by day,
+    a camera with its flash, a bottle) and, at night, the headlamp beam, so they turn
+    with it; a second arm hangs hidden along the torso until a gesture lifts it."""
+    x0 = CLIMBER_X[0]
+    start, rest = (x0, height_on(RIDGE, x0) - .6), climber_spot()
     night = theme == "dark"
     beam = ("""
           <path class="beam" d="M4.3 -15 L24 -28.8 L27.5 -21.2 Z" fill="url(#beam)" filter="url(#spark)"/>"""
             if night else "")
-    look = ' class="look"' if night else ""         # at night the head looks around, the beam with it
+    binoculars = ("" if night else """
+          <g class="prop binoculars"><rect x="3.7" y="-16.4" width="2.8" height="1.1" rx=".35"/><rect x="3.9" y="-15.2" width="2.6" height="1" rx=".35"/></g>""")
     return f"""<g transform="translate({num(rest[0])} {num(rest[1])})">
     <g class="climber" style="--dx: {num(start[0] - rest[0])}px; --dy: {num(start[1] - rest[1])}px">
       <g transform="translate(0 -7)"><g class="leg back">
@@ -260,11 +263,16 @@ def climber(theme: str) -> str:
       <g transform="translate(0 -7)"><g class="leg">
         <path class="limb" d="M0 0 L4 1.2 L2.6 5.2 L3.8 4.9"/>
       </g></g>
-      <g transform="translate(2 -13.4)"><g{look}><g transform="translate(-2 13.4)">{beam}
+      <g transform="translate(2 -13.4)"><g class="turn"><g transform="translate(-2 13.4)">{beam}
           <circle class="head" cx="2.6" cy="-15.1" r="1.75"/>
           <path class="muffler" d="M.85 -15.4 A1.8 1.8 0 0 1 4.35 -15.4 Z"/>
           <circle class="muffler" cx="2.4" cy="-17.3" r=".6"/>
-          <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>
+          <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>{binoculars}
+          <g class="prop camera"><rect class="body" x="3.7" y="-16.5" width="2.6" height="1.8" rx=".35"/><circle class="lens" cx="6.4" cy="-15.6" r=".6"/></g>
+          <g transform="translate(7.6 -15.6)"><g class="flash">
+            <path class="spark" d="M0 -3 Q.4 -.4 3 0 Q.4 .4 0 3 Q-.4 .4 -3 0 Q-.4 -.4 0 -3Z"/><circle class="core" r=".8"/>
+          </g></g>
+          <rect class="prop bottle" x="0" y="-.65" width="3.4" height="1.3" rx=".5" transform="translate(4 -14.4) rotate(-28)"/>
       </g></g></g>
       <g transform="translate(.8 -13.2)"><g class="tail-a">
         <path class="muffler" d="M.4 -.6 L-4.6 -.8 L-4.6 .6 L.4 .6 Z"/>
@@ -276,6 +284,9 @@ def climber(theme: str) -> str:
         </g></g>
       </g></g>
       <rect class="muffler" x=".6" y="-13.7" width="2.8" height="1.3" rx=".6" transform="rotate(16 2 -13)"/>
+      <g transform="translate(1.6 -12.2)"><g class="gesture">
+        <path class="limb" d="M0 0 L-1.15 4.04"/>
+      </g></g>
       <g transform="translate(1.6 -12.2)"><g class="arm">
         <path class="limb" d="M0 0 L2 2.8"/>
         <path class="limb pole" d="M1.7 1.8 L5 8"/>
@@ -493,8 +504,23 @@ CLIMBER_STYLE = Template("""
     .climber .tail-b  { animation: flutter-b .6s ease-in-out -.2s infinite alternate; }
     .climber .tail-c  { animation: flutter-c .6s ease-in-out -.4s infinite alternate; }
     .climber .beam    { animation: beam 2.4s ease-in-out infinite alternate; }
-    .climber .look    { animation: look ${look_cycle}s ease-in-out ${stopped}s infinite; }
-    .print            { fill: var(--muted); opacity: .75; animation: print .4s ease-out var(--d) backwards; }
+
+    /* once stopped, one gesture at a time: every moving part runs the same loop */
+    .climber .turn, .climber .gesture,
+    .climber .prop, .climber .flash { animation: none ${routine_cycle}s ease-in-out ${routine_at}s infinite; }
+    .climber .turn       { animation-name: climber-head; }
+    .climber .gesture    { animation-name: climber-arm; }
+    .climber .binoculars { animation-name: climber-binoculars; fill: $binoculars; }
+    .climber .camera     { animation-name: climber-camera; }
+    .climber .bottle     { animation-name: climber-bottle; fill: $bottle; }
+    .climber .flash      { animation-name: climber-flash; }
+    .climber .prop, .climber .flash { opacity: 0; }
+    .climber .camera .body { fill: var(--muted); }
+    .climber .camera .lens { fill: var(--accent); }
+    .climber .flash .spark { fill: $lamp; }
+    .climber .flash .core  { fill: #FFFFFF; }
+
+    .print           { fill: var(--muted); opacity: .75; animation: print .4s ease-out var(--d) backwards; }
 
     @keyframes climb     { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } 5% { opacity: 1; } to { transform: none; } }
     @keyframes stride    { 25% { transform: rotate(18deg); } 75% { transform: rotate(-18deg); } }
@@ -503,7 +529,7 @@ CLIMBER_STYLE = Template("""
     @keyframes flutter-c { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
     @keyframes beam      { from { opacity: .7; } to { opacity: 1; } }
     @keyframes print     { from { opacity: 0; } }
-    $look
+    $gestures
 """)
 
 REDUCED_MOTION ="\n    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }\n"
@@ -586,20 +612,120 @@ def ting(name: str, at: float, cycle: float) -> str:
             f"{share(at + UFO_TING, cycle)}, 100% {{ opacity: 0; transform: scale(.4) rotate(90deg); }} }}")
 
 
-def look_around() -> str:
-    """Keyframes for the climber's head at night: it holds each of CLIMBER_LOOKS for
-    CLIMBER_LOOK_HOLD seconds, turning quickly between them, and loops. Every frame
-    names the same functions, so they ease one into the next: a look up or down tilts
-    the head, a look back flips it through scaleX, which reads as turning round."""
-    cycle, turn = CLIMBER_LOOK_HOLD * len(CLIMBER_LOOKS), CLIMBER_LOOK_TURN
-    frames = []
-    for i, (tilt, facing) in enumerate(CLIMBER_LOOKS):
-        held_from, held_to = i * CLIMBER_LOOK_HOLD, (i + 1) * CLIMBER_LOOK_HOLD - turn
-        frames.append(f"{share(held_from, cycle)}, {share(held_to, cycle)} "
-                      f"{{ transform: rotate({num(tilt)}deg) scaleX({facing}); }}")
-    tilt, facing = CLIMBER_LOOKS[0]
-    frames.append(f"100% {{ transform: rotate({num(tilt)}deg) scaleX({facing}); }}")
-    return f"@keyframes look {{ {' '.join(frames)} }}"
+# ── Climber's gestures ───────────────────────────────────────────────────────
+# Each gesture is a list of poses over its duration. A pose sets any of the moving
+# parts: the head (tilt in degrees, - is up, and facing, -1 looks back), the gesture
+# arm (degrees turned from hanging along the torso), each prop's opacity, and the
+# camera flash (opacity, scale). The routine's poses become one keyframe set per
+# part, so the parts stay in step and only one gesture ever plays at a time.
+
+NECK, SHOULDER, EYE = (2, -13.4), (1.6, -12.2), (3.6, -15.3)   # in the climber's own frame
+ARM_HANGS = 106                      # degrees: the arm at rest lies along the torso, hidden by it
+BROW, GRIP, BOTTLE_GRIP = (3.8, -16.8), (4.6, -14.9), (5.4, -15.4)   # where the hand goes, in the head's frame
+AT_REST = {"head": (0, 1), "arm": 0, "binoculars": 0, "camera": 0, "bottle": 0, "flash": (0, .3)}
+
+
+def climber_spot() -> Point:
+    """Where the climber stands once stopped: on the ridge stroke, not in it."""
+    x = CLIMBER_X[1]
+    return x, height_on(RIDGE, x) - .6
+
+
+def turned(p: Point, head: tuple[float, int]) -> Point:
+    """Where a point drawn in the head's frame ends up once the head turns: the
+    head's `rotate(tilt) scaleX(facing)` about the neck."""
+    tilt, facing = head
+    qx, qy, a = (p[0] - NECK[0]) * facing, p[1] - NECK[1], math.radians(tilt)
+    return NECK[0] + qx * math.cos(a) - qy * math.sin(a), NECK[1] + qx * math.sin(a) + qy * math.cos(a)
+
+
+def reach(p: Point, head: tuple[float, int]) -> float:
+    """The arm's turn from hanging that puts the hand on p, a point in the head's
+    frame. It always swings up over the front, never round the back."""
+    x, y = turned(p, head)
+    angle = math.degrees(math.atan2(y - SHOULDER[1], x - SHOULDER[0]))
+    return (angle - 360 if angle > ARM_HANGS else angle) - ARM_HANGS
+
+
+def aim(target: Point, facing: int) -> tuple[float, int]:
+    """The head's tilt to look at a point in the sky, facing ahead or back."""
+    sx, sy = climber_spot()
+    dx, dy = target[0] - (sx + EYE[0]), target[1] - (sy + EYE[1])
+    if facing > 0:
+        return max(-70.0, min(15.0, math.degrees(math.atan2(dy, dx)))), 1
+    return max(20.0, min(70.0, math.degrees(math.atan2(-dy, -dx)))), -1   # at least 20° up, clear of the pack
+
+
+def holding(head: tuple[float, int], grip: Point, **props: float) -> dict:
+    return {"head": head, "arm": reach(grip, head), **props}
+
+
+def gesture_poses(g: Gesture, sky: Sky) -> list[tuple[float, dict]]:
+    """The poses of one gesture, as (seconds into it, pose); it starts and ends at rest."""
+    d, r = g.duration, CLIMBER_RAISE
+    if g.kind == "shade":       # a hand to the brow, gazing up at the sun, scanning a little
+        up, scan = aim(ORB, 1), (aim(ORB, 1)[0] + 8, 1)
+        poses = [(r, holding(up, BROW)), (d / 2, holding(scan, BROW)), (d - r, holding(up, BROW))]
+    elif g.kind == "wave":      # the arm up high, waving side to side
+        head, high, low = (-6, 1), -60 - ARM_HANGS, -98 - ARM_HANGS
+        swings = [(r + (d - 2 * r) * (k + 1) / 5, {"head": head, "arm": low if k % 2 == 0 else high}) for k in range(4)]
+        poses = [(r, {"head": head, "arm": (high + low) / 2}), *swings, (d - r, {"head": head, "arm": (high + low) / 2})]
+    elif g.kind == "photo":     # the camera to the eye, a flash, the camera down
+        head, mid = (-8, 1), d / 2
+        poses = [(r * .6, {"camera": 0}), (r, holding(head, GRIP, camera=1)),
+                 (mid - .05, {"flash": (0, .3)}), (mid + .06, {"flash": (1, 1.2)}), (mid + .35, {"flash": (0, .6)}),
+                 (d - r, holding(head, GRIP, camera=1)), (d - r * .4, {"camera": 0})]
+    elif g.kind == "drink":     # the bottle to the lips, the head tipping back to drink
+        sip, gulp = (-6, 1), (-36, 1)
+        poses = [(r * .6, {"bottle": 0}), (r, holding(sip, BOTTLE_GRIP, bottle=1)),
+                 (r + .45, holding(gulp, BOTTLE_GRIP, bottle=1)), (d - r - .45, holding(gulp, BOTTLE_GRIP, bottle=1)),
+                 (d - r, holding(sip, BOTTLE_GRIP, bottle=1)), (d - r * .4, {"bottle": 0})]
+    elif g.kind == "look":      # up, down and back over the shoulder; the beam follows at night
+        turn = CLIMBER_LOOK_TURN
+        hold = (d - turn * (len(CLIMBER_LOOKS) + 1)) / len(CLIMBER_LOOKS)
+        poses, t = [], 0.0
+        for head in CLIMBER_LOOKS:
+            poses += [(t + turn, {"head": head}), (t + turn + hold, {"head": head})]
+            t += turn + hold
+    elif g.kind == "binoculars":    # follow the UFO from parked to where it vanishes
+        u, (rise, park, approach, whip) = sky.ufos[g.ufo], sky.ufo_times
+        lead = CLIMBER_BINOCULARS_LEAD * rise
+        whip_from, gone = rise + park + approach - lead, rise + park + approach + whip - lead
+        parked, far = (u.x, u.y), (u.x + u.dx, u.y + u.dy)
+        mid = (u.x + .3 * u.dx, u.y + .3 * u.dy)       # the whip starts slow, so it is a third of the way at 60%
+        facing = 1 if u.x >= climber_spot()[0] + EYE[0] else -1
+        on = lambda p: holding(aim(p, facing), GRIP, binoculars=1)
+        poses = [(r * .6, {"binoculars": 0}), (r, on(parked)), (whip_from, on(parked)),
+                 (whip_from + .6 * whip, on(mid)), (gone, on(far)), (gone + .1, on(far)), (d - r * .4, {"binoculars": 0})]
+    else:
+        raise ValueError(f"unknown gesture {g.kind}")
+    return [(0, AT_REST), *poses, (d, AT_REST)]
+
+
+def gesture_keyframes(sky: Sky, theme: str) -> str:
+    """One keyframe set per moving part over the theme's routine."""
+    routine = sky.routines[theme]
+    tracks: dict[str, list[tuple[float, object]]] = {part: [] for part in AT_REST}
+    for g in routine.gestures:
+        for t, pose in gesture_poses(g, sky):
+            for part, value in pose.items():
+                tracks[part].append((g.start + t, value))
+
+    def decl(part: str, v) -> str:
+        if part == "head":
+            return f"transform: rotate({num(v[0])}deg) scaleX({v[1]});"
+        if part == "arm":
+            return f"transform: rotate({num(v)}deg);"
+        if part == "flash":
+            return f"opacity: {num(v[0])}; transform: scale({num(v[1])});"
+        return f"opacity: {num(v)};"
+
+    sets = []
+    for part, points in tracks.items():
+        frames = [(0, AT_REST[part]), *points, (routine.cycle, AT_REST[part])]
+        body = " ".join(f"{share(t, routine.cycle)} {{ {decl(part, v)} }}" for t, v in frames)
+        sets.append(f"@keyframes climber-{part} {{ {body} }}")
+    return "\n    ".join(sets)
 
 
 def style(theme: str, sky: Sky, look: Look) -> str:
@@ -625,12 +751,11 @@ def style(theme: str, sky: Sky, look: Look) -> str:
         )
     css += UFO_STYLE.substitute(UFO_COLORS[theme], cycle=num(sky.ufo_cycle),
                                 visit=ufo_visit(*sky.ufo_times, sky.ufo_cycle))
-    walk = CLIMBER_STRIDE * CLIMBER_STRIDES
+    routine = sky.routines[theme]
     css += CLIMBER_STYLE.substitute(
-        climb=num(walk), at=num(CLIMBER_AT), stride=num(CLIMBER_STRIDE),
-        strides=CLIMBER_STRIDES, muffler=MUFFLER, lamp=HEADLAMP,
-        look_cycle=num(CLIMBER_LOOK_HOLD * len(CLIMBER_LOOKS)), stopped=num(CLIMBER_AT + walk),
-        look=look_around())
+        climb=num(CLIMBER_STRIDE * CLIMBER_STRIDES), at=num(CLIMBER_AT), stride=num(CLIMBER_STRIDE),
+        strides=CLIMBER_STRIDES, muffler=MUFFLER, lamp=HEADLAMP, binoculars=BINOCULARS, bottle=BOTTLE,
+        routine_cycle=num(routine.cycle), routine_at=num(routine.at), gestures=gesture_keyframes(sky, theme))
     css += REDUCED_MOTION
     return "\n" + indent(dedent(css).strip(), " " * 6) + "\n    "
 
