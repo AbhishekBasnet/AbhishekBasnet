@@ -21,7 +21,7 @@ from .config import (
 )
 from .keyframes import crossing, num, share
 from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Ufo, Visit
-from .night import NIGHT_SHAPES, PLANE, comet, night_glows, night_visitor_style
+from .night import NIGHT_SHAPES, comet, night_glows, night_visitor_style
 
 Point = tuple[float, float]
 
@@ -198,6 +198,9 @@ def paraglider() -> str:
             <path class="lines" d="M-8.5 -16.6 L0 0 M8.5 -16.6 L0 0"/>
             <circle class="pilot" cy="1.2" r="1.4"/>
           </g>"""
+
+
+PLANE = "M-6 0 H5 Q7 0 7 .6 Q7 1.2 5 1.2 H-5 Z M-6 0 L-7.5 -2.6 H-5.4 L-3.6 0 Z M-1 .8 L-3 2.6 H-1.6 L1.6 .8 Z"
 
 
 def plane() -> str:

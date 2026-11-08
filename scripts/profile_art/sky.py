@@ -411,7 +411,7 @@ def plan_night_visits(rng: random.Random) -> tuple[dict[str, float], list[Visit]
 
 def night_visit(rng: random.Random, kind: str, start: float) -> Visit:
     """One night crossing: lanterns rise and the balloon hops from behind the ridge;
-    the plane and bats cross from one edge to the other."""
+    bats cross from one edge to the other."""
     if kind == "lanterns":
         spread, below = cfg.LANTERN_SPREAD
         return Visit(kind, lantern_route(rng), start, flock=tuple(

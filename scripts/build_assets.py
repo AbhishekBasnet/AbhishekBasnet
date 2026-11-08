@@ -24,7 +24,7 @@ Animation timeline (seconds after the image loads):
     always      ambient          clouds sway, stars twinkle, muffler waves
     4.5 →       day visitors     birds, parachute, paraglider, plane take turns, 1–3s apart
     5 – 7 →     both             UFOs arrive, park and whip off, 6–12s apart
-    4.5 →       night visitors   plane, bats, sky lanterns, Starlink train, balloon take turns, 1–3s apart;
+    4.5 →       night visitors   bats, sky lanterns, hot air balloon take turns, 1–3s apart;
                                  shooting stars; satellites from 3–5s, 3–8s apart; a comet from 25–45s, every 2.5–3.5 min
     2.8 – 5.4   climber, once    walks four strides up the devsecops peak, stops halfway
     5.4 →       climber          one gesture at a time: binoculars on each UFO by day, and

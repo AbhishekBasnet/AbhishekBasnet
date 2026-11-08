@@ -214,12 +214,11 @@ CONTRAIL = "#C2CAD6"
 
 # ── Night visitors ───────────────────────────────────────────────────────────
 
-# By night the plane (lights blinking), bats, sky lanterns and a hot air balloon
-# take turns the way the day visitors do: only one is ever in the sky, with
+# By night bats, sky lanterns and a hot air balloon take turns the way the day visitors do: only one is ever in the sky, with
 # VISIT_GAP seconds of empty sky after it, and no kind follows itself.
-NIGHT_FLIGHT = {"plane": (9, 12), "bats": (5, 7), "lanterns": (16, 20), "balloon": (24, 30)}   # seconds
-NIGHT_VISIT_Y = {"plane": (58, 96), "bats": (80, 140)}
-NIGHT_SINK = {"plane": (-14, 14), "bats": (-12, 12)}
+NIGHT_FLIGHT = {"bats": (5, 7), "lanterns": (16, 20), "balloon": (24, 30)}   # seconds
+NIGHT_VISIT_Y = {"bats": (80, 140)}
+NIGHT_SINK = {"bats": (-12, 12)}
 BAT_COLONY = (3, 5)
 BAT_SIZE = 1.5                       # bats are drawn this much larger than a bird, so they read as bats
 LANTERN_SIZE = 1.7                   # and lanterns this much larger than their outline
@@ -235,8 +234,7 @@ BALLOON_HOP = (140, 260)             # px between lift-off and landing
 BALLOON_TOP = (182, 196)             # y of the basket at the top of its climb; the envelope stands 23 px above
 BALLOON_HOVER = .2                   # share of its flight it drifts at the top
 NIGHT_INK = "#7B88A1"                # bats and the balloon: moonlit grey, so they show on the night sky
-NIGHT_PLANE = "#4C566A"              # the plane is dark; its lights do the talking
-NAV_LIGHTS = dict(red="#BF616A", green="#A3BE8C", white="#ECEFF4")
+NIGHT_DARK = "#4C566A"               # the balloon's seams, ropes and basket
 LANTERN_PAPER, LANTERN_GLOW = "#D08770", "#EBCB8B"
 
 # Now and then a comet glides slowly across the upper sky.
