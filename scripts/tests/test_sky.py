@@ -165,6 +165,8 @@ class NightRules(unittest.TestCase):
                     self.assertGreaterEqual(distance((u.x, u.y), entry), cfg.UFO_WHIP_MIN)
                     self.assertGreaterEqual(distance(entry, (u.x + u.dx, u.y + u.dy)), cfg.UFO_PATHS_APART)
                 self.assertTrue(all(abs(u.x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS))
+                left, right = cfg.CLIMBER_X                                   # never parks over the climber
+                self.assertFalse(left - cfg.UFO_CLEAR_OF_CLIMBER <= u.x <= right + cfg.UFO_CLEAR_OF_CLIMBER)
                 far = (u.x + u.dx, u.y + u.dy)                                # vanishes in the sky
                 self.assertTrue(contains(cfg.UFO_FAR_AREA, far))
                 self.assertGreaterEqual(distance((u.x, u.y), far), cfg.UFO_WHIP_MIN)

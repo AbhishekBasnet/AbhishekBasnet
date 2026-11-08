@@ -40,26 +40,54 @@ CLOUD_FILL = "#E5E9F0"
 NAME = "Abhishek Man Basnet"
 ROLE = "backend engineer · nepal"
 COORDS = "28.39° N   84.12° E"  # geographic centre of Nepal
-TITLE = f"{NAME}, backend engineer — flutter, go, fastapi"
+TITLE = f"{NAME}, backend engineer and software engineering graduate, 2026 — flutter, devsecops, goLang"
 
 LEGEND = [
-    ("go", "services · concurrency · systems"),
-    ("fastapi", "python apis"),
+    ("goLang", "services · concurrency · systems"),
+    ("devsecops", "pipelines · security · infra"),
     ("flutter", "the clients on top"),
+    ("grad", "software engineering · 2026"),
 ]
 
 # ── Landscape ────────────────────────────────────────────────────────────────
 
 RIDGE = [
-    (48, 332), (110, 322), (150, 326), (210, 292), (236, 300), (268, 264), (300, 284),
-    (338, 272), (380, 296), (420, 254), (452, 220), (486, 246), (516, 238), (560, 284),
+    (48, 332), (110, 322), (150, 326), (200, 286), (236, 304), (270, 290), (296, 296),
+    (336, 252), (378, 288), (476, 220), (504, 244), (526, 238), (560, 284),
     (604, 272), (652, 250), (690, 282), (740, 306), (790, 298), (852, 320),
 ]
-SUMMITS = [(268, 264, "flutter"), (452, 220, "go"), (652, 250, "fastapi")]
+# A label can run to two lines ("\n"): the first in the label style, the line under
+# it smaller, so it fits between its neighbours. The last line sits on LABEL_Y.
+SUMMITS = [(200, 286, "flutter"), (336, 252, "grad '26\nSoftware Engineering"),
+           (476, 220, "devsecops"), (652, 250, "goLang")]
 LABEL_Y = 170
+LABEL_LINE_GAP = 14                  # px between the baselines of a two-line label
 GROUND_Y = 342
 ORB = (792, 92)                      # the sun by day, the moon by night
-KEEP_CLEAR = [(40, 40, 224, 64)]     # boxes nothing in the sky may touch: the coordinates
+KEEP_CLEAR = [(40, 40, 224, 64),     # boxes nothing in the sky may touch: the coordinates,
+              (292, 140, 380, 162)]  # and the upper line of the two-line summit label
+
+# ── Climber ──────────────────────────────────────────────────────────────────
+
+# A climber with a backpack walks up the straight left face of the devsecops peak
+# (the ridge from (378, 288) to (476, 220)) and stops halfway, as if still on the
+# way up. The muffler waves in the wind for good; at night a headlamp lights the way.
+CLIMBER_X = (408, 427)               # x where the climber sets off and where they stop
+CLIMBER_AT = 2.8                     # seconds after load they appear, once the ridge is drawn
+CLIMBER_STRIDE = .65                 # seconds per stride
+CLIMBER_STRIDES = 4                  # strides to the stop, so the walk lasts 2.6s
+MUFFLER = "#D08770"                  # Nord orange, like the parachute and the sun's glow
+HEADLAMP = "#EBCB8B"
+UFO_CLEAR_OF_CLIMBER = 30            # px either side of the climber's walk that UFOs don't park in
+
+# Footprints along the ridge crest from the left edge to the climber's heels: the
+# peaks already climbed. They appear left to right as the ridge draws, and the last
+# few under the climber's feet as they walk.
+FOOTPRINT_SPACING = 6.5              # px along the ridge from one print to the next
+FOOTPRINT_OFFSETS = (1.8, 3.6)       # px above the ridge line of the left and right foot
+FOOTPRINT_TOE_OUT = 12               # degrees each print turns out from the direction of travel
+FOOTPRINT_REVEAL = (1.0, 2.8)        # seconds the trail takes to reach where the climber sets off
+FOOTPRINT_SUMMIT_CLEAR = 4.5         # px around a summit dot left bare
 
 # ── Clouds (day) ─────────────────────────────────────────────────────────────
 

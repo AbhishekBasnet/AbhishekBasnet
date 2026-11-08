@@ -14,7 +14,8 @@ from dataclasses import replace
 from datetime import date, datetime, timezone
 
 from . import config as cfg
-from .geometry import Box, contains, distance, distance_to_box, height_on, inside, overlaps, segment_clear_of
+from .geometry import (Box, contains, distance, distance_to_box, height_on, inside, overlaps,
+                       segment_clear_of, segment_touches)
 from .models import Cloud, Meteor, Moon, Ribbon, Route, Satellite, Sky, Star, Ufo, Visit
 
 
@@ -83,12 +84,13 @@ def place_clouds(rng: random.Random, count: int) -> list[Cloud]:
 # ── Shooting stars ───────────────────────────────────────────────────────────
 
 def meteor_fits(m: Meteor) -> bool:
-    """The whole streak stays inside the sky and clear of the moon."""
+    """The whole streak stays inside the sky, clear of the moon and of the text."""
     dx, dy = math.cos(math.radians(m.angle)), math.sin(math.radians(m.angle))
     tail = (m.x - m.length * dx, m.y - m.length * dy)
     end = (m.x + m.travel * dx, m.y + m.travel * dy)
     return (contains(cfg.METEOR_AREA, tail) and contains(cfg.METEOR_AREA, end)
-            and segment_clear_of(tail, end, cfg.ORB, cfg.METEOR_MOON_CLEAR))
+            and segment_clear_of(tail, end, cfg.ORB, cfg.METEOR_MOON_CLEAR)
+            and not any(segment_touches(tail, end, k) for k in cfg.KEEP_CLEAR))
 
 
 def place_meteors(rng: random.Random) -> list[Meteor]:
@@ -210,9 +212,11 @@ def satellite_pass(rng: random.Random, start: float, attempts: int = 10_000) -> 
 # ── UFOs ─────────────────────────────────────────────────────────────────────
 
 def ufo_parks_well(x: float, y: float) -> bool:
-    """Clear of the ridge below and the summit leader lines beside."""
+    """Clear of the ridge below, the summit leader lines beside and the climber."""
+    left, right = cfg.CLIMBER_X
     return (height_on(cfg.RIDGE, x) - y >= cfg.UFO_ABOVE_RIDGE
-            and all(abs(x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS))
+            and all(abs(x - sx) >= cfg.UFO_CLEAR_OF_LEADERS for sx, _, _ in cfg.SUMMITS)
+            and not left - cfg.UFO_CLEAR_OF_CLIMBER <= x <= right + cfg.UFO_CLEAR_OF_CLIMBER)
 
 
 def plan_ufos(rng: random.Random) -> tuple[list[Ufo], tuple[float, float, float, float], float]:

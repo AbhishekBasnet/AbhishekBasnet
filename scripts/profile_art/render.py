@@ -6,15 +6,19 @@ import math
 from dataclasses import dataclass
 from string import Template
 from textwrap import dedent, indent
+from xml.sax.saxutils import escape
 
 from .config import (
-    AURORA_COLORS, BACKDROP_HEIGHT, CANOPY, CLOUD_FILL, CONTRAIL, COORDS, GROUND_Y, HEIGHT,
-    LABEL_GLOW, LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB,
+    AURORA_COLORS, BACKDROP_HEIGHT, CANOPY, CLIMBER_AT, CLIMBER_STRIDE, CLIMBER_STRIDES, CLIMBER_X,
+    CLOUD_FILL, CONTRAIL, COORDS, FOOTPRINT_OFFSETS, FOOTPRINT_REVEAL, FOOTPRINT_SPACING,
+    FOOTPRINT_SUMMIT_CLEAR, FOOTPRINT_TOE_OUT, GROUND_Y, HEADLAMP, HEIGHT, MUFFLER,
+    LABEL_GLOW, LABEL_LINE_GAP, LABEL_STAGGER, LABEL_Y, LEFT, LEGEND, MONO, MOON_R, MOON_TILT, NAME, ORB,
     PARAGLIDER_GROWTH, RIDGE, RIGHT, RIPPLE_AT, RIPPLE_LEN, ROLE, SANS, SATELLITE_HULL,
     SATELLITE_PANEL, SATELLITE_TRIM, SATELLITE_TUMBLE, SEQUENCE_START, SITE_CLOUD, SITE_THEMES,
     SNOW, SUMMITS, THEMES, TITLE, TRACE_AT, TRACE_LEN, UFO_APPROACH_SCALE, UFO_COLORS, UFO_TING,
     VIEW_X, VIEW_Y, VISITOR_INK, VISIT_FIRST, WIDTH,
 )
+from .geometry import distance_to_polyline, height_on
 from .models import Cloud, Meteor, Moon, Ribbon, Satellite, Sky, Star, Ufo, Visit
 
 Point = tuple[float, float]
@@ -230,13 +234,101 @@ def visitor(v: Visit) -> str:
     </g>"""
 
 
+def climber(theme: str) -> str:
+    """A small hiker with a big backpack, a beanie and a trekking pole, drawn facing
+    right around their feet at (0, 0) on a slope of about 35°. The outer group stands
+    them where they stop; `.climber` walks them in from where they set off. Each leg,
+    the arm and the three pieces of the muffler sit in a group at their own hinge, so a plain
+    CSS rotation swings them about it. At night a headlamp beam lights the slope."""
+    (x0, x1), lift = CLIMBER_X, .6          # stand on the ridge stroke, not in it
+    start, rest = (x0, height_on(RIDGE, x0) - lift), (x1, height_on(RIDGE, x1) - lift)
+    beam = ("""
+        <path class="beam" d="M4.3 -15 L24 -28.8 L27.5 -21.2 Z" fill="url(#beam)" filter="url(#spark)"/>"""
+            if theme == "dark" else "")
+    return f"""<g transform="translate({num(rest[0])} {num(rest[1])})">
+    <g class="climber" style="--dx: {num(start[0] - rest[0])}px; --dy: {num(start[1] - rest[1])}px">{beam}
+      <g transform="translate(0 -7)"><g class="leg back">
+        <path class="limb" d="M0 0 L-.9 4.1 L-1.8 8.3 L-.6 8.1"/>
+      </g></g>
+      <g transform="rotate(16 .8 -9.8)">
+        <rect class="pack" x="-3.4" y="-12.8" width="3.2" height="5.6" rx="1"/>
+        <rect class="bedroll" x="-3.7" y="-14.1" width="3.8" height="1.4" rx=".7"/>
+      </g>
+      <path class="limb torso" d="M0 -7 L1.6 -12.6"/>
+      <g transform="translate(0 -7)"><g class="leg">
+        <path class="limb" d="M0 0 L4 1.2 L2.6 5.2 L3.8 4.9"/>
+      </g></g>
+      <circle class="head" cx="2.6" cy="-15.1" r="1.75"/>
+      <path class="muffler" d="M.85 -15.4 A1.8 1.8 0 0 1 4.35 -15.4 Z"/>
+      <circle class="muffler" cx="2.4" cy="-17.3" r=".6"/>
+      <circle class="lamp" cx="4.2" cy="-15.1" r=".55"/>
+      <g transform="translate(.8 -13.2)"><g class="tail-a">
+        <path class="muffler" d="M.4 -.6 L-4.6 -.8 L-4.6 .6 L.4 .6 Z"/>
+        <g transform="translate(-4.6 -.1)"><g class="tail-b">
+          <path class="muffler" d="M.4 -.7 L-4.6 -.7 L-4.6 .5 L.4 .6 Z"/>
+          <g transform="translate(-4.6 -.1)"><g class="tail-c">
+            <path class="muffler" d="M.4 -.6 L-4.4 -.55 L-3.7 0 L-4.5 .5 L.4 .6 Z"/>
+          </g></g>
+        </g></g>
+      </g></g>
+      <rect class="muffler" x=".6" y="-13.7" width="2.8" height="1.3" rx=".6" transform="rotate(16 2 -13)"/>
+      <g transform="translate(1.6 -12.2)"><g class="arm">
+        <path class="limb" d="M0 0 L2 2.8"/>
+        <path class="limb pole" d="M1.7 1.8 L5 8"/>
+      </g></g>
+    </g>
+  </g>"""
+
+
+def footprints() -> str:
+    """Prints every FOOTPRINT_SPACING px along the ridge, from its left end to just
+    behind the climber's heels, left and right feet taking turns just above the
+    line. Each print's delay follows the climber's progress: the stretch already
+    climbed fills in as the ridge draws, the rest as the climber walks over it."""
+    (x0, x1), walk = CLIMBER_X, CLIMBER_STRIDE * CLIMBER_STRIDES
+    stop, (reveal_from, reveal_to) = x1 - 4, FOOTPRINT_REVEAL
+    prints, carry, n = [], 0.0, 0
+    for (ax, ay), (bx, by) in zip(RIDGE, RIDGE[1:]):
+        length = math.hypot(bx - ax, by - ay)
+        tx, ty = (bx - ax) / length, (by - ay) / length
+        s = carry
+        while s <= length:
+            x, y = ax + tx * s, ay + ty * s
+            if x > stop:
+                return "\n    ".join(prints)
+            lift = FOOTPRINT_OFFSETS[n % 2]
+            px, py = x + ty * lift, y - tx * lift          # the upward normal of the ridge
+            # bare around the summit dots, and off the line where a valley folds back over it
+            if (all(math.hypot(x - sx, y - sy) > FOOTPRINT_SUMMIT_CLEAR for sx, sy, _ in SUMMITS)
+                    and distance_to_polyline((px, py), RIDGE) >= FOOTPRINT_OFFSETS[0] - .1):
+                at = (reveal_from + (reveal_to - reveal_from) * (x - RIDGE[0][0]) / (x0 - RIDGE[0][0])
+                      if x <= x0 else CLIMBER_AT + walk * (x - x0) / (x1 - x0))
+                toe = FOOTPRINT_TOE_OUT * (1 if n % 2 else -1)   # toes turn out, away from the line between the feet
+                angle = math.degrees(math.atan2(ty, tx)) + toe
+                prints.append(f'<ellipse class="print" cx="{num(px)}" cy="{num(py)}" rx="1.1" ry=".55" '
+                              f'transform="rotate({num(angle)} {num(px)} {num(py)})" style="--d: {num(at)}s"/>')
+            n += 1
+            s += FOOTPRINT_SPACING
+        carry = s - length
+    return "\n    ".join(prints)
+
+
 def summit(i: int, x: int, y: int, label: str) -> str:
+    """A summit's dot, leader line and label. A multi-line label ends on LABEL_Y;
+    its first line is the label, the lines under it are drawn smaller."""
+    lines = label.split("\n")
+    texts = []
+    for j, line in enumerate(lines):
+        ly = LABEL_Y - (len(lines) - 1 - j) * LABEL_LINE_GAP
+        kind = "label sub" if j > 0 else "label"
+        texts += [f'<text class="{kind} halo" filter="url(#blur)" x="{x}" y="{ly}">{escape(line)}</text>',
+                  f'<text class="{kind}" x="{x}" y="{ly}">{escape(line)}</text>']
+    body = "\n      ".join(texts)
     return f"""  <g class="summit" style="--i: {i}">
     <line class="leader" x1="{x}" y1="{y - 8}" x2="{x}" y2="{LABEL_Y + 12}"/>
     <circle class="dot" cx="{x}" cy="{y}" r="2.5"/>
     <g class="pulse">
-      <text class="label halo" filter="url(#blur)" x="{x}" y="{LABEL_Y}">{label}</text>
-      <text class="label" x="{x}" y="{LABEL_Y}">{label}</text>
+      {body}
     </g>
   </g>"""
 
@@ -254,6 +346,7 @@ COMMON_STYLE = Template("""
     .name  { font: 300 30px var(--sans); letter-spacing: -.3px; fill: var(--ink); }
     .meta  { font: 400 11px var(--mono); letter-spacing: 1.8px; fill: var(--muted); }
     .label { font: 500 12px var(--mono); letter-spacing: 2px; fill: var(--ink); text-anchor: middle; }
+    .label.sub { font-size: 10px; letter-spacing: 1px; }
 
     /* shapes */
     .ridge  { fill: none; stroke: var(--accent); stroke-width: 1.25; stroke-linejoin: miter; }
@@ -397,7 +490,37 @@ UFO_STYLE = Template("""
     @keyframes blink { 50% { opacity: .2; } }
 """)
 
-REDUCED_MOTION = "\n    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }\n"
+CLIMBER_STYLE = Template("""
+    /* the climber walks up to halfway and stops there; the muffler waves for good */
+    .climber          { animation: climb ${climb}s linear ${at}s backwards; }
+    .climber .leg,
+    .climber .arm     { animation: stride ${stride}s ease-in-out ${at}s ${strides}; }
+    .climber .back,
+    .climber .arm     { animation-direction: reverse; }
+    .climber .limb    { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .climber .torso   { stroke-width: 2.6; }
+    .climber .pole    { stroke-width: .6; }
+    .climber .head    { fill: var(--ink); }
+    .climber .pack    { fill: var(--accent); }
+    .climber .bedroll { fill: var(--muted); }
+    .climber .muffler { fill: $muffler; }
+    .climber .lamp    { fill: $lamp; }
+    .climber .tail-a  { animation: flutter-a .6s ease-in-out infinite alternate; }
+    .climber .tail-b  { animation: flutter-b .6s ease-in-out -.2s infinite alternate; }
+    .climber .tail-c  { animation: flutter-c .6s ease-in-out -.4s infinite alternate; }
+    .climber .beam    { animation: beam 2.4s ease-in-out infinite alternate; }
+    .print            { fill: var(--muted); opacity: .75; animation: print .4s ease-out var(--d) backwards; }
+
+    @keyframes climb     { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } 5% { opacity: 1; } to { transform: none; } }
+    @keyframes stride    { 25% { transform: rotate(18deg); } 75% { transform: rotate(-18deg); } }
+    @keyframes flutter-a { from { transform: rotate(-6deg); } to { transform: rotate(8deg); } }
+    @keyframes flutter-b { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
+    @keyframes flutter-c { from { transform: rotate(-18deg); } to { transform: rotate(16deg); } }
+    @keyframes beam      { from { opacity: .7; } to { opacity: 1; } }
+    @keyframes print     { from { opacity: 0; } }
+""")
+
+REDUCED_MOTION ="\n    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }\n"
 
 
 def crossing(name: str, duration: float, cycle: float, peak: float = 1) -> str:
@@ -502,6 +625,9 @@ def style(theme: str, sky: Sky, look: Look) -> str:
         )
     css += UFO_STYLE.substitute(UFO_COLORS[theme], cycle=num(sky.ufo_cycle),
                                 visit=ufo_visit(*sky.ufo_times, sky.ufo_cycle))
+    css += CLIMBER_STYLE.substitute(
+        climb=num(CLIMBER_STRIDE * CLIMBER_STRIDES), at=num(CLIMBER_AT), stride=num(CLIMBER_STRIDE),
+        strides=CLIMBER_STRIDES, muffler=MUFFLER, lamp=HEADLAMP)
     css += REDUCED_MOTION
     return "\n" + indent(dedent(css).strip(), " " * 6) + "\n    "
 
@@ -528,7 +654,11 @@ def defs(theme: str, sky: Sky) -> str:
       <stop offset=".7" stop-color="#fff"/>
       <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>{"".join(aurora_window(i, rb) for i, rb in enumerate(sky.aurora))}
-    <filter id="haze" x="-10%" y="-60%" width="120%" height="220%"><feGaussianBlur stdDeviation="6"/></filter>"""
+    <filter id="haze" x="-10%" y="-60%" width="120%" height="220%"><feGaussianBlur stdDeviation="6"/></filter>
+    <linearGradient id="beam">
+      <stop offset="0" stop-color="{HEADLAMP}" stop-opacity=".6"/>
+      <stop offset="1" stop-color="{HEADLAMP}" stop-opacity="0"/>
+    </linearGradient>"""
 
 
 def aurora_gradient(i: int, color: str) -> str:
@@ -642,7 +772,13 @@ def scene(theme: str, sky: Sky, look: Look) -> str:
   <!-- range: the ridge, then two copies for the light that runs along it -->
   <use class="ridge" href="#ridge-line"/>
   <use class="trace halo" href="#ridge-line" filter="url(#blur)"/>
-  <use class="trace core" href="#ridge-line"/>{caption}
+  <use class="trace core" href="#ridge-line"/>
+
+  <!-- climber: footprints over the peaks behind, halfway up the devsecops peak -->
+  <g class="footprints">
+    {footprints()}
+  </g>
+  {climber(theme)}{caption}
 </svg>
 """
 
@@ -659,7 +795,9 @@ def legend(theme: str) -> str:
   </g>"""
         for i, (key, value) in enumerate(LEGEND))
     summary = "; ".join(f"{k} — {v.replace(' · ', ', ')}" for k, v in LEGEND)
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="140" viewBox="{VIEW_X} 0 {WIDTH} 140" role="img" aria-labelledby="title">
+    rule_y = 48 + len(LEGEND) * 28     # one row's spacing below the last row
+    height = rule_y + 8
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{height}" viewBox="{VIEW_X} 0 {WIDTH} {height}" role="img" aria-labelledby="title">
   <title id="title">Legend: {summary}</title>
   <!-- generated by scripts/build_assets.py, edit that instead -->
   <defs>
@@ -676,6 +814,6 @@ def legend(theme: str) -> str:
   <text class="title" x="{LEFT}" y="48">legend</text>
 {rows}
 
-  <line class="rule" x1="{LEFT}" y1="132" x2="{RIGHT}" y2="132"/>
+  <line class="rule" x1="{LEFT}" y1="{rule_y}" x2="{RIGHT}" y2="{rule_y}"/>
 </svg>
 """

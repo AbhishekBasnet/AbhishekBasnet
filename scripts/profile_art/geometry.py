@@ -29,12 +29,29 @@ def distance_to_box(p: Point, box: Box) -> float:
     return distance(p, nearest)
 
 
+def distance_to_polyline(p: Point, polyline: list[Point]) -> float:
+    """The shortest distance from p to any segment of the polyline."""
+    best = math.inf
+    for (x0, y0), (x1, y1) in zip(polyline, polyline[1:]):
+        dx, dy = x1 - x0, y1 - y0
+        t = max(0.0, min(1.0, ((p[0] - x0) * dx + (p[1] - y0) * dy) / (dx * dx + dy * dy)))
+        best = min(best, distance(p, (x0 + t * dx, y0 + t * dy)))
+    return best
+
+
 def height_on(polyline: list[Point], x: float) -> float:
     """The y of a left-to-right polyline at x."""
     for (x0, y0), (x1, y1) in zip(polyline, polyline[1:]):
         if x0 <= x <= x1:
             return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
     raise ValueError(f"x={x} is outside the polyline")
+
+
+def segment_touches(start: Point, end: Point, box: Box, samples: int = 40) -> bool:
+    """True if any sampled point of the segment lies in the box."""
+    return any(
+        contains(box, (start[0] + (end[0] - start[0]) * i / samples, start[1] + (end[1] - start[1]) * i / samples))
+        for i in range(samples + 1))
 
 
 def segment_clear_of(start: Point, end: Point, centre: Point, radius: float, samples: int = 20) -> bool:
