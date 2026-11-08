@@ -81,11 +81,13 @@ class Route:
 
 @dataclass(frozen=True)
 class Visit:
-    """One crossing by a bird flock, the parachute, the paraglider or the plane."""
-    kind: str         # "birds", "parachute", "paraglider" or "plane"
+    """One crossing. By day: a bird flock, the parachute, the paraglider or the plane.
+    By night: the plane, bats, sky lanterns or a hot air balloon."""
+    kind: str
     route: Route
     start: float      # seconds into the schedule
-    flock: tuple[tuple[float, float, float], ...] = ()   # birds only: offset x, offset y, size
+    flock: tuple[tuple[float, float, float], ...] = ()   # birds, bats, lanterns: offset x, offset y, size
+    top: float = 0    # balloon only: y of the basket at the top of its climb
 
 
 @dataclass(frozen=True)
@@ -100,6 +102,19 @@ class Ufo:
     dy: float
     start: float      # seconds after load of its first visit
     arrive: tuple[float, float] | None = None
+
+
+@dataclass(frozen=True)
+class Comet:
+    """A slow comet: its head glides `travel` px along `angle`, tail trailing behind."""
+    x: float          # where the head starts
+    y: float
+    angle: float      # direction of travel, degrees clockwise from east
+    tail: float       # px
+    travel: float
+    flight: float     # seconds it is in the sky
+    period: float     # seconds between appearances
+    delay: float      # first appearance, seconds after load
 
 
 @dataclass(frozen=True)
@@ -140,3 +155,7 @@ class Sky:
     ufo_times: tuple[float, float, float, float]   # seconds to rise, park, approach and whip off
     ufo_cycle: float              # night: seconds before the first comes round again
     routines: dict[str, Routine]  # the climber's gestures, by theme
+    night_visits: list[Visit]     # night: one visitor at a time
+    night_flight: dict[str, float]
+    night_visit_cycle: float
+    comet: Comet

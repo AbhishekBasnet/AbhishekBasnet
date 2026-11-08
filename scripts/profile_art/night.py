@@ -1,0 +1,191 @@
+"""The night visitors and the comet: what they look like and how they move.
+
+    night_plane(), bats(visit), lanterns(visit), balloon()   the visitors, drawn facing right around (0, 0)
+    comet(comet)                                             the comet
+    night_visitor_style(sky)                                 their CSS
+    night_glows()                                            their soft glows, as gradients
+
+Every glow here is a gradient rather than a blur filter, and everything moves by
+position and fade alone, so the night stays light on the GPU.
+"""
+
+from __future__ import annotations
+
+from string import Template
+
+from .config import (
+    AURORA_COLORS, BALLOON_HOVER, BAT_SIZE, LANTERN_GLOW, LANTERN_PAPER, LANTERN_SIZE, NAV_LIGHTS,
+    NIGHT_INK, NIGHT_PLANE, SNOW,
+)
+from .keyframes import crossing, num, share
+from .models import Comet, Sky, Visit
+
+PLANE = "M-6 0 H5 Q7 0 7 .6 Q7 1.2 5 1.2 H-5 Z M-6 0 L-7.5 -2.6 H-5.4 L-3.6 0 Z M-1 .8 L-3 2.6 H-1.6 L1.6 .8 Z"
+BAT = ("M-5 0 Q-3.5 -2.6 -1.2 -.7 L-.5 -1.5 L0 -.9 L.5 -1.5 L1.2 -.7 Q3.5 -2.6 5 0 "
+       "Q4 -.6 3.4 .5 Q2.6 -.3 1.8 .8 Q1 .1 0 .7 Q-1 .1 -1.8 .8 Q-2.6 -.3 -3.4 .5 Q-4 -.6 -5 0Z")
+
+
+# ── The visitors ─────────────────────────────────────────────────────────────
+
+def night_plane() -> str:
+    """Dark against the sky and picked out by its lights: a steady green on the
+    wingtip, a blinking red beacon on the belly and a double white strobe on the tail."""
+    lights = (("green", -2.3, 2.6, "steady"), ("red", 0, 1.5, "beacon"), ("white", -7.2, -2.6, "strobe"))
+    drawn = "".join(f'<g class="{blink}"><circle cx="{x}" cy="{y}" r="2.4" fill="url(#glow-{color})"/>'
+                    f'<circle cx="{x}" cy="{y}" r=".55" fill="{NAV_LIGHTS[color]}"/></g>'
+                    for color, x, y, blink in lights)
+    return f"""<path class="night-plane" d="{PLANE}"/>
+          {drawn}"""
+
+
+def bats(visit: Visit) -> str:
+    """A small colony flitting along, wings beating fast and out of step."""
+    colony = "".join(
+        f'<g transform="translate({num(offset_x * BAT_SIZE)} {num(offset_y * BAT_SIZE)}) scale({num(size * BAT_SIZE)})">'
+        f'<path class="bat" style="animation-delay: -{num(n * .05)}s" d="{BAT}"/></g>'
+        for n, (offset_x, offset_y, size) in enumerate(visit.flock))
+    return f'<g class="flit">{colony}</g>'
+
+
+def lanterns(visit: Visit) -> str:
+    """Paper sky lanterns rising together, each glowing, flickering and swaying."""
+    return "".join(
+        f'<g transform="translate({num(offset_x)} {num(offset_y)}) scale({num(size * LANTERN_SIZE)})">'
+        f'<g class="lantern" style="animation-delay: -{num(n * .9)}s">'
+        f'<circle class="halo" r="5" fill="url(#lantern-glow)"/>'
+        f'<path class="paper" d="M-1.5 -2.4 L1.5 -2.4 L1.2 1.8 L-1.2 1.8Z"/>'
+        f'<circle class="flame" cy="1.4" r=".45"/></g></g>'
+        for n, (offset_x, offset_y, size) in enumerate(visit.flock))
+
+
+def balloon() -> str:
+    """A hot air balloon bobbing gently, its burner alight the whole way: the flame
+    flickers, and its glow lights the envelope from inside, brightest on the climb
+    and dimming on the way down. Drawn with the basket at (0, 0)."""
+    return """<g class="drift">
+            <path class="envelope" d="M0 -23 C6.5 -23 7.5 -15 4.6 -10.5 L2 -7 H-2 L-4.6 -10.5 C-7.5 -15 -6.5 -23 0 -23Z"/>
+            <path class="seams" d="M0 -23 V-7 M-3.6 -21.6 Q-4.2 -14 -1.4 -7 M3.6 -21.6 Q4.2 -14 1.4 -7"/>
+            <circle class="flare" cy="-13" r="10" fill="url(#balloon-flare)"/>
+            <path class="burner" d="M0 -9.8 Q1.1 -8.1 0 -6.8 Q-1.1 -8.1 0 -9.8Z"/>
+            <path class="ropes" d="M-2 -7 L-1.4 -3.4 M2 -7 L1.4 -3.4"/>
+            <rect class="basket" x="-1.6" y="-3.4" width="3.2" height="2.4" rx=".3"/>
+          </g>"""
+
+
+NIGHT_SHAPES = {"plane": lambda visit: night_plane(), "bats": bats, "lanterns": lanterns,
+                "balloon": lambda visit: balloon()}
+
+
+# ── The comet ────────────────────────────────────────────────────────────────
+
+def comet(c: Comet) -> str:
+    """A soft dust tail fading behind a bright head, a fainter blue ion tail
+    splitting off it, gliding slowly along `angle`."""
+    tail = c.tail
+    return f"""<g transform="translate({num(c.x)} {num(c.y)}) rotate({num(c.angle)})">
+      <g class="comet">
+        <path d="M0 -1.4 L{num(-tail)} -.25 L{num(-tail)} .25 L0 1.4Z" fill="url(#comet-tail)"/>
+        <path d="M0 -.8 L{num(-tail * .75)} -4.2 L{num(-tail * .75)} -3 L0 .8Z" fill="url(#comet-ion)"/>
+        <circle r="4.5" fill="url(#glow-white)"/>
+        <circle class="comet-head" r="1.3"/>
+      </g>
+    </g>"""
+
+
+# ── Styles ───────────────────────────────────────────────────────────────────
+
+NIGHT_VISITOR_STYLE = Template("""
+    /* night: the plane, bats, sky lanterns and a balloon take turns */
+    .visitor          { opacity: 0; animation: none ${cycle}s linear var(--d) infinite; }
+    .visitor.plane    { animation-name: fly-plane; }
+    .visitor.bats     { animation-name: fly-bats; }
+    .visitor.lanterns { animation-name: fly-lanterns; }
+    .visitor.balloon  { animation-name: fly-balloon; }
+    .night-plane      { fill: $dark; }
+    .beacon           { animation: beacon 1.2s linear infinite; }
+    .strobe           { animation: strobe 1.6s linear infinite; }
+    .bat              { fill: $ink; transform-box: fill-box; transform-origin: center;
+                        animation: bat-flap .14s ease-in-out infinite alternate; }
+    .flit             { animation: flit .9s ease-in-out infinite alternate; }
+    .lantern          { animation: lantern-sway 3.2s ease-in-out infinite alternate; }
+    .lantern .paper   { fill: $paper; }
+    .lantern .flame   { fill: $glow; }
+    .lantern .halo    { animation: flicker 1.3s ease-in-out infinite alternate; }
+    .balloon .envelope { fill: $ink; }
+    .balloon .seams, .balloon .ropes { fill: none; stroke: $dark; stroke-width: .5; }
+    .balloon .basket  { fill: $dark; }
+    .balloon .flare   { animation: balloon-fire ${cycle}s linear var(--d) infinite; }
+    .balloon .burner  { fill: $glow; animation: flicker .22s ease-in-out infinite alternate; }
+    .balloon .drift   { animation: balloon-bob 4s ease-in-out infinite alternate; }
+    .lift             { animation: balloon-lift ${cycle}s linear var(--d) infinite; }
+
+    /* night: now and then a comet glides slowly across the upper sky */
+    .comet            { opacity: 0; animation: comet ${comet_period}s linear ${comet_at}s infinite; }
+    .comet-head       { fill: $snow; }
+
+    $fly
+    @keyframes beacon       { 0%, 45% { opacity: 1; } 50%, 100% { opacity: .1; } }
+    @keyframes strobe       { 0%, 6% { opacity: 1; } 7%, 14% { opacity: 0; } 15%, 21% { opacity: 1; } 22%, 100% { opacity: 0; } }
+    @keyframes bat-flap     { to { transform: scaleY(-.4); } }
+    @keyframes flit         { 30% { transform: translateY(-2.5px); } 60% { transform: translateY(1.5px); } 100% { transform: translateY(-1px); } }
+    @keyframes lantern-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+    @keyframes flicker      { from { opacity: .6; } to { opacity: 1; } }
+    @keyframes balloon-bob  { from { transform: translateY(-2px); } to { transform: translateY(2px); } }
+    $comet
+""")
+
+
+def night_visitor_style(sky: Sky) -> str:
+    cycle = sky.night_visit_cycle
+    flights = [crossing(f"fly-{kind}", seconds, cycle)
+               for kind, seconds in sky.night_flight.items() if kind != "balloon"]
+    flights.append(balloon_flight(sky.night_flight["balloon"], cycle))
+    return NIGHT_VISITOR_STYLE.substitute(
+        cycle=num(cycle), dark=NIGHT_PLANE, ink=NIGHT_INK, snow=SNOW,
+        paper=LANTERN_PAPER, glow=LANTERN_GLOW, comet_period=num(sky.comet.period), comet_at=num(sky.comet.delay),
+        fly="\n    ".join(flights), comet=comet_glide(sky.comet))
+
+
+def balloon_flight(duration: float, cycle: float) -> str:
+    """The balloon's flight as three keyframe sets. It drifts across at a steady pace,
+    while it climbs slowly (easing off near the top) to var(--top), drifts there for
+    BALLOON_HOVER of its flight, then sinks (gathering pace) to land var(--dy) down.
+    It starts and ends hidden behind the ridge, so it only fades at the very ends.
+    The fire burns bright on the climb, steady at the top, and dims on the way down."""
+    top_from, top_to = duration * (1 - BALLOON_HOVER) / 2, duration * (1 + BALLOON_HOVER) / 2
+    across = (f"@keyframes fly-balloon {{ 0% {{ opacity: 0; transform: none; }} {share(.5, cycle)}, "
+              f"{share(duration - .5, cycle)} {{ opacity: 1; }} "
+              f"{share(duration, cycle)}, 100% {{ opacity: 0; transform: translateX(var(--dx)); }} }}")
+    up_and_down = (f"@keyframes balloon-lift {{ 0% {{ transform: none; animation-timing-function: cubic-bezier(.3, .2, .5, 1); }} "
+                   f"{share(top_from, cycle)} {{ transform: translateY(var(--top)); animation-timing-function: linear; }} "
+                   f"{share(top_to, cycle)} {{ transform: translateY(var(--top)); animation-timing-function: cubic-bezier(.5, 0, .7, .8); }} "
+                   f"{share(duration, cycle)}, 100% {{ transform: translateY(var(--dy)); }} }}")
+    fire = (f"@keyframes balloon-fire {{ 0%, {share(top_from, cycle)} {{ opacity: 1; }} "
+            f"{share(top_to, cycle)} {{ opacity: .55; }} {share(duration, cycle)}, 100% {{ opacity: .2; }} }}")
+    return "\n    ".join((across, up_and_down, fire))
+
+
+def comet_glide(c: Comet) -> str:
+    """Fades in, glides `travel` px, fades out, then waits out its period."""
+    return (f"@keyframes comet {{ 0% {{ opacity: 0; transform: none; }} {share(1.5, c.period)}, "
+            f"{share(c.flight - 2, c.period)} {{ opacity: 1; }} {share(c.flight, c.period)}, 100% "
+            f"{{ opacity: 0; transform: translateX({num(c.travel)}px); }} }}")
+
+
+# ── Glows ────────────────────────────────────────────────────────────────────
+
+def night_glows() -> str:
+    """Soft glows for the night visitors and the comet, as gradients rather than blurs."""
+    radial = [(f"glow-{name}", color, ".7") for name, color in NAV_LIGHTS.items()]
+    radial += [("lantern-glow", LANTERN_GLOW, ".55"), ("balloon-flare", LANTERN_GLOW, ".75")]
+    glows = "".join(f"""
+    <radialGradient id="{gradient_id}">
+      <stop offset="0" stop-color="{color}" stop-opacity="{peak}"/>
+      <stop offset="1" stop-color="{color}" stop-opacity="0"/>
+    </radialGradient>""" for gradient_id, color, peak in radial)
+    tails = "".join(f"""
+    <linearGradient id="{gradient_id}">
+      <stop offset="0" stop-color="{color}" stop-opacity="0"/>
+      <stop offset="1" stop-color="{color}" stop-opacity="{peak}"/>
+    </linearGradient>""" for gradient_id, color, peak in (("comet-tail", SNOW, ".75"), ("comet-ion", AURORA_COLORS[1], ".4")))
+    return glows + tails

@@ -16,7 +16,7 @@ from datetime import date, datetime, timezone
 from . import config as cfg
 from .geometry import (Box, contains, distance, distance_to_box, height_on, inside, overlaps,
                        segment_clear_of, segment_touches)
-from .models import Cloud, Gesture, Meteor, Moon, Ribbon, Route, Routine, Satellite, Sky, Star, Ufo, Visit
+from .models import Cloud, Comet, Gesture, Meteor, Moon, Ribbon, Route, Routine, Satellite, Sky, Star, Ufo, Visit
 
 
 def roll_sky(seed: str, day: date) -> Sky:
@@ -32,12 +32,16 @@ def roll_sky(seed: str, day: date) -> Sky:
     satellites, satellite_duration, satellite_cycle = plan_satellites(rng)
     ufos, ufo_times, ufo_cycle = plan_ufos(rng)
     routines = {"light": day_routine(rng, ufos, ufo_times, ufo_cycle), "dark": night_routine(rng)}
+    aurora = shape_aurora(rng)
+    night_flight, night_visits, night_visit_cycle = plan_night_visits(rng)
     return Sky(clouds=clouds, cloudy_sun=cloudy_sun, wind=wind,
                visits=visits, flight=flight, visit_cycle=visit_cycle,
                stars=stars, meteors=meteors, moon=moon_on(day),
-               aurora=shape_aurora(rng), satellites=satellites,
+               aurora=aurora, satellites=satellites,
                satellite_pass=satellite_duration, satellite_cycle=satellite_cycle,
-               ufos=ufos, ufo_times=ufo_times, ufo_cycle=ufo_cycle, routines=routines)
+               ufos=ufos, ufo_times=ufo_times, ufo_cycle=ufo_cycle, routines=routines,
+               night_visits=night_visits, night_flight=night_flight, night_visit_cycle=night_visit_cycle,
+               comet=place_comet(rng))
 
 
 # ── Clouds ───────────────────────────────────────────────────────────────────
@@ -277,12 +281,12 @@ def night_routine(rng: random.Random) -> Routine:
     """The night gestures taking turns in a shuffled loop, from just after the climber stops."""
     order = list(cfg.CLIMBER_NIGHT)
     rng.shuffle(order)
-    gestures, t = [], 0.0
+    gestures, at = [], 0.0
     for kind in order:
-        gestures.append(Gesture(kind, t, cfg.CLIMBER_GESTURES[kind]))
-        t += cfg.CLIMBER_GESTURES[kind] + rng.uniform(*cfg.CLIMBER_REST)
+        gestures.append(Gesture(kind, at, cfg.CLIMBER_GESTURES[kind]))
+        at += cfg.CLIMBER_GESTURES[kind] + rng.uniform(*cfg.CLIMBER_REST)
     stopped = cfg.CLIMBER_AT + cfg.CLIMBER_STRIDE * cfg.CLIMBER_STRIDES
-    return Routine(gestures, t, stopped + cfg.CLIMBER_REST[0])
+    return Routine(gestures, cycle=at, at=stopped + cfg.CLIMBER_REST[0])
 
 
 def fill_gaps(rng: random.Random, kinds: tuple[str, ...], gaps: list[tuple[float, float]],
@@ -291,15 +295,15 @@ def fill_gaps(rng: random.Random, kinds: tuple[str, ...], gaps: list[tuple[float
     whole between rests; returns them merged with the `fixed` gestures, in order."""
     order = list(kinds)
     rng.shuffle(order)
-    placed, k = [], 0
-    for start, end in gaps:
-        t = start + rng.uniform(*cfg.CLIMBER_REST)
-        while t + cfg.CLIMBER_GESTURES[order[k % len(order)]] + cfg.CLIMBER_REST[0] <= end:
-            kind = order[k % len(order)]
-            placed.append(Gesture(kind, t, cfg.CLIMBER_GESTURES[kind]))
-            t += cfg.CLIMBER_GESTURES[kind] + rng.uniform(*cfg.CLIMBER_REST)
-            k += 1
-    return sorted(fixed + placed, key=lambda g: g.start)
+    placed, turn = [], 0
+    for gap_start, gap_end in gaps:
+        at = gap_start + rng.uniform(*cfg.CLIMBER_REST)
+        while at + cfg.CLIMBER_GESTURES[order[turn % len(order)]] + cfg.CLIMBER_REST[0] <= gap_end:
+            kind = order[turn % len(order)]
+            placed.append(Gesture(kind, at, cfg.CLIMBER_GESTURES[kind]))
+            at += cfg.CLIMBER_GESTURES[kind] + rng.uniform(*cfg.CLIMBER_REST)
+            turn += 1
+    return sorted(fixed + placed, key=lambda gesture: gesture.start)
 
 
 # ── Day visitors ─────────────────────────────────────────────────────────────
@@ -381,7 +385,93 @@ def bird_route(rng: random.Random) -> Route:
                  direction * (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]), rng.uniform(*cfg.SINK["birds"]))
 
 
-def flock(rng: random.Random) -> tuple[tuple[float, float, float], ...]:
+def flock(rng: random.Random, size: tuple[int, int] = cfg.FLOCK_SIZE) -> tuple[tuple[float, float, float], ...]:
     """A loose V: the leader in front, the rest trailing and alternating sides."""
     return tuple((-i * rng.uniform(9, 14), (1 if i % 2 else -1) * i * rng.uniform(3, 6) if i else 0,
-                  rng.uniform(.8, 1.1)) for i in range(rng.randint(*cfg.FLOCK_SIZE)))
+                  rng.uniform(.8, 1.1)) for i in range(rng.randint(*size)))
+
+
+# ── Night visitors ───────────────────────────────────────────────────────────
+
+def plan_night_visits(rng: random.Random) -> tuple[dict[str, float], list[Visit], float]:
+    """The night's schedule, on the day visitors' rules: one in the sky at a time,
+    VISIT_GAP seconds of empty sky after each, no kind following itself (across the
+    loop too), and every kind at least once. Each crossing takes a fresh path."""
+    flight = {kind: rng.uniform(*seconds) for kind, seconds in cfg.NIGHT_FLIGHT.items()}
+    kinds = list(cfg.NIGHT_FLIGHT)
+    visits: list[Visit] = []
+    at = 0.0
+    while (at < cfg.VISIT_SCHEDULE or set(kinds) - {visit.kind for visit in visits}
+           or visits[-1].kind == visits[0].kind):
+        kind = rng.choice([other for other in kinds if not visits or other != visits[-1].kind])
+        visits.append(night_visit(rng, kind, at))
+        at += flight[kind] + rng.uniform(*cfg.VISIT_GAP)
+    return flight, visits, at
+
+
+def night_visit(rng: random.Random, kind: str, start: float) -> Visit:
+    """One night crossing: lanterns rise and the balloon hops from behind the ridge;
+    the plane and bats cross from one edge to the other."""
+    if kind == "lanterns":
+        spread, below = cfg.LANTERN_SPREAD
+        return Visit(kind, lantern_route(rng), start, flock=tuple(
+            (rng.uniform(-spread, spread), rng.uniform(0, below), rng.uniform(.8, 1.1))
+            for _ in range(rng.randint(*cfg.LANTERNS))))
+    if kind == "balloon":
+        route, top = balloon_route(rng)
+        return Visit(kind, route, start, top=top)
+    direction = rng.choice((1, -1))
+    route = Route(edge(direction), rng.uniform(*cfg.NIGHT_VISIT_Y[kind]),
+                  direction * (cfg.OFFSTAGE[1] - cfg.OFFSTAGE[0]), rng.uniform(*cfg.NIGHT_SINK[kind]))
+    return Visit(kind, route, start, flock=flock(rng, cfg.BAT_COLONY) if kind == "bats" else ())
+
+
+def hidden_below_ridge(x: float, half_width: float, above: float) -> float:
+    """The highest y at x where something reaching `half_width` px either side and
+    `above` px up from it is still wholly behind the ridge."""
+    reach = int(half_width)
+    return max(height_on(cfg.RIDGE, x + o) for o in range(-reach, reach + 1, 2)) + above
+
+
+def lantern_route(rng: random.Random) -> Route:
+    """Up from fully behind the ridge (glow included; the lanterns spread either side
+    and below the route), drifting a little sideways, to fade out high."""
+    x = rng.uniform(*cfg.LANTERN_AREA)
+    hidden = hidden_below_ridge(x, cfg.LANTERN_SPREAD[0] + 10, 11)
+    top = rng.uniform(*cfg.LANTERN_TOP)
+    return Route(x, hidden, rng.uniform(*cfg.LANTERN_DRIFT), top - hidden)
+
+
+def balloon_route(rng: random.Random) -> tuple[Route, float]:
+    """Lift-off and landing spots behind the ridge (envelope, flare and bob all
+    hidden), a hop apart, and how high the basket climbs in between."""
+    while True:
+        lift_off_x = rng.uniform(*cfg.BALLOON_AREA)
+        landing_x = lift_off_x + rng.uniform(*cfg.BALLOON_HOP) * rng.choice((1, -1))
+        if cfg.BALLOON_AREA[0] <= landing_x <= cfg.BALLOON_AREA[1]:
+            # hidden: the envelope reaches 12 px either side and, with its bob, 28 px up
+            lift_off_y, landing_y = hidden_below_ridge(lift_off_x, 12, 28), hidden_below_ridge(landing_x, 12, 28)
+            route = Route(lift_off_x, lift_off_y, landing_x - lift_off_x, landing_y - lift_off_y)
+            return route, rng.uniform(*cfg.BALLOON_TOP)
+
+
+def comet_fits(c: Comet) -> bool:
+    """The whole comet, tail to where it ends, stays inside the sky, clear of the moon and the text."""
+    dx, dy = math.cos(math.radians(c.angle)), math.sin(math.radians(c.angle))
+    tail = (c.x - c.tail * dx, c.y - c.tail * dy)
+    end = (c.x + c.travel * dx, c.y + c.travel * dy)
+    return (contains(cfg.COMET_AREA, tail) and contains(cfg.COMET_AREA, end)
+            and segment_clear_of(tail, end, cfg.ORB, cfg.COMET_MOON_CLEAR)
+            and not any(segment_touches(tail, end, k) for k in cfg.KEEP_CLEAR))
+
+
+def place_comet(rng: random.Random) -> Comet:
+    while True:
+        rightward = rng.random() < .5
+        tilt = rng.uniform(4, 14)
+        c = Comet(x=rng.uniform(80, 820), y=rng.uniform(60, 110), angle=tilt if rightward else 180 - tilt,
+                  tail=rng.uniform(*cfg.COMET_TAIL), travel=rng.uniform(*cfg.COMET_TRAVEL),
+                  flight=rng.uniform(*cfg.COMET_FLIGHT), period=rng.uniform(*cfg.COMET_PERIOD),
+                  delay=rng.uniform(*cfg.COMET_FIRST))
+        if comet_fits(c):
+            return c

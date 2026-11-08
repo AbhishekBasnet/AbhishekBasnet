@@ -212,6 +212,42 @@ VISITOR_INK = "#4C566A"
 CANOPY = "#D08770"                   # parachute and paraglider
 CONTRAIL = "#C2CAD6"
 
+# ── Night visitors ───────────────────────────────────────────────────────────
+
+# By night the plane (lights blinking), bats, sky lanterns and a hot air balloon
+# take turns the way the day visitors do: only one is ever in the sky, with
+# VISIT_GAP seconds of empty sky after it, and no kind follows itself.
+NIGHT_FLIGHT = {"plane": (9, 12), "bats": (5, 7), "lanterns": (16, 20), "balloon": (24, 30)}   # seconds
+NIGHT_VISIT_Y = {"plane": (58, 96), "bats": (80, 140)}
+NIGHT_SINK = {"plane": (-14, 14), "bats": (-12, 12)}
+BAT_COLONY = (3, 5)
+BAT_SIZE = 1.5                       # bats are drawn this much larger than a bird, so they read as bats
+LANTERN_SIZE = 1.7                   # and lanterns this much larger than their outline
+LANTERNS = (4, 7)                    # lanterns let go together
+LANTERN_SPREAD = (24, 18)            # px the lanterns spread either side, and below the first
+LANTERN_AREA = (120, 780)            # x along the ridge they rise from behind
+LANTERN_TOP = (64, 100)              # y they have risen to when they fade out
+LANTERN_DRIFT = (-50, 50)            # px sideways on the way up
+# The balloon lifts off slowly from behind the ridge, climbs until its envelope
+# reaches the labels, drifts a while, then sinks to land behind the ridge elsewhere.
+BALLOON_AREA = (90, 810)             # x it lifts off from and lands at
+BALLOON_HOP = (140, 260)             # px between lift-off and landing
+BALLOON_TOP = (182, 196)             # y of the basket at the top of its climb; the envelope stands 23 px above
+BALLOON_HOVER = .2                   # share of its flight it drifts at the top
+NIGHT_INK = "#7B88A1"                # bats and the balloon: moonlit grey, so they show on the night sky
+NIGHT_PLANE = "#4C566A"              # the plane is dark; its lights do the talking
+NAV_LIGHTS = dict(red="#BF616A", green="#A3BE8C", white="#ECEFF4")
+LANTERN_PAPER, LANTERN_GLOW = "#D08770", "#EBCB8B"
+
+# Now and then a comet glides slowly across the upper sky.
+COMET_FIRST = (25, 45)               # seconds after load it first appears
+COMET_PERIOD = (150, 210)            # seconds between its appearances
+COMET_FLIGHT = (9, 13)               # seconds it takes to glide its way
+COMET_TRAVEL = (260, 360)            # px its head moves
+COMET_TAIL = (60, 90)                # px of tail
+COMET_AREA = (60, 48, 840, 132)      # the whole comet, tail to end, stays inside
+COMET_MOON_CLEAR = 44
+
 # ── Timeline (seconds) ───────────────────────────────────────────────────────
 
 # After the intro the labels glow once, one after another. Then the header rests.

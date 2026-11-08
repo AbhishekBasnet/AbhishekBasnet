@@ -12,7 +12,7 @@ import xml.dom.minidom
 from profile_art import config as cfg
 from profile_art.geometry import contains, distance, height_on, overlaps
 from profile_art.render import backdrop, landscape, legend
-from profile_art.sky import cloud_box, cloud_fits, meteor_fits, moon_on, roll_sky, satellite_path
+from profile_art.sky import cloud_box, cloud_fits, comet_fits, meteor_fits, moon_on, roll_sky, satellite_path
 
 DAYS = [datetime.date(2026, 1, 1) + datetime.timedelta(days=d) for d in range(365)]
 SKIES = [roll_sky(day.isoformat(), day) for day in DAYS]
@@ -179,6 +179,50 @@ class NightRules(unittest.TestCase):
                 # the drawn edge reaches a full wave past the window on both sides
                 self.assertLessEqual(rb.top[0][0], rb.span[0] - rb.wave + 1e-6)
                 self.assertGreaterEqual(rb.top[-1][0], rb.span[1] + rb.wave - 1e-6)
+
+
+class NightVisitorRules(unittest.TestCase):
+    def test_one_night_visitor_at_a_time_with_empty_sky_between(self):
+        for sky in SKIES:
+            ends = [v.start + sky.night_flight[v.kind] for v in sky.night_visits]
+            starts = [v.start for v in sky.night_visits[1:]] + [sky.night_visit_cycle]
+            for end, nxt in zip(ends, starts):
+                self.assertTrue(cfg.VISIT_GAP[0] <= nxt - end <= cfg.VISIT_GAP[1])
+
+    def test_every_night_kind_appears_and_none_follows_itself_even_across_the_loop(self):
+        for sky in SKIES:
+            kinds = [v.kind for v in sky.night_visits]
+            self.assertEqual(set(kinds), set(cfg.NIGHT_FLIGHT))
+            for a, b in zip(kinds, kinds[1:] + kinds[:1]):
+                self.assertNotEqual(a, b)
+
+    def test_lanterns_and_balloon_start_behind_the_ridge_and_the_rest_cross_from_an_edge(self):
+        for sky in SKIES:
+            for v in sky.night_visits:
+                r = v.route
+                if v.kind == "balloon":    # lifts off and lands hidden, a hop apart, topping out at the labels
+                    for x, y in ((r.x, r.y), (r.x + r.dx, r.y + r.dy)):
+                        self.assertTrue(cfg.BALLOON_AREA[0] <= x <= cfg.BALLOON_AREA[1])
+                        for o in range(-12, 13, 2):
+                            self.assertGreater(y - 28, height_on(cfg.RIDGE, x + o) - 1e-9)
+                    self.assertTrue(cfg.BALLOON_HOP[0] <= abs(r.dx) <= cfg.BALLOON_HOP[1])
+                    self.assertTrue(cfg.BALLOON_TOP[0] <= v.top <= cfg.BALLOON_TOP[1])
+                elif v.kind == "lanterns":
+                    for ox, _, _ in v.flock:   # every lantern starts hidden, glow and all
+                        self.assertGreater(r.y - 10, height_on(cfg.RIDGE, r.x + ox))
+                    self.assertTrue(cfg.LANTERN_TOP[0] <= r.y + r.dy <= cfg.LANTERN_TOP[1])
+                    self.assertTrue(cfg.LANTERNS[0] <= len(v.flock) <= cfg.LANTERNS[1])
+                else:
+                    self.assertIn(r.x, cfg.OFFSTAGE)
+                    low, high = cfg.NIGHT_VISIT_Y[v.kind]
+                    self.assertTrue(low <= r.y <= high)
+
+    def test_comet_stays_in_the_sky_clear_of_the_moon_and_text_and_is_rare(self):
+        for sky in SKIES:
+            c = sky.comet
+            self.assertTrue(comet_fits(c))
+            self.assertTrue(cfg.COMET_PERIOD[0] <= c.period and c.flight < c.period)
+            self.assertTrue(cfg.COMET_FIRST[0] <= c.delay <= cfg.COMET_FIRST[1])
 
 
 class ClimberRules(unittest.TestCase):
