@@ -9,4 +9,4 @@
   <img alt="Legend: goLang — services, concurrency, systems; devsecops — pipelines, security, infra; flutter — the clients on top; grad — software engineering, 2026" src="https://raw.githubusercontent.com/AbhishekBasnet/AbhishekBasnet/output/legend-light.svg" width="100%">
 </picture>
 
-[website ↗](https://abhishekbasnet.github.io) &nbsp;&nbsp;·&nbsp;&nbsp; [linkedin ↗](https://www.linkedin.com/in/abhishekbasnet)
+[website ↗](https://abhishekbasnet.github.io](https://abhishekmanbasnet.com.np/) &nbsp;&nbsp;·&nbsp;&nbsp; [linkedin ↗](https://www.linkedin.com/in/abhishekbasnet)
